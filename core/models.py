@@ -182,18 +182,19 @@ class Quote(models.Model):
         """Return version as string (e.g., '1.5')"""
         return f"{self.major_version}.{self.minor_version}"
 
-    def increment_version(self, user, description="Quote updated"):
+    def increment_version(self, user, description="Quote updated", activity_type="quote_updated", create_timeline=True):
         """Increment minor version and log to timeline"""
         self.minor_version += 1
         self.save()
 
         # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=self,
-            activity_type='quote_updated',
-            description=f'{description} - Version updated to {self.get_version()}',
-            user=user
-        )
+        if create_timeline:
+            QuoteTimeline.add_entry(
+                quote=self,
+                activity_type=activity_type,
+                description=f'{description} - Version updated to {self.get_version()}',
+                user=user
+            )
 
     def mark_completed(self, user):
         """Mark quote as completed and bump to next major version"""

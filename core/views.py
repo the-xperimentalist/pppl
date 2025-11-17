@@ -253,7 +253,7 @@ def raw_material_add(request, project_id, quote_id):
             raw_material.save()
 
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added', 'raw_material_added')
 
             messages.success(request, f'Raw material "{raw_material.material_name}" added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -286,15 +286,8 @@ def raw_material_delete(request, project_id, quote_id, rm_id):
     material_name = raw_material.material_name
     raw_material.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='raw_material_deleted',
-        description=f'Raw material "{material_name}" deleted',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Raw material "{material_name}" deleted', 'raw_material_deleted')
 
     messages.success(request, f'Raw material "{material_name}" deleted successfully!')
     return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -315,15 +308,8 @@ def raw_material_complete(request, project_id, quote_id):
         quote.raw_material_complete = True
         quote.save()
 
-        # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=quote,
-            activity_type='section_completed',
-            description='Raw material section marked as complete',
-            user=request.user
-        )
         # Increment version and add timeline entry
-        quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+        quote.increment_version(request.user, f'Raw material section marked as complete', 'section_completed')
 
 
         messages.success(request, 'Raw material section marked as complete!')
@@ -373,7 +359,7 @@ def moulding_machine_add(request, project_id, quote_id):
             )
 
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity added')
+            quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity added', 'moulding_machine_added')
 
             messages.success(request, 'Moulding machine added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -405,15 +391,8 @@ def moulding_machine_delete(request, project_id, quote_id, mm_id):
     cavity = moulding_machine.cavity
     moulding_machine.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='moulding_machine_deleted',
-        description=f'Moulding machine with {cavity} cavities deleted',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Moulding machine with {cavity} cavities deleted', 'moulding_machine_deleted')
 
     messages.success(request, 'Moulding machine detail deleted successfully!')
     return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -434,15 +413,8 @@ def moulding_machine_complete(request, project_id, quote_id):
         quote.moulding_machine_complete = True
         quote.save()
 
-        # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=quote,
-            activity_type='section_completed',
-            description='Moulding machine section marked as complete',
-            user=request.user
-        )
         # Increment version and add timeline entry
-        quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+        quote.increment_version(request.user, f'Moulding machine section marked as complete', 'section_completed')
 
         messages.success(request, 'Moulding machine section marked as complete!')
     else:
@@ -482,15 +454,8 @@ def assembly_add(request, project_id, quote_id):
             assembly.save()
             assembly.calculate_costs()
 
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='assembly_added',
-                description=f'{assembly.get_assembly_type_display()} assembly added',
-                user=request.user
-            )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'{assembly.get_assembly_type_display()} assembly added', 'assembly_added')
 
             messages.success(request, 'Assembly added successfully!')
             return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
@@ -539,15 +504,8 @@ def assembly_delete(request, project_id, quote_id, assembly_id):
     assembly_type = assembly.get_assembly_type_display()
     assembly.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='assembly_deleted',
-        description=f'{assembly_type} assembly deleted',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'{assembly_type} assembly deleted', 'assembly_deleted')
 
     messages.success(request, 'Assembly deleted successfully!')
     return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -577,15 +535,8 @@ def assembly_raw_material_add(request, project_id, quote_id, assembly_id):
             )
             arm.save()
 
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='assembly_rm_added',
-                description=f'Assembly raw material "{arm.description}" added to assembly #{assembly.id}',
-                user=request.user
-            )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'Assembly raw material "{arm.description}" added to assembly #{assembly.id}', 'assembly_rm_added')
 
             messages.success(request, 'Assembly raw material added successfully!')
             return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
@@ -619,15 +570,8 @@ def assembly_raw_material_delete(request, project_id, quote_id, assembly_id, arm
     description = arm.description
     arm.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='assembly_rm_deleted',
-        description=f'Assembly raw material "{description}" deleted from assembly #{assembly.id}',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Assembly raw material "{description}" deleted from assembly #{assembly.id}', 'assembly_rm_deleted')
 
     messages.success(request, 'Assembly raw material deleted successfully!')
     return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
@@ -656,15 +600,8 @@ def manufacturing_printing_cost_add(request, project_id, quote_id, assembly_id):
             )
             mpc.save()
 
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='manufacturing_cost_added',
-                description=f'Manufacturing cost "{mpc.process}" added to assembly #{assembly.id}',
-                user=request.user
-            )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'Manufacturing cost "{mpc.process}" added to assembly #{assembly.id}', 'manufacturing_cost_added')
 
             messages.success(request, 'Manufacturing/printing cost added successfully!')
             return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
@@ -697,15 +634,8 @@ def manufacturing_printing_cost_delete(request, project_id, quote_id, assembly_i
     process = mpc.process
     mpc.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='manufacturing_cost_deleted',
-        description=f'Manufacturing cost "{process}" deleted from assembly #{assembly.id}',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Manufacturing cost "{process}" deleted from assembly #{assembly.id}', 'manufacturing_cost_deleted')
 
     messages.success(request, 'Manufacturing/printing cost deleted successfully!')
     return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
@@ -726,15 +656,8 @@ def assembly_complete(request, project_id, quote_id):
         quote.assembly_complete = True
         quote.save()
 
-        # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=quote,
-            activity_type='section_completed',
-            description='Assembly section marked as complete',
-            user=request.user
-        )
         # Increment version and add timeline entry
-        quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+        quote.increment_version(request.user, f'Assembly section marked as complete', 'section_completed')
 
         messages.success(request, 'Assembly section marked as complete!')
     else:
@@ -768,15 +691,8 @@ def packaging_add(request, project_id, quote_id):
             )
             packaging.save()
 
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='packaging_added',
-                description=f'Packaging "{packaging.get_packaging_type_display()}" added',
-                user=request.user
-            )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'Packaging "{packaging.get_packaging_type_display()}" added', 'packaging_added')
 
             messages.success(request, f'Packaging "{packaging.get_packaging_type_display()}" added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -808,15 +724,8 @@ def packaging_delete(request, project_id, quote_id, packaging_id):
     packaging_type = packaging.get_packaging_type_display()
     packaging.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='packaging_deleted',
-        description=f'Packaging "{packaging_type}" deleted',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Packaging "{packaging_type}" deleted', 'packaging_deleted')
 
     messages.success(request, f'Packaging "{packaging_type}" deleted successfully!')
     return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -837,15 +746,8 @@ def packaging_complete(request, project_id, quote_id):
         quote.packaging_complete = True
         quote.save()
 
-        # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=quote,
-            activity_type='section_completed',
-            description='Packaging section marked as complete',
-            user=request.user
-        )
         # Increment version and add timeline entry
-        quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+        quote.increment_version(request.user, f'Packaging section marked as complete', 'section_completed')
 
         messages.success(request, 'Packaging section marked as complete!')
     else:
@@ -885,15 +787,8 @@ def transport_add(request, project_id, quote_id):
             )
             transport.save()
 
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='transport_added',
-                description=f'Transport for {transport.packaging.get_packaging_type_display()} added',
-                user=request.user
-            )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, f'Transport for {transport.packaging.get_packaging_type_display()} added', 'transport_added')
 
             messages.success(request, 'Transport added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -925,15 +820,8 @@ def transport_delete(request, project_id, quote_id, transport_id):
     packaging_type = transport.packaging.get_packaging_type_display()
     transport.delete()
 
-    # Add timeline entry
-    QuoteTimeline.add_entry(
-        quote=quote,
-        activity_type='transport_deleted',
-        description=f'Transport for {packaging_type} deleted',
-        user=request.user
-    )
     # Increment version and add timeline entry
-    quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+    quote.increment_version(request.user, f'Transport for {packaging_type} deleted', 'transport_deleted')
 
     messages.success(request, 'Transport deleted successfully!')
     return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -953,16 +841,8 @@ def transport_complete(request, project_id, quote_id):
     if quote.transports.count() > 0:
         quote.transport_complete = True
         quote.save()
-
-        # Add timeline entry
-        QuoteTimeline.add_entry(
-            quote=quote,
-            activity_type='section_completed',
-            description='Transport section marked as complete',
-            user=request.user
-        )
         # Increment version and add timeline entry
-        quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+        quote.increment_version(request.user, f'Transport section marked as complete', 'section_completed')
 
         messages.success(request, 'Transport section marked as complete!')
     else:
@@ -997,7 +877,7 @@ def timeline_add_manual(request, project_id, quote_id):
                 attachment=attachment
             )
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" added')
+            quote.increment_version(request.user, description, f'manual_entry', False)
 
             messages.success(request, 'Timeline entry added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -1552,7 +1432,7 @@ def upload_raw_materials(request, project_id, quote_id):
                 for error in errors:
                     messages.error(request, error)
             else:
-                quote.increment_version(request.user, f'{count} raw materials uploaded from Excel')
+                quote.increment_version(request.user, f'{count} raw materials uploaded from Excel', 'quote_updated')
                 messages.success(request, f'Successfully uploaded {count} raw materials!')
                 return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
         except Exception as e:
@@ -1584,7 +1464,7 @@ def upload_moulding_machines(request, project_id, quote_id):
                 for error in errors:
                     messages.error(request, error)
             else:
-                quote.increment_version(request.user, f'{count} moulding machines uploaded from Excel')
+                quote.increment_version(request.user, f'{count} moulding machines uploaded from Excel', 'quote_updated')
                 messages.success(request, f'Successfully uploaded {count} moulding machines!')
                 return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
         except Exception as e:
@@ -1620,7 +1500,7 @@ def upload_complete_quote(request, project_id, quote_id):
                 elif data['count'] > 0:
                     messages.success(request, f"{section}: {data['count']} items uploaded")
 
-            quote.increment_version(request.user, 'Complete quote uploaded from Excel')
+            quote.increment_version(request.user, 'Complete quote uploaded from Excel', 'quote_updated')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
         except Exception as e:
             messages.error(request, f'Error processing file: {str(e)}')
