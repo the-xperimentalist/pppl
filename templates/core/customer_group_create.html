@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Customer Group{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Config
+            </a>
+            <h1 class="mb-0">Add Customer Group</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required 
+                               placeholder="Enter customer group name">
+                        <div class="form-text">Display name for this customer group</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="value" class="form-label">Value <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="value" name="value" required 
+                               placeholder="Enter unique value/code">
+                        <div class="form-text">Unique identifier or code (e.g., CG001)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Enter description (optional)"></textarea>
+                        <div class="form-text">Additional details about this customer group</div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'config' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Customer Group
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

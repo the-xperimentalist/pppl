@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-4">
+            <i class="bi bi-shield-lock"></i> Admin Dashboard
+        </h1>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-primary">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Total Users</h6>
+                <h2 class="card-title text-primary">{{ total_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-success">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Active Users</h6>
+                <h2 class="card-title text-success">{{ active_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-warning">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Staff Users</h6>
+                <h2 class="card-title text-warning">{{ staff_users }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Users Management -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">User Management</h5>
+                <a href="{% url 'admin_user_create' %}" class="btn btn-primary">
+                    <i class="bi bi-person-plus"></i> Add New User
+                </a>
+            </div>
+            <div class="card-body">
+                {% if users %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Full Name</th>
+                                    <th>Status</th>
+                                    <th>Permissions</th>
+                                    <th>Date Joined</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user_item in users %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ user_item.username }}</strong>
+                                        {% if user_item == user %}
+                                            <span class="badge bg-info">You</span>
+                                        {% endif %}
+                                        {% if user_item.is_superuser %}
+                                            <span class="badge bg-danger">Superuser</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user_item.email|default:"-" }}</td>
+                                    <td>{{ user_item.get_full_name|default:"-" }}</td>
+                                    <td>
+                                        {% if user_item.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_item.is_staff %}
+                                            <span class="badge bg-warning text-dark">Staff</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">Regular</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user_item.date_joined|date:"M d, Y" }}</td>
+                                    <td>{{ user_item.last_login|date:"M d, Y H:i"|default:"-" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'admin_user_edit' user_item.id %}" 
+                                               class="btn btn-outline-primary" 
+                                               title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% if user_item != user %}
+                                                <a href="{% url 'admin_user_toggle_active' user_item.id %}" 
+                                                   class="btn btn-outline-warning"
+                                                   title="{% if user_item.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                                    <i class="bi bi-toggle-{% if user_item.is_active %}on{% else %}off{% endif %}"></i>
+                                                </a>
+                                                <a href="{% url 'admin_user_delete' user_item.id %}" 
+                                                   class="btn btn-outline-danger"
+                                                   onclick="return confirm('Are you sure you want to delete user {{ user_item.username }}?')"
+                                                   title="Delete">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No users found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

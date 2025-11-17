@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Timeline Entry{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <div>
+                <h1 class="mb-0">Add Timeline Entry</h1>
+                <small class="text-muted">Quote: <strong>{{ quote.name }}</strong></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Change Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required
+                                  placeholder="Describe the change or update..."></textarea>
+                        <div class="form-text">Provide details about the change or update to the quote</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="attachment" class="form-label">Attachment (Optional)</label>
+                        <input type="file" class="form-control" id="attachment" name="attachment">
+                        <div class="form-text">Upload any relevant files (documents, images, etc.)</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> This entry will be added to the quote timeline with your name and timestamp.
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Timeline Entry
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

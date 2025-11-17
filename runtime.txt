@@ -1,0 +1,6 @@
+python-3.9.13
+```
+
+Create `Procfile`:
+```
+web: gunicorn quoting_system.wsgi --log-file -

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Material Type{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}?customer_group={{ customer_group.id }}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Config
+            </a>
+            <div>
+                <h1 class="mb-0">Add Material Type</h1>
+                <small class="text-muted">Customer Group: <strong>{{ customer_group.name }}</strong></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="raw_material_name" class="form-label">Raw Material Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="raw_material_name" name="raw_material_name" required 
+                               placeholder="Enter raw material name">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="raw_material_grade" class="form-label">Raw Material Grade <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="raw_material_grade" name="raw_material_grade" required 
+                               placeholder="Enter grade">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="raw_material_code" class="form-label">Raw Material Code <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="raw_material_code" name="raw_material_code" required
+                               placeholder="Enter RM code">
+                        <div class="form-text">Unique code for this raw material</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="raw_material_rate" class="form-label">Raw Material Rate <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="raw_material_rate" name="raw_material_rate" 
+                               step="0.01" min="0" required placeholder="Enter rate">
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'config' %}?customer_group={{ customer_group.id }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Add Material Type
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

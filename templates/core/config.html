@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuration{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1>Configuration</h1>
+        <p class="text-muted">Manage your application configuration settings</p>
+    </div>
+</div>
+
+<!-- Customer Group Selection and Management -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Customer Group</h5>
+                <a href="{% url 'customer_group_create' %}" class="btn btn-success btn-sm">
+                    <i class="bi bi-plus-circle"></i> Add Customer Group
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="get" class="row align-items-end">
+                    <div class="col-md-10">
+                        <label for="customer_group" class="form-label">Select Customer Group</label>
+                        <select class="form-select" id="customer_group" name="customer_group" onchange="this.form.submit()">
+                            {% if not customer_groups.exists %}
+                                <option value="">No customer groups available</option>
+                            {% else %}
+                                {% for group in customer_groups %}
+                                    <option value="{{ group.id }}" {% if selected_customer_group and selected_customer_group.id == group.id %}selected{% endif %}>
+                                        {{ group.name }} ({{ group.value }})
+                                    </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        {% if selected_customer_group %}
+                            <a href="{% url 'customer_group_delete' selected_customer_group.id %}"
+                               class="btn btn-danger w-100"
+                               onclick="return confirm('Delete customer group \'{{ selected_customer_group.name }}\'? This will only work if no configuration items are associated.')">
+                                <i class="bi bi-trash"></i> Delete Group
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if selected_customer_group %}
+<div class="alert alert-info">
+    <strong>Managing configurations for:</strong> {{ selected_customer_group.name }}
+    {% if selected_customer_group.description %}
+        <br><small>{{ selected_customer_group.description }}</small>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="material-types-tab" data-bs-toggle="tab"
+                        data-bs-target="#material-types" type="button" role="tab">
+                    <i class="bi bi-box"></i> Material Types
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="moulding-machine-types-tab" data-bs-toggle="tab"
+                        data-bs-target="#moulding-machine-types" type="button" role="tab">
+                    <i class="bi bi-gear"></i> Moulding Machine Types
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assembly-types-tab" data-bs-toggle="tab"
+                        data-bs-target="#assembly-types" type="button" role="tab">
+                    <i class="bi bi-tools"></i> Assembly Types
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="packaging-types-tab" data-bs-toggle="tab"
+                        data-bs-target="#packaging-types" type="button" role="tab">
+                    <i class="bi bi-box-seam"></i> Packaging Types
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab content -->
+        <div class="tab-content mt-3" id="configTabContent">
+            <!-- Material Types Tab -->
+            <div class="tab-pane fade show active" id="material-types" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Material Types</h5>
+                        <a href="{% url 'material_type_create' selected_customer_group.id %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Material Type
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if material_types %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Raw Material Name</th>
+                                            <th>Grade</th>
+                                            <th>RM Code</th>
+                                            <th>Rate</th>
+                                            <th>Created By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for material in material_types %}
+                                        <tr>
+                                            <td><strong>{{ material.raw_material_name }}</strong></td>
+                                            <td>{{ material.raw_material_grade }}</td>
+                                            <td><code>{{ material.raw_material_code }}</code></td>
+                                            <td>{{ material.raw_material_rate|floatformat:2 }}</td>
+                                            <td>{{ material.created_by.username }}</td>
+                                            <td>
+                                                <a href="{% url 'material_type_delete' material.id %}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Delete this material type?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No material types configured yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Moulding Machine Types Tab -->
+            <div class="tab-pane fade" id="moulding-machine-types" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Moulding Machine Types</h5>
+                        <a href="{% url 'moulding_machine_type_create' selected_customer_group.id %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Machine Type
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if moulding_machine_types %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Shift Rate</th>
+                                            <th>Shift Rate for MTC</th>
+                                            <th>MTC Cost</th>
+                                            <th>Created By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for machine in moulding_machine_types %}
+                                        <tr>
+                                            <td><strong>{{ machine.name }}</strong></td>
+                                            <td>{{ machine.shift_rate|floatformat:2 }}</td>
+                                            <td>{{ machine.shift_rate_for_mtc|floatformat:2 }}</td>
+                                            <td>{{ machine.mtc_cost|floatformat:2 }}</td>
+                                            <td>{{ machine.created_by.username }}</td>
+                                            <td>
+                                                <a href="{% url 'moulding_machine_type_delete' machine.id %}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Delete this machine type?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No moulding machine types configured yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assembly Types Tab -->
+            <div class="tab-pane fade" id="assembly-types" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Assembly Types</h5>
+                        <a href="{% url 'config_create' 'assembly-type' %}?customer_group={{ selected_customer_group.id }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Assembly Type
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if assembly_types %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Value</th>
+                                            <th>Description</th>
+                                            <th>Created By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in assembly_types %}
+                                        <tr>
+                                            <td><strong>{{ item.name }}</strong></td>
+                                            <td><code>{{ item.value }}</code></td>
+                                            <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
+                                            <td>{{ item.created_by.username }}</td>
+                                            <td>
+                                                <a href="{% url 'config_delete' 'assembly-type' item.id %}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Delete this assembly type?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No assembly types configured yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Packaging Types Tab -->
+            <div class="tab-pane fade" id="packaging-types" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Packaging Types</h5>
+                        <a href="{% url 'config_create' 'packaging-type' %}?customer_group={{ selected_customer_group.id }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Add Packaging Type
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if packaging_types %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Value</th>
+                                            <th>Description</th>
+                                            <th>Created By</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in packaging_types %}
+                                        <tr>
+                                            <td><strong>{{ item.name }}</strong></td>
+                                            <td><code>{{ item.value }}</code></td>
+                                            <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
+                                            <td>{{ item.created_by.username }}</td>
+                                            <td>
+                                                <a href="{% url 'config_delete' 'packaging-type' item.id %}"
+                                                   class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Delete this packaging type?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No packaging types configured yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i> Please create a customer group to start configuring.
+</div>
+{% endif %}
+{% endblock %}

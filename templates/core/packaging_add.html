@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Packaging{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <div>
+                <h1 class="mb-0">Add Packaging</h1>
+                <small class="text-muted">Quote: <strong>{{ quote.name }}</strong></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Packaging Type</h5>
+                    <div class="mb-4">
+                        <label for="packaging_type" class="form-label">Select Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="packaging_type" name="packaging_type" required>
+                            {% for value, label in packaging_types %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-2"><strong>Fixed Dimensions (Auto-set):</strong></h6>
+                        <ul class="mb-0">
+                            <li>Length: <strong>600</strong></li>
+                            <li>Breadth: <strong>400</strong></li>
+                            <li>Height: <strong>250</strong></li>
+                            <li>Polybag Length: <strong>16</strong></li>
+                            <li>Polybag Width: <strong>20</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <h5 class="mb-3">Cost Details</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="lifecycle" class="form-label">Lifecycle <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="lifecycle" name="lifecycle" min="0" required>
+                            <div class="form-text">Number of lifecycle cycles</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="cost" class="form-label">Cost <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="cost" name="cost" step="0.01" min="0" required>
+                            <div class="form-text">Base cost</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="maintenance_percentage" class="form-label">Maintenance (%) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage" step="0.01" min="0" required>
+                            <div class="form-text">Maintenance percentage of cost</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="part_per_polybag" class="form-label">Parts per Polybag <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="part_per_polybag" name="part_per_polybag" min="1" value="1" required>
+                            <div class="form-text">Number of parts per polybag</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-secondary">
+                        <h6 class="mb-2"><strong>Calculation Formulas:</strong></h6>
+                        <ul class="mb-0 small">
+                            <li>Maintenance Cost = Cost × (Maintenance % / 100)</li>
+                            <li>Total Cost = Cost + Maintenance Cost</li>
+                            <li>Cost per Part = Total Cost / (Lifecycle × 288)</li>
+                            <li>Polybag Cost = 3.56 / Parts per Polybag</li>
+                            <li><strong>Total Packaging Cost = Cost per Part + Polybag Cost</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Packaging
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

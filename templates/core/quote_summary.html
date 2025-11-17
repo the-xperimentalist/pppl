@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+
+{% block title %}Quote Summary - {{ quote.name }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Quote Details
+            </a>
+        </div>
+        
+        <!-- Quote Header -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h2 class="mb-3">{{ quote.name }}</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Project:</strong> {{ project.name }}</p>
+                                <p class="mb-2"><strong>Client:</strong> {{ quote.client_name }}</p>
+                                <p class="mb-2"><strong>Customer Group:</strong> {{ quote.client_group.name }}</p>
+                                <p class="mb-2"><strong>Part Number:</strong> {{ quote.part_number }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Part Name:</strong> {{ quote.part_name }}</p>
+                                <p class="mb-2"><strong>SAP Number:</strong> {{ quote.sap_number|default:"-" }}</p>
+                                <p class="mb-2"><strong>Quantity:</strong> {{ quote.quantity }}</p>
+                                <p class="mb-2"><strong>Status:</strong> 
+                                    <span class="badge {% if quote.status == 'complete' %}bg-success{% elif quote.status == 'incomplete' %}bg-warning{% else %}bg-info{% endif %}">
+                                        {{ quote.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h6 class="mb-2">Total Quote Cost</h6>
+                                <h2 class="mb-0">{{ grand_total|floatformat:2 }}</h2>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 25px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ quote.get_completion_percentage }}%;" 
+                                 aria-valuenow="{{ quote.get_completion_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ quote.get_completion_percentage }}% Complete
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cost Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h3 class="mb-3">Cost Breakdown</h3>
+    </div>
+    
+    <!-- Raw Materials -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 {% if quote.raw_material_complete %}border-success{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-box"></i> Raw Materials</span>
+                {% if quote.raw_material_complete %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_rm_cost|floatformat:2 }}</h4>
+                <p class="mb-0 text-muted">{{ raw_materials_count }} material{{ raw_materials_count|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Moulding Machine -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 {% if quote.moulding_machine_complete %}border-success{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-gear"></i> Moulding Machine</span>
+                {% if quote.moulding_machine_complete %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_conversion_cost|floatformat:2 }}</h4>
+                <p class="mb-0 text-muted">{{ moulding_machines_count }} machine{{ moulding_machines_count|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Assembly -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 {% if quote.assembly_complete %}border-success{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-tools"></i> Assembly</span>
+                {% if quote.assembly_complete %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_assembly_cost|floatformat:2 }}</h4>
+                <p class="mb-0 text-muted">{{ assemblies_count }} assembl{{ assemblies_count|pluralize:"y,ies" }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Packaging -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 {% if quote.packaging_complete %}border-success{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-box-seam"></i> Packaging</span>
+                {% if quote.packaging_complete %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_packaging_cost|floatformat:4 }}</h4>
+                <p class="mb-0 text-muted">{{ packagings_count }} packaging{{ packagings_count|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transport -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 {% if quote.transport_complete %}border-success{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-truck"></i> Transport</span>
+                {% if quote.transport_complete %}
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <h4 class="text-primary">{{ total_transport_cost|floatformat:4 }}</h4>
+                <p class="mb-0 text-muted">{{ transports_count }} transport{{ transports_count|pluralize }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Grand Total -->
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card h-100 border-primary">
+            <div class="card-header bg-primary text-white">
+                <strong><i class="bi bi-calculator"></i> Grand Total</strong>
+            </div>
+            <div class="card-body">
+                <h3 class="text-success mb-0">{{ grand_total|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Breakdown Sections -->
+<div class="row">
+    <div class="col-md-12">
+        <h3 class="mb-3">Detailed Breakdown</h3>
+    </div>
+</div>
+
+<!-- Raw Materials Detail -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-box"></i> Raw Materials Details</h5>
+            </div>
+            <div class="card-body">
+                {% if raw_materials %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Material Name</th>
+                                    <th>Grade</th>
+                                    <th>RM Code</th>
+                                    <th>Net Weight</th>
+                                    <th>Gross Weight</th>
+                                    <th>RM Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rm in raw_materials %}
+                                <tr>
+                                    <td>{{ rm.material_name }}</td>
+                                    <td>{{ rm.grade|default:"-" }}</td>
+                                    <td><code>{{ rm.rm_code }}</code></td>
+                                    <td>{{ rm.net_weight }}</td>
+                                    <td>{{ rm.gross_weight }}</td>
+                                    <td class="text-end">{{ rm.rm_cost|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>{{ total_rm_cost|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No raw materials added.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Moulding Machine Detail -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear"></i> Moulding Machine Details</h5>
+            </div>
+            <div class="card-body">
+                {% if moulding_machines %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Machine Type</th>
+                                    <th>Cavity</th>
+                                    <th>Machine Tonnage</th>
+                                    <th>Cycle Time (s)</th>
+                                    <th>Efficiency (%)</th>
+                                    <th>Parts/Shift</th>
+                                    <th>Conversion Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mm in moulding_machines %}
+                                <tr>
+                                    <td>{{ mm.moulding_machine_type.name|default:"-" }}</td>
+                                    <td>{{ mm.cavity }}</td>
+                                    <td>{{ mm.machine_tonnage }}</td>
+                                    <td>{{ mm.cycle_time }}</td>
+                                    <td>{{ mm.efficiency }}%</td>
+                                    <td>{{ mm.number_of_parts_per_shift }}</td>
+                                    <td class="text-end">{{ mm.conversion_cost|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>{{ total_conversion_cost|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No moulding machines added.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Assembly Detail -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-tools"></i> Assembly Details</h5>
+            </div>
+            <div class="card-body">
+                {% if assemblies %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Assembly RM Cost</th>
+                                    <th>Manufacturing Cost</th>
+                                    <th>Profit</th>
+                                    <th>Rejection</th>
+                                    <th>Inspection+Handling</th>
+                                    <th>Total Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assembly in assemblies %}
+                                <tr>
+                                    <td>{{ assembly.get_assembly_type_display }}</td>
+                                    <td class="text-end">{{ assembly.total_assembly_rm_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ assembly.total_manufacturing_printing_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ assembly.profit_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ assembly.rejection_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ assembly.inspection_handling_cost|floatformat:2 }}</td>
+                                    <td class="text-end"><strong>{{ assembly.total_assembly_cost|floatformat:2 }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>{{ total_assembly_cost|floatformat:2 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No assemblies added.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Packaging Detail -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Packaging Details</h5>
+            </div>
+            <div class="card-body">
+                {% if packagings %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Lifecycle</th>
+                                    <th>Cost</th>
+                                    <th>Total Cost</th>
+                                    <th>Cost/Part</th>
+                                    <th>Polybag Cost</th>
+                                    <th>Total Packaging Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pkg in packagings %}
+                                <tr>
+                                    <td>{{ pkg.get_packaging_type_display }}</td>
+                                    <td>{{ pkg.lifecycle }}</td>
+                                    <td class="text-end">{{ pkg.cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ pkg.total_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ pkg.cost_per_part|floatformat:4 }}</td>
+                                    <td class="text-end">{{ pkg.polybag_cost|floatformat:4 }}</td>
+                                    <td class="text-end"><strong>{{ pkg.total_packaging_cost|floatformat:4 }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end"><strong>{{ total_packaging_cost|floatformat:4 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No packaging added.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transport Detail -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-truck"></i> Transport Details</h5>
+            </div>
+            <div class="card-body">
+                {% if transports %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Packaging Type</th>
+                                    <th>Total Boxes</th>
+                                    <th>Parts/Box</th>
+                                    <th>Total Parts/Trip</th>
+                                    <th>Trip Cost</th>
+                                    <th>Cost/Part</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transport in transports %}
+                                <tr>
+                                    <td>{{ transport.packaging.get_packaging_type_display }}</td>
+                                    <td>{{ transport.total_boxes }}</td>
+                                    <td>{{ transport.parts_per_box }}</td>
+                                    <td>{{ transport.total_parts_per_trip }}</td>
+                                    <td class="text-end">{{ transport.trip_cost|floatformat:2 }}</td>
+                                    <td class="text-end"><strong>{{ transport.trip_cost_per_part|floatformat:4 }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="5" class="text-end"><strong>Total Cost/Part:</strong></td>
+                                    <td class="text-end"><strong>{{ total_transport_cost|floatformat:4 }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">No transport added.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Final Summary -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-calculator"></i> Final Cost Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <table class="table table-borderless mb-0">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Raw Materials Cost:</strong></td>
+                                    <td class="text-end">{{ total_rm_cost|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Moulding Machine (Conversion) Cost:</strong></td>
+                                    <td class="text-end">{{ total_conversion_cost|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Assembly Cost:</strong></td>
+                                    <td class="text-end">{{ total_assembly_cost|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Packaging Cost:</strong></td>
+                                    <td class="text-end">{{ total_packaging_cost|floatformat:4 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transport Cost per Part:</strong></td>
+                                    <td class="text-end">{{ total_transport_cost|floatformat:4 }}</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td><strong>Base Cost:</strong></td>
+                                    <td class="text-end"><strong>{{ quote.get_base_cost|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Profit ({{ quote.profit_percentage }}%):</strong></td>
+                                    <td class="text-end">{{ quote.get_profit_amount|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Handling Charge:</strong></td>
+                                    <td class="text-end">{{ quote.handling_charge|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="border-top">
+                                    <td><h4 class="mb-0"><strong>Grand Total:</strong></h4></td>
+                                    <td class="text-end"><h4 class="mb-0 text-success"><strong>{{ quote.get_grand_total|floatformat:2 }}</strong></h4></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Action Buttons -->
+<div class="row mb-4">
+    <div class="col-md-12 text-end">
+        <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Quote
+        </a>
+        <button class="btn btn-primary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print Summary
+        </button>
+    </div>
+</div>
+
+<!-- Chart.js for cost breakdown visualization -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('costChart');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Raw Materials', 'Moulding Machine', 'Assembly', 'Packaging', 'Transport'],
+            datasets: [{
+                data: [
+                    {{ total_rm_cost|floatformat:2 }},
+                    {{ total_conversion_cost|floatformat:2 }},
+                    {{ total_assembly_cost|floatformat:2 }},
+                    {{ total_packaging_cost|floatformat:4 }},
+                    {{ total_transport_cost|floatformat:4 }}
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                title: {
+                    display: true,
+                    text: 'Cost Distribution'
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    @media print {
+        .btn, nav, .sidebar {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}

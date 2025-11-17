@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Quote{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Project
+            </a>
+            <h1 class="mb-0">Create New Quote</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h5 class="mb-3">Basic Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Quote Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="client_group" class="form-label">Customer Group <span class="text-danger">*</span></label>
+                            <select class="form-select" id="client_group" name="client_group" required>
+                                <option value="">Select Customer Group</option>
+                                {% for group in customer_groups %}
+                                    <option value="{{ group.id }}">{{ group.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Select the customer group for this quote</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="client_name" class="form-label">Client Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="client_name" name="client_name" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="sap_number" class="form-label">SAP Number</label>
+                            <input type="text" class="form-control" id="sap_number" name="sap_number">
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Financial Parameters</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="handling_charge" class="form-label">Handling Charge</label>
+                            <input type="number" class="form-control" id="handling_charge" name="handling_charge"
+                                   step="0.01" min="0" value="0">
+                            <div class="form-text">Fixed handling charge for this quote</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="profit_percentage" class="form-label">Profit %</label>
+                            <input type="number" class="form-control" id="profit_percentage" name="profit_percentage"
+                                   step="0.01" min="0" max="100" value="0">
+                            <div class="form-text">Profit percentage to be applied</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Part Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="part_number" class="form-label">Part Number <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="part_number" name="part_number" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="part_name" class="form-label">Part Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="part_name" name="part_name" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="amendment_number" class="form-label">Amendment Number</label>
+                            <input type="text" class="form-control" id="amendment_number" name="amendment_number">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="quantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" value="1" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Quote
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

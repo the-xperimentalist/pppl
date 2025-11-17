@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Transport{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+            <div>
+                <h1 class="mb-0">Add Transport</h1>
+                <small class="text-muted">Quote: <strong>{{ quote.name }}</strong></small>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Select Packaging</h5>
+                    <div class="mb-4">
+                        <label for="packaging" class="form-label">Packaging Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="packaging" name="packaging" required>
+                            <option value="">Select Packaging</option>
+                            {% for pkg in packagings %}
+                                <option value="{{ pkg.id }}" 
+                                        data-length="{{ pkg.length }}" 
+                                        data-breadth="{{ pkg.breadth }}" 
+                                        data-height="{{ pkg.height }}">
+                                    {{ pkg.get_packaging_type_display }} ({{ pkg.length }} × {{ pkg.breadth }} × {{ pkg.height }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Select the packaging this transport is for</div>
+                    </div>
+                    
+                    <div id="boxDimensions" class="alert alert-info mb-4" style="display: none;">
+                        <h6 class="mb-2"><strong>Selected Box Dimensions:</strong></h6>
+                        <ul class="mb-0">
+                            <li>Length: <strong id="boxLength">-</strong></li>
+                            <li>Breadth: <strong id="boxBreadth">-</strong></li>
+                            <li>Height: <strong id="boxHeight">-</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <h5 class="mb-3">Transport Vehicle Dimensions</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="transport_length" class="form-label">Transport Length <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="transport_length" name="transport_length" step="0.01" min="0" required>
+                            <div class="form-text">Overall length of transport</div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="transport_breadth" class="form-label">Transport Breadth <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="transport_breadth" name="transport_breadth" step="0.01" min="0" required>
+                            <div class="form-text">Overall breadth of transport</div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="transport_height" class="form-label">Transport Height <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="transport_height" name="transport_height" step="0.01" min="0" required>
+                            <div class="form-text">Overall height of transport</div>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mb-3 mt-4">Cost & Parts</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="trip_cost" class="form-label">Trip Cost <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="trip_cost" name="trip_cost" step="0.01" min="0" required>
+                            <div class="form-text">Cost per trip</div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="parts_per_box" class="form-label">Parts per Box <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="parts_per_box" name="parts_per_box" min="1" value="1" required>
+                            <div class="form-text">Number of parts per box</div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-secondary">
+                        <h6 class="mb-2"><strong>Calculation Formulas:</strong></h6>
+                        <ul class="mb-0 small">
+                            <li>Boxes on Length = Transport Length / Box Length (rounded down)</li>
+                            <li>Boxes on Breadth = Transport Breadth / Box Breadth (rounded down)</li>
+                            <li>Boxes on Height = Transport Height / Box Height (rounded down)</li>
+                            <li>Total Boxes = Boxes on Length × Boxes on Breadth × Boxes on Height</li>
+                            <li>Total Parts per Trip = Total Boxes × Parts per Box</li>
+                            <li><strong>Trip Cost per Part = Trip Cost / Total Parts per Trip</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Transport
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show box dimensions when packaging is selected
+    document.getElementById('packaging').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const boxDimDiv = document.getElementById('boxDimensions');
+        
+        if (this.value) {
+            const length = selectedOption.getAttribute('data-length');
+            const breadth = selectedOption.getAttribute('data-breadth');
+            const height = selectedOption.getAttribute('data-height');
+            
+            document.getElementById('boxLength').textContent = length;
+            document.getElementById('boxBreadth').textContent = breadth;
+            document.getElementById('boxHeight').textContent = height;
+            
+            boxDimDiv.style.display = 'block';
+        } else {
+            boxDimDiv.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Projects</h1>
+            <a href="{% url 'project_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Project
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        {% if projects %}
+            <div class="row">
+                {% for project in projects %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ project.name }}</h5>
+                            <p class="card-text text-muted">
+                                {% if project.description %}
+                                    {{ project.description|truncatewords:20 }}
+                                {% else %}
+                                    No description
+                                {% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-file-text"></i> {{ project.get_quotes_count }} quote{{ project.get_quotes_count|pluralize }}
+                                </small>
+                                <a href="{% url 'project_detail' project.id %}" class="btn btn-sm btn-outline-primary">
+                                    View <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>
+                                <i class="bi bi-person"></i> {{ project.created_by.username }} •
+                                <i class="bi bi-calendar"></i> {{ project.created_at|date:"M d, Y" }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No projects yet. Create your first project to get started!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
