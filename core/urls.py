@@ -77,4 +77,9 @@ urlpatterns = [
     path('projects/<int:project_id>/quotes/<int:quote_id>/upload/raw-materials/', views.upload_raw_materials, name='upload_raw_materials'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/upload/moulding-machines/', views.upload_moulding_machines, name='upload_moulding_machines'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/upload/complete/', views.upload_complete_quote, name='upload_complete_quote'),
+    # Raw Material edit
+    path('projects/<int:project_id>/quotes/<int:quote_id>/raw-materials/<int:rm_id>/edit/', views.raw_material_edit, name='raw_material_edit'),
+
+    # Moulding Machine edit
+    path('projects/<int:project_id>/quotes/<int:quote_id>/moulding-machines/<int:mm_id>/edit/', views.moulding_machine_edit, name='moulding_machine_edit'),
 ]

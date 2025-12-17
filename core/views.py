@@ -1510,3 +1510,120 @@ def upload_complete_quote(request, project_id, quote_id):
         'quote': quote,
     }
     return render(request, 'core/upload_complete_quote.html', context)
+
+@login_required
+def raw_material_edit(request, project_id, quote_id, rm_id):
+    """Edit raw material"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    raw_material = get_object_or_404(RawMaterial, id=rm_id, quote=quote)
+
+    # Get material types for the quote's customer group
+    material_types = MaterialType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+
+    if request.method == 'POST':
+        try:
+            material_type_id = request.POST.get('material_type')
+            frozen_rate_str = request.POST.get('frozen_rate')
+            frozen_rate = float(frozen_rate_str) if frozen_rate_str else None
+
+            raw_material.material_type_id = material_type_id if material_type_id else None
+            raw_material.material_name = request.POST.get('material_name')
+            raw_material.grade = request.POST.get('grade')
+            raw_material.rm_code = request.POST.get('rm_code')
+            raw_material.unit_of_measurement = request.POST.get('unit_of_measurement', 'kg')
+            raw_material.frozen_rate = frozen_rate
+            raw_material.rm_rate = float(request.POST.get('rm_rate'))
+            raw_material.part_weight = float(request.POST.get('part_weight'))
+            raw_material.runner_weight = float(request.POST.get('runner_weight'))
+            raw_material.process_losses = float(request.POST.get('process_losses', 0))
+            raw_material.purging_loss_cost = float(request.POST.get('purging_loss_cost', 0))
+            raw_material.icc_percentage = float(request.POST.get('icc_percentage', 0))
+            raw_material.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
+            raw_material.overhead_percentage = float(request.POST.get('overhead_percentage', 0))
+            raw_material.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))
+            raw_material.profit_percentage = float(request.POST.get('profit_percentage', 0))
+
+            raw_material.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Raw material "{raw_material.material_name}" updated')
+
+            messages.success(request, f'Raw material "{raw_material.material_name}" updated successfully!')
+            return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating raw material: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'raw_material': raw_material,
+        'material_types': material_types,
+        'unit_choices': RawMaterial.UNIT_CHOICES,
+    }
+    return render(request, 'core/raw_material_edit.html', context)
+
+@login_required
+def moulding_machine_edit(request, project_id, quote_id, mm_id):
+    """Edit moulding machine"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    machine = get_object_or_404(MouldingMachineDetail, id=mm_id, quote=quote)
+
+    # Get moulding machine types for the quote's customer group
+    moulding_machine_types = MouldingMachineType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+
+    if request.method == 'POST':
+        try:
+            moulding_machine_type_id = request.POST.get('moulding_machine_type')
+
+            machine.moulding_machine_type_id = moulding_machine_type_id if moulding_machine_type_id else None
+            machine.cavity = int(request.POST.get('cavity', 1))
+            machine.machine_tonnage = float(request.POST.get('machine_tonnage', 0))
+            machine.cycle_time = float(request.POST.get('cycle_time', 0))
+            machine.efficiency = float(request.POST.get('efficiency', 0))
+            machine.shift_rate = float(request.POST.get('shift_rate', 0))
+            machine.shift_rate_for_mtc = float(request.POST.get('shift_rate_for_mtc', 0))
+            machine.mtc_cost = float(request.POST.get('mtc_cost', 0))
+            machine.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
+            machine.overhead_percentage = float(request.POST.get('overhead_percentage', 0))
+            machine.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))
+            machine.profit_percentage = float(request.POST.get('profit_percentage', 0))
+
+            machine.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity updated')
+
+            messages.success(request, 'Moulding machine updated successfully!')
+            return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating moulding machine: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'machine': machine,
+        'moulding_machine_types': moulding_machine_types,
+    }
+    return render(request, 'core/moulding_machine_edit.html', context)

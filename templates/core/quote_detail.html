@@ -321,6 +321,11 @@
                                     <td>{{ rm.profit_percentage }}%</td>
                                     <td><strong>{{ rm.rm_cost|floatformat:2 }}</strong></td>
                                     <td>
+                                        <a href="{% url 'raw_material_edit' project.id quote.id rm.id %}"
+                                           class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <a href="{% url 'raw_material_delete' project.id quote.id rm.id %}"
                                            class="btn btn-sm btn-outline-danger {% if not quote.can_edit_sections %}disabled{% endif %}"
                                            onclick="return confirm('Are you sure you want to delete this raw material?')">
@@ -395,6 +400,11 @@
                                     <td>{{ mm.profit_percentage }}%</td>
                                     <td><strong>{{ mm.conversion_cost|floatformat:2 }}</strong></td>
                                     <td>
+                                        <a href="{% url 'moulding_machine_edit' project.id quote.id mm.id %}"
+                                           class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <a href="{% url 'moulding_machine_delete' project.id quote.id mm.id %}"
                                            class="btn btn-sm btn-outline-danger {% if not quote.can_edit_sections %}disabled{% endif %}"
                                            onclick="return confirm('Are you sure you want to delete this moulding machine?')">
