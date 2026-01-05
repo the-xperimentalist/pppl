@@ -13,6 +13,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse
 from .excel_utils import ExcelTemplateGenerator, ExcelParser
 
+from pprint import pprint
+
 
 # Check if user is superuser
 def superuser_required(user):
@@ -151,6 +153,7 @@ def quote_detail(request, project_id, quote_id):
         'total_packaging_cost': quote.get_total_packaging_cost(),
         'total_transport_cost': quote.get_total_transport_cost(),
     }
+    pprint(context)
     return render(request, 'core/quote_detail.html', context)
 
 
@@ -351,7 +354,7 @@ def moulding_machine_add(request, project_id, quote_id):
                 efficiency=float(request.POST.get('efficiency', 0)),
                 shift_rate=float(request.POST.get('shift_rate', 0)),
                 shift_rate_for_mtc=float(request.POST.get('shift_rate_for_mtc', 0)),
-                mtc_cost=float(request.POST.get('mtc_cost', 0)),
+                mtc_count=int(request.POST.get('mtc_count', 0)),
                 rejection_percentage=float(request.POST.get('rejection_percentage', 0)),
                 overhead_percentage=float(request.POST.get('overhead_percentage', 0)),
                 maintenance_percentage=float(request.POST.get('maintenance_percentage', 0)),
@@ -359,7 +362,7 @@ def moulding_machine_add(request, project_id, quote_id):
             )
 
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity added', 'moulding_machine_added')
+            quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity added')
 
             messages.success(request, 'Moulding machine added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
@@ -1288,16 +1291,16 @@ def moulding_machine_type_create(request, customer_group_id):
         name = request.POST.get('name')
         shift_rate = request.POST.get('shift_rate')
         shift_rate_for_mtc = request.POST.get('shift_rate_for_mtc')
-        mtc_cost = request.POST.get('mtc_cost')
+        mtc_count = request.POST.get('mtc_count')
 
-        if name and shift_rate and shift_rate_for_mtc and mtc_cost:
+        if name and shift_rate and shift_rate_for_mtc and mtc_count:
             try:
                 machine_type = MouldingMachineType.objects.create(
                     customer_group=customer_group,
                     name=name,
                     shift_rate=float(shift_rate),
                     shift_rate_for_mtc=float(shift_rate_for_mtc),
-                    mtc_cost=float(mtc_cost),
+                    mtc_count=int(mtc_count),
                     created_by=request.user
                 )
                 messages.success(request, f'Moulding machine type "{machine_type.name}" created successfully!')
@@ -1311,6 +1314,7 @@ def moulding_machine_type_create(request, customer_group_id):
         'customer_group': customer_group,
     }
     return render(request, 'core/moulding_machine_type_create.html', context)
+
 
 @login_required
 def moulding_machine_type_delete(request, machine_type_id):
@@ -1573,6 +1577,7 @@ def raw_material_edit(request, project_id, quote_id, rm_id):
     }
     return render(request, 'core/raw_material_edit.html', context)
 
+
 @login_required
 def moulding_machine_edit(request, project_id, quote_id, mm_id):
     """Edit moulding machine"""
@@ -1602,7 +1607,7 @@ def moulding_machine_edit(request, project_id, quote_id, mm_id):
             machine.efficiency = float(request.POST.get('efficiency', 0))
             machine.shift_rate = float(request.POST.get('shift_rate', 0))
             machine.shift_rate_for_mtc = float(request.POST.get('shift_rate_for_mtc', 0))
-            machine.mtc_cost = float(request.POST.get('mtc_cost', 0))
+            machine.mtc_count = int(request.POST.get('mtc_count', 0))
             machine.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
             machine.overhead_percentage = float(request.POST.get('overhead_percentage', 0))
             machine.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))

@@ -59,7 +59,7 @@ class ExcelTemplateGenerator:
         
         headers = [
             'Cavity*', 'Machine Tonnage*', 'Cycle Time (s)*', 'Efficiency %*',
-            'Shift Rate*', 'Shift Rate for MTC*', 'MTC Cost*',
+            'Shift Rate*', 'Shift Rate for MTC*', 'MTC Count*',
             'Rejection %', 'Overhead %', 'Maintenance %', 'Profit %'
         ]
         
@@ -206,7 +206,7 @@ class ExcelTemplateGenerator:
         ws_mm = wb.create_sheet("Moulding Machines")
         mm_headers = [
             'Cavity*', 'Machine Tonnage*', 'Cycle Time (s)*', 'Efficiency %*',
-            'Shift Rate*', 'Shift Rate for MTC*', 'MTC Cost*',
+            'Shift Rate*', 'Shift Rate for MTC*', 'MTC Count*',
             'Rejection %', 'Overhead %', 'Maintenance %', 'Profit %'
         ]
         ExcelTemplateGenerator._add_headers(ws_mm, mm_headers, "70AD47")
@@ -321,7 +321,7 @@ class ExcelParser:
                     efficiency=float(row[3]) if row[3] else 0,
                     shift_rate=float(row[4]) if row[4] else 0,
                     shift_rate_for_mtc=float(row[5]) if row[5] else 0,
-                    mtc_cost=float(row[6]) if row[6] else 0,
+                    mtc_count=int(row[6]) if row[6] else 0,
                     rejection_percentage=float(row[7]) if row[7] else 0,
                     overhead_percentage=float(row[8]) if row[8] else 0,
                     maintenance_percentage=float(row[9]) if row[9] else 0,

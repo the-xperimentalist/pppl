@@ -126,10 +126,10 @@ class RawMaterialAdmin(admin.ModelAdmin):
 @admin.register(MouldingMachineDetail)
 class MouldingMachineDetailAdmin(admin.ModelAdmin):
     list_display = ['quote', 'moulding_machine_type', 'cavity', 'machine_tonnage', 'cycle_time',
-                    'efficiency', 'shift_rate', 'created_at']
+                    'efficiency', 'shift_rate', 'mtc_count', 'created_at']
     list_filter = ['moulding_machine_type', 'created_at']
     search_fields = ['quote__name', 'moulding_machine_type__name']
-    readonly_fields = ['created_at', 'updated_at', 'number_of_parts_per_shift', 'conversion_cost']
+    readonly_fields = ['created_at', 'updated_at', 'number_of_parts_per_shift', 'mtc_cost', 'conversion_cost']
 
     fieldsets = (
         ('Quote', {
@@ -142,15 +142,19 @@ class MouldingMachineDetailAdmin(admin.ModelAdmin):
             'fields': ('cavity', 'machine_tonnage', 'cycle_time', 'efficiency')
         }),
         ('Shift and Cost Details', {
-            'fields': ('shift_rate', 'shift_rate_for_mtc', 'mtc_cost')
+            'fields': ('shift_rate', 'shift_rate_for_mtc', 'mtc_count')
+        }),
+        ('Cost Percentages', {
+            'fields': ('rejection_percentage', 'overhead_percentage', 'maintenance_percentage', 'profit_percentage')
         }),
         ('Calculated', {
-            'fields': ('number_of_parts_per_shift', 'conversion_cost')
+            'fields': ('number_of_parts_per_shift', 'mtc_cost', 'conversion_cost')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at')
         }),
     )
+
 
 @admin.register(Assembly)
 class AssemblyAdmin(admin.ModelAdmin):
@@ -271,18 +275,21 @@ class MaterialTypeAdmin(admin.ModelAdmin):
 
 @admin.register(MouldingMachineType)
 class MouldingMachineTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'customer_group', 'shift_rate', 'shift_rate_for_mtc', 'mtc_cost',
+    list_display = ['name', 'customer_group', 'shift_rate', 'shift_rate_for_mtc', 'mtc_count',
                     'is_active', 'created_by']
     list_filter = ['customer_group', 'is_active', 'created_at']
     search_fields = ['name']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'mtc_cost']
 
     fieldsets = (
         ('Customer Group', {
             'fields': ('customer_group',)
         }),
         ('Machine Details', {
-            'fields': ('name', 'shift_rate', 'shift_rate_for_mtc', 'mtc_cost')
+            'fields': ('name', 'shift_rate', 'shift_rate_for_mtc', 'mtc_count')
+        }),
+        ('Calculated', {
+            'fields': ('mtc_cost',)
         }),
         ('Status', {
             'fields': ('is_active', 'created_by')

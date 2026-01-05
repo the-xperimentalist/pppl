@@ -25,10 +25,9 @@
                             <option value="">-- Select Machine Type to Auto-Fill --</option>
                             {% for mt in moulding_machine_types %}
                                 <option value="{{ mt.id }}"
-                                        {% if machine.moulding_machine_type and machine.moulding_machine_type.id == mt.id %}selected{% endif %}
-                                        data-shift-rate="{{ mt.shift_rate }}"
-                                        data-shift-rate-mtc="{{ mt.shift_rate_for_mtc }}"
-                                        data-mtc-cost="{{ mt.mtc_cost }}">
+                                    data-shift-rate="{{ mt.shift_rate }}"
+                                    data-shift-rate-mtc="{{ mt.shift_rate_for_mtc }}"
+                                    data-mtc-count="{{ mt.mtc_count }}">
                                     {{ mt.name }}
                                 </option>
                             {% endfor %}
@@ -84,9 +83,9 @@
                         </div>
                         
                         <div class="col-md-4 mb-3">
-                            <label for="mtc_cost" class="form-label">MTC Cost <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="mtc_cost" name="mtc_cost" 
-                                   step="0.01" value="{{ machine.mtc_cost }}" required>
+                            <label for="mtc_count" class="form-label">MTC Count <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="mtc_count" name="mtc_count" min="0" value="0" required>
+                            <div class="form-text">Number of MTC (Mold Tool Changes)</div>
                         </div>
                     </div>
                     
@@ -134,12 +133,17 @@
 <script>
 document.getElementById('moulding_machine_type').addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
-    
+
     if (selectedOption.value) {
         // Auto-fill fields from selected machine type
         document.getElementById('shift_rate').value = selectedOption.dataset.shiftRate || '';
         document.getElementById('shift_rate_for_mtc').value = selectedOption.dataset.shiftRateMtc || '';
-        document.getElementById('mtc_cost').value = selectedOption.dataset.mtcCost || '';
+        document.getElementById('mtc_count').value = selectedOption.dataset.mtcCount || '';
+    } else {
+        // Clear fields if "Select Machine Type" is chosen
+        document.getElementById('shift_rate').value = '';
+        document.getElementById('shift_rate_for_mtc').value = '';
+        document.getElementById('mtc_count').value = '';
     }
 });
 </script>

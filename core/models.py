@@ -32,7 +32,7 @@ class MouldingMachineType(models.Model):
     shift_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Shift rate")
     shift_rate_for_mtc = models.DecimalField(max_digits=10, decimal_places=2, default=0,
                                              verbose_name="Shift Rate for MTC")
-    mtc_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="MTC Cost")
+    mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moulding_machine_types')
     created_at = models.DateTimeField(default=timezone.now)
@@ -49,6 +49,11 @@ class MouldingMachineType(models.Model):
             return f"{self.name} - {self.customer_group.name if self.customer_group else 'No Group'}"
         return f"Moulding Machine (Shift: {self.shift_rate}) - {self.customer_group.name if self.customer_group else 'No Group'}"
 
+    @property
+    def mtc_cost(self):
+        """Calculate MTC cost = mtc_count * shift_rate_for_mtc"""
+        from decimal import Decimal
+        return float(Decimal(str(self.mtc_count)) * Decimal(str(self.shift_rate_for_mtc)))
 
 class MaterialType(models.Model):
     """Material Type - belongs to a customer group"""
@@ -497,7 +502,7 @@ class MouldingMachineDetail(models.Model):
     shift_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shift_rate_for_mtc = models.DecimalField(max_digits=10, decimal_places=2, default=0,
                                              verbose_name="Shift Rate for MTC")
-    mtc_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="MTC Cost")
+    mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
 
     # Cost percentages
     rejection_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
@@ -534,18 +539,23 @@ class MouldingMachineDetail(models.Model):
     @property
     def number_of_mtc(self):
         """Calculate number of MTC (tool changes)"""
-        if self.number_of_parts_per_shift > 0:
-            # Example: assume tool needs change every 10000 parts
-            tool_life = 10000
-            return self.number_of_parts_per_shift / tool_life
-        return 0
+        return self.mtc_count
+
+    @property
+    def mtc_cost(self):
+        """Calculate MTC cost = mtc_count * shift_rate_for_mtc"""
+        from decimal import Decimal
+        return float(Decimal(str(self.mtc_count)) * Decimal(str(self.shift_rate_for_mtc)))
 
     @property
     def base_conversion_cost(self):
         """Calculate base conversion cost per part before percentages"""
         parts_per_shift = self.number_of_parts_per_shift
         if parts_per_shift > 0:
-            return float(self.shift_rate) / parts_per_shift
+            from decimal import Decimal
+            # Base cost includes shift rate + MTC cost
+            total_shift_cost = Decimal(str(self.shift_rate)) + Decimal(str(self.mtc_cost))
+            return float(total_shift_cost / parts_per_shift)
         return 0
 
     @property
