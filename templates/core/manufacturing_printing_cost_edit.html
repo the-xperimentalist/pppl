@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Manufacturing/Printing Cost{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Assembly
+            </a>
+            <h1 class="mb-0">Edit Manufacturing/Printing Cost</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Assembly: {{ assembly.name }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="process" class="form-label">Process <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="process" name="process" 
+                               value="{{ mfg_cost.process }}" required 
+                               placeholder="e.g., Printing, Welding, Assembly">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="mc_tonnage" class="form-label">Machine Tonnage <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="mc_tonnage" name="mc_tonnage" 
+                                   step="0.00000001" value="{{ mfg_cost.mc_tonnage }}" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="mc_rate_per_hour" class="form-label">Machine Rate per Hour <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="mc_rate_per_hour" name="mc_rate_per_hour" 
+                                   step="0.00000001" value="{{ mfg_cost.mc_rate_per_hour }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="cycle_time" class="form-label">Cycle Time (seconds) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="cycle_time" name="cycle_time" 
+                               step="0.00000001" value="{{ mfg_cost.cycle_time }}" required>
+                        <div class="form-text">Time per cycle in seconds</div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Current Per Cost:</strong> {{ mfg_cost.per_cost|floatformat:2 }}
+                        <br>
+                        <small>Formula: (Machine Rate per Hour × Cycle Time) / 3600</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Update Manufacturing Cost
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

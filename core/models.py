@@ -29,8 +29,8 @@ class MouldingMachineType(models.Model):
 
     # Machine type details
     name = models.CharField(max_length=200, default="", help_text="Name/identifier for this machine type")
-    shift_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Shift rate")
-    shift_rate_for_mtc = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    shift_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Shift rate")
+    shift_rate_for_mtc = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                              verbose_name="Shift Rate for MTC")
     mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
 
@@ -64,7 +64,7 @@ class MaterialType(models.Model):
     raw_material_name = models.CharField(max_length=200, default="")
     raw_material_grade = models.CharField(max_length=100, default="")
     raw_material_code = models.CharField(max_length=100, default="", verbose_name="RM Code")
-    raw_material_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    raw_material_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='material_types')
     created_at = models.DateTimeField(default=timezone.now)
@@ -146,9 +146,9 @@ class Quote(models.Model):
     notes = models.TextField(blank=True, null=True, default="")
 
     # Financial parameters
-    handling_charge = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    handling_charge = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                          help_text="Fixed handling charge")
-    profit_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                            help_text="Profit percentage")
 
     # Version tracking
@@ -346,29 +346,29 @@ class RawMaterial(models.Model):
     unit_of_measurement = models.CharField(max_length=10, choices=UNIT_CHOICES, default='kg')
 
     # Pricing
-    frozen_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True,
+    frozen_rate = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True,
                                      help_text="Frozen rate if applicable")
-    rm_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="RM Rate")
+    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate")
 
     # Weight details
-    part_weight = models.DecimalField(max_digits=10, decimal_places=3, default=0)
-    runner_weight = models.DecimalField(max_digits=10, decimal_places=3, default=0)
+    part_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    runner_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     # Additional costs
-    process_losses = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    process_losses = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                         help_text="Process losses cost")
-    purging_loss_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    icc_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    purging_loss_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    icc_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                         verbose_name="ICC %", help_text="ICC percentage")
 
     # Cost percentages
-    rejection_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                               help_text="Rejection percentage")
-    overhead_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                              help_text="Overhead percentage")
-    maintenance_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                 help_text="Maintenance percentage")
-    profit_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                            help_text="Profit percentage")
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -494,24 +494,24 @@ class MouldingMachineDetail(models.Model):
 
     # Machine details
     cavity = models.IntegerField(default=1)
-    machine_tonnage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    cycle_time = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Cycle time in seconds")
-    efficiency = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Efficiency percentage")
+    machine_tonnage = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    cycle_time = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Cycle time in seconds")
+    efficiency = models.DecimalField(max_digits=13, decimal_places=8, default=0, help_text="Efficiency percentage")
 
     # Shift and cost details
-    shift_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    shift_rate_for_mtc = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    shift_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    shift_rate_for_mtc = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                              verbose_name="Shift Rate for MTC")
     mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
 
     # Cost percentages
-    rejection_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                               help_text="Rejection percentage")
-    overhead_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                              help_text="Overhead percentage")
-    maintenance_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                 help_text="Maintenance percentage")
-    profit_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                            help_text="Profit percentage")
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -611,7 +611,7 @@ class Assembly(models.Model):
     assembly_type = models.CharField(max_length=20, choices=ASSEMBLY_TYPE_CHOICES, default='manual')
 
     # For manual assembly
-    manual_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                      help_text="Cost for manual assembly")
 
     # For automated assembly
@@ -619,23 +619,23 @@ class Assembly(models.Model):
                                             help_text="Assembly type from configuration")
 
     # Other costs
-    other_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    other_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     # Percentages for calculations
-    profit_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                            help_text="Profit percentage")
-    rejection_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                               help_text="Rejection percentage")
-    inspection_handling_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    inspection_handling_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                         help_text="Inspection + Handling percentage")
 
     # Calculated fields
-    total_assembly_rm_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
-    total_manufacturing_printing_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
-    profit_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
-    rejection_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
-    inspection_handling_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
-    total_assembly_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False)
+    total_assembly_rm_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    total_manufacturing_printing_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    profit_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    rejection_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    inspection_handling_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    total_assembly_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -713,14 +713,14 @@ class AssemblyRawMaterial(models.Model):
 
     description = models.CharField(max_length=200, default="")
     production_quantity = models.IntegerField(default=1, help_text="Production quantity")
-    production_weight = models.DecimalField(max_digits=10, decimal_places=3, default=0,
+    production_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                            help_text="Production weight/amount")
     unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='kg')
-    cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    cost_per_unit = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                        help_text="Cost per unit")
 
     # Calculated field
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False,
+    total_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                     help_text="(Production Weight × Cost/Unit) / Production Quantity")
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -759,15 +759,15 @@ class ManufacturingPrintingCost(models.Model):
     assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE, related_name='manufacturing_printing_costs')
 
     process = models.CharField(max_length=200, default="", help_text="Process name/description")
-    mc_tonnage = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    mc_tonnage = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                     verbose_name="M/C Tonnage", help_text="Machine tonnage")
-    mc_rate_per_hour = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    mc_rate_per_hour = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           verbose_name="M/C Rate/Hr", help_text="Machine rate per hour")
-    cycle_time = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    cycle_time = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                     help_text="Cycle time in seconds")
 
     # Calculated field
-    per_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False,
+    per_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                   help_text="(Rate/Hr × Cycle Time) / 3600")
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -811,16 +811,16 @@ class Packaging(models.Model):
     packaging_type = models.CharField(max_length=30, choices=PACKAGING_TYPE_CHOICES, default='pp_box')
 
     # Fixed dimensions (read-only in forms, set automatically)
-    length = models.DecimalField(max_digits=10, decimal_places=2, default=600, editable=False)
-    breadth = models.DecimalField(max_digits=10, decimal_places=2, default=400, editable=False)
-    height = models.DecimalField(max_digits=10, decimal_places=2, default=250, editable=False)
-    polybag_length = models.DecimalField(max_digits=10, decimal_places=2, default=16, editable=False)
-    polybag_width = models.DecimalField(max_digits=10, decimal_places=2, default=20, editable=False)
+    length = models.DecimalField(max_digits=18, decimal_places=8, default=600, editable=False)
+    breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400, editable=False)
+    height = models.DecimalField(max_digits=18, decimal_places=8, default=250, editable=False)
+    polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16, editable=False)
+    polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20, editable=False)
 
     # User-defined values
     lifecycle = models.IntegerField(default=0, help_text="Lifecycle count")
-    cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Base cost")
-    maintenance_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+    cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Base cost")
+    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                  help_text="Maintenance percentage")
     part_per_polybag = models.IntegerField(default=1, help_text="Number of parts per polybag")
 
@@ -829,15 +829,15 @@ class Packaging(models.Model):
     POLYBAG_COST_CONSTANT = 3.56  # Fixed value for polybag calculation
 
     # Calculated fields
-    maintenance_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False,
+    maintenance_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                           help_text="Maintenance % of cost")
-    total_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0, editable=False,
+    total_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                     help_text="Cost + Maintenance cost")
-    cost_per_part = models.DecimalField(max_digits=10, decimal_places=4, default=0, editable=False,
+    cost_per_part = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                        help_text="Total cost / (Lifecycle × 288)")
-    polybag_cost = models.DecimalField(max_digits=10, decimal_places=4, default=0, editable=False,
+    polybag_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                       help_text="3.56 / Part per polybag")
-    total_packaging_cost = models.DecimalField(max_digits=10, decimal_places=4, default=0, editable=False,
+    total_packaging_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                               help_text="Cost per part + Polybag cost")
 
     created_at = models.DateTimeField(default=timezone.now)
@@ -893,15 +893,15 @@ class Transport(models.Model):
                                  help_text="Associated packaging type")
 
     # User-defined transport dimensions
-    transport_length = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    transport_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Overall length of transport vehicle")
-    transport_breadth = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    transport_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                            help_text="Overall breadth of transport vehicle")
-    transport_height = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    transport_height = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Overall height of transport vehicle")
 
     # User-defined cost
-    trip_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0,
+    trip_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                    help_text="Cost per trip")
 
     # User-defined parts per box
@@ -918,7 +918,7 @@ class Transport(models.Model):
                                      help_text="Boxes on length × breadth × height")
     total_parts_per_trip = models.IntegerField(default=0, editable=False,
                                               help_text="Total boxes × Parts per box")
-    trip_cost_per_part = models.DecimalField(max_digits=10, decimal_places=4, default=0, editable=False,
+    trip_cost_per_part = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
                                             help_text="Trip cost / Total parts per trip")
 
     created_at = models.DateTimeField(default=timezone.now)

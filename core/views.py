@@ -1633,3 +1633,91 @@ def moulding_machine_edit(request, project_id, quote_id, mm_id):
         'moulding_machine_types': moulding_machine_types,
     }
     return render(request, 'core/moulding_machine_edit.html', context)
+
+
+@login_required
+def assembly_raw_material_edit(request, project_id, quote_id, assembly_id, arm_id):
+    """Edit assembly raw material"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    assembly = get_object_or_404(Assembly, id=assembly_id, quote=quote)
+    assembly_rm = get_object_or_404(AssemblyRawMaterial, id=arm_id, assembly=assembly)
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
+
+    if request.method == 'POST':
+        try:
+            assembly_rm.description = request.POST.get('description')
+            assembly_rm.production_quantity = int(request.POST.get('production_quantity', 1))
+            assembly_rm.production_weight = float(request.POST.get('production_weight', 0))
+            assembly_rm.unit = request.POST.get('unit', 'kg')
+            assembly_rm.cost_per_unit = float(request.POST.get('cost_per_unit', 0))
+            assembly_rm.save()
+
+            # Recalculate assembly costs
+            assembly.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Assembly RM "{assembly_rm.description}" updated in "{assembly.name}"')
+
+            messages.success(request, f'Assembly raw material "{assembly_rm.description}" updated successfully!')
+            return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating assembly raw material: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'assembly': assembly,
+        'assembly_rm': assembly_rm,
+        'unit_choices': AssemblyRawMaterial.UNIT_CHOICES,
+    }
+    return render(request, 'core/assembly_raw_material_edit.html', context)
+
+
+@login_required
+def manufacturing_printing_cost_edit(request, project_id, quote_id, assembly_id, cost_id):
+    """Edit manufacturing/printing cost"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    assembly = get_object_or_404(Assembly, id=assembly_id, quote=quote)
+    mfg_cost = get_object_or_404(ManufacturingPrintingCost, id=cost_id, assembly=assembly)
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
+
+    if request.method == 'POST':
+        try:
+            mfg_cost.process = request.POST.get('process')
+            mfg_cost.mc_tonnage = float(request.POST.get('mc_tonnage', 0))
+            mfg_cost.mc_rate_per_hour = float(request.POST.get('mc_rate_per_hour', 0))
+            mfg_cost.cycle_time = float(request.POST.get('cycle_time', 0))
+            mfg_cost.save()
+
+            # Recalculate assembly costs
+            assembly.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Manufacturing cost "{mfg_cost.process}" updated in "{assembly.name}"')
+
+            messages.success(request, f'Manufacturing/Printing cost "{mfg_cost.process}" updated successfully!')
+            return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating manufacturing cost: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'assembly': assembly,
+        'mfg_cost': mfg_cost,
+    }
+    return render(request, 'core/manufacturing_printing_cost_edit.html', context)

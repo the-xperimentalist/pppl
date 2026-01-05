@@ -82,4 +82,12 @@ urlpatterns = [
 
     # Moulding Machine edit
     path('projects/<int:project_id>/quotes/<int:quote_id>/moulding-machines/<int:mm_id>/edit/', views.moulding_machine_edit, name='moulding_machine_edit'),
+
+    # Assembly Raw Material edit
+    path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/raw-materials/<int:arm_id>/edit/',
+         views.assembly_raw_material_edit, name='assembly_raw_material_edit'),
+
+    # Manufacturing/Printing Cost edit
+    path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/manufacturing-costs/<int:cost_id>/edit/',
+         views.manufacturing_printing_cost_edit, name='manufacturing_printing_cost_edit'),
 ]
