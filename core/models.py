@@ -606,6 +606,7 @@ class Assembly(models.Model):
         ('automated', 'Automated'),
     ]
 
+    name = models.CharField(max_length=200, default="", help_text="Assembly name/identifier")
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='assemblies')
     assembly_type = models.CharField(max_length=20, choices=ASSEMBLY_TYPE_CHOICES, default='manual')
 
@@ -645,7 +646,7 @@ class Assembly(models.Model):
         verbose_name_plural = 'Assemblies'
 
     def __str__(self):
-        return f"Assembly {self.id} - {self.quote.name} ({self.assembly_type})"
+        return f"Assembly {self.id} - {self.name} - {self.quote.name} ({self.assembly_type})"
 
     def calculate_costs(self):
         """Calculate all assembly costs"""

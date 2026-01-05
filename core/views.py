@@ -447,6 +447,7 @@ def assembly_add(request, project_id, quote_id):
             assembly = Assembly(
                 quote=quote,
                 assembly_type=assembly_type,
+                name=request.POST.get('name', ''),
                 manual_cost=float(request.POST.get('manual_cost', 0)) if assembly_type == 'manual' else 0,
                 assembly_type_config_id=request.POST.get('assembly_type_config') or None if assembly_type == 'automated' else None,
                 other_cost=float(request.POST.get('other_cost', 0)),

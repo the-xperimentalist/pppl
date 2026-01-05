@@ -156,16 +156,6 @@ class MouldingMachineDetailAdmin(admin.ModelAdmin):
     )
 
 
-@admin.register(Assembly)
-class AssemblyAdmin(admin.ModelAdmin):
-    list_display = ['quote', 'assembly_type', 'total_assembly_rm_cost',
-                    'total_manufacturing_printing_cost', 'total_assembly_cost']
-    list_filter = ['assembly_type', 'quote']
-    readonly_fields = ['total_assembly_rm_cost', 'total_manufacturing_printing_cost',
-                      'profit_cost', 'rejection_cost', 'inspection_handling_cost',
-                      'total_assembly_cost', 'created_at', 'updated_at']
-
-
 @admin.register(AssemblyRawMaterial)
 class AssemblyRawMaterialAdmin(admin.ModelAdmin):
     list_display = ['description', 'assembly', 'production_quantity', 'production_weight',

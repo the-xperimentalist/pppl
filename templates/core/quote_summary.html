@@ -274,31 +274,27 @@
                         <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Name</th>
                                     <th>Type</th>
-                                    <th>Assembly RM Cost</th>
-                                    <th>Manufacturing Cost</th>
-                                    <th>Profit</th>
-                                    <th>Rejection</th>
-                                    <th>Inspection+Handling</th>
+                                    <th>Manual Cost</th>
+                                    <th>Other Cost</th>
                                     <th>Total Cost</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for assembly in assemblies %}
                                 <tr>
-                                    <td>{{ assembly.get_assembly_type_display }}</td>
-                                    <td class="text-end">{{ assembly.total_assembly_rm_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ assembly.total_manufacturing_printing_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ assembly.profit_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ assembly.rejection_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ assembly.inspection_handling_cost|floatformat:2 }}</td>
+                                    <td><strong>{{ assembly.name }}</strong></td>
+                                    <td>{{ assembly.assembly_type_config.name|default:"-" }}</td>
+                                    <td class="text-end">{{ assembly.manual_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ assembly.other_cost|floatformat:2 }}</td>
                                     <td class="text-end"><strong>{{ assembly.total_assembly_cost|floatformat:2 }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                                    <td colspan="4" class="text-end"><strong>Total:</strong></td>
                                     <td class="text-end"><strong>{{ total_assembly_cost|floatformat:2 }}</strong></td>
                                 </tr>
                             </tfoot>
