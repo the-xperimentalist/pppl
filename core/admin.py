@@ -171,33 +171,6 @@ class ManufacturingPrintingCostAdmin(admin.ModelAdmin):
     readonly_fields = ['per_cost', 'created_at', 'updated_at']
 
 
-@admin.register(Packaging)
-class PackagingAdmin(admin.ModelAdmin):
-    list_display = ['quote', 'packaging_type', 'lifecycle', 'cost', 'maintenance_percentage',
-                    'part_per_polybag', 'total_packaging_cost']
-    list_filter = ['packaging_type', 'quote']
-    readonly_fields = ['length', 'breadth', 'height', 'polybag_length', 'polybag_width',
-                      'maintenance_cost', 'total_cost', 'cost_per_part', 'polybag_cost',
-                      'total_packaging_cost', 'created_at', 'updated_at']
-
-    fieldsets = (
-        ('Packaging Type', {
-            'fields': ('quote', 'packaging_type')
-        }),
-        ('Fixed Dimensions (Auto-set)', {
-            'fields': ('length', 'breadth', 'height', 'polybag_length', 'polybag_width'),
-            'classes': ('collapse',)
-        }),
-        ('User Inputs', {
-            'fields': ('lifecycle', 'cost', 'maintenance_percentage', 'part_per_polybag')
-        }),
-        ('Calculated Values', {
-            'fields': ('maintenance_cost', 'total_cost', 'cost_per_part', 'polybag_cost', 'total_packaging_cost'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
 @admin.register(Transport)
 class TransportAdmin(admin.ModelAdmin):
     list_display = ['quote', 'packaging', 'transport_length', 'transport_breadth', 'transport_height',

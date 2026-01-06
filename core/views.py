@@ -677,6 +677,10 @@ def packaging_add(request, project_id, quote_id):
     """Add packaging to quote"""
     project = get_object_or_404(Project, id=project_id, is_active=True)
     quote = get_object_or_404(Quote, id=quote_id, project=project)
+    packaging_types = PackagingType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
 
     # Check if quote can be edited
     if not quote.can_edit_sections():
@@ -685,30 +689,36 @@ def packaging_add(request, project_id, quote_id):
 
     if request.method == 'POST':
         try:
-            packaging = Packaging(
+            packaging_type_id = request.POST.get('packaging_type_config')
+
+            packaging = Packaging.objects.create(
                 quote=quote,
                 packaging_type=request.POST.get('packaging_type', 'pp_box'),
-                lifecycle=int(request.POST.get('lifecycle', 0)),
+                packaging_length=float(request.POST.get('packaging_length', 600)),
+                packaging_breadth=float(request.POST.get('packaging_breadth', 400)),
+                packaging_height=float(request.POST.get('packaging_height', 250)),
+                polybag_length=float(request.POST.get('polybag_length', 16)),
+                polybag_width=float(request.POST.get('polybag_width', 20)),
+                lifecycle=int(request.POST.get('lifecycle', 1)),
                 cost=float(request.POST.get('cost', 0)),
                 maintenance_percentage=float(request.POST.get('maintenance_percentage', 0)),
                 part_per_polybag=int(request.POST.get('part_per_polybag', 1)),
             )
-            packaging.save()
 
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'Packaging "{packaging.get_packaging_type_display()}" added', 'packaging_added')
+            quote.increment_version(request.user, f'Packaging "{packaging.get_packaging_type_display()}" added')
 
             messages.success(request, f'Packaging "{packaging.get_packaging_type_display()}" added successfully!')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
-        except ValueError:
-            messages.error(request, 'Invalid numeric value provided. Please check your inputs.')
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
         except Exception as e:
             messages.error(request, f'Error adding packaging: {str(e)}')
 
     context = {
         'project': project,
         'quote': quote,
-        'packaging_types': Packaging.PACKAGING_TYPE_CHOICES,
+        'packaging_types': packaging_types,
     }
     return render(request, 'core/packaging_add.html', context)
 
@@ -1721,3 +1731,54 @@ def manufacturing_printing_cost_edit(request, project_id, quote_id, assembly_id,
         'mfg_cost': mfg_cost,
     }
     return render(request, 'core/manufacturing_printing_cost_edit.html', context)
+
+
+@login_required
+def packaging_edit(request, project_id, quote_id, packaging_id):
+    """Edit packaging"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    packaging = get_object_or_404(Packaging, id=packaging_id, quote=quote)
+    packaging_types = PackagingType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+
+    if request.method == 'POST':
+        try:
+            packaging_type_id = request.POST.get('packaging_type_config')
+
+            packaging.packaging_type = request.POST.get('packaging_type', 'pp_box')
+            packaging.packaging_length = float(request.POST.get('packaging_length', 600))
+            packaging.packaging_breadth = float(request.POST.get('packaging_breadth', 400))
+            packaging.packaging_height = float(request.POST.get('packaging_height', 250))
+            packaging.polybag_length = float(request.POST.get('polybag_length', 16))
+            packaging.polybag_width = float(request.POST.get('polybag_width', 20))
+            packaging.lifecycle = int(request.POST.get('lifecycle', 1))
+            packaging.cost = float(request.POST.get('cost', 0))
+            packaging.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))
+            packaging.part_per_polybag = int(request.POST.get('part_per_polybag', 1))
+            packaging.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Packaging "{packaging.get_packaging_type_display()}" updated')
+
+            messages.success(request, f'Packaging "{packaging.get_packaging_type_display()}" updated successfully!')
+            return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating packaging: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'packaging': packaging,
+        'packaging_types': packaging_types,
+    }
+    return render(request, 'core/packaging_edit.html', context)

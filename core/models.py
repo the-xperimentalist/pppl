@@ -799,7 +799,7 @@ class ManufacturingPrintingCost(models.Model):
 
 
 class Packaging(models.Model):
-    """Packaging details for a quote"""
+    """Packaging for a quote"""
     PACKAGING_TYPE_CHOICES = [
         ('pp_box', 'PP Box'),
         ('pp_box_partition', 'PP Box with Partition'),
@@ -808,37 +808,30 @@ class Packaging(models.Model):
     ]
 
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='packagings')
-    packaging_type = models.CharField(max_length=30, choices=PACKAGING_TYPE_CHOICES, default='pp_box')
 
-    # Fixed dimensions (read-only in forms, set automatically)
-    length = models.DecimalField(max_digits=18, decimal_places=8, default=600, editable=False)
-    breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400, editable=False)
-    height = models.DecimalField(max_digits=18, decimal_places=8, default=250, editable=False)
-    polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16, editable=False)
-    polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20, editable=False)
+    # Editable dimensions (previously constants)
+    packaging_length = models.DecimalField(max_digits=18, decimal_places=8, default=600,
+                                          help_text="Packaging length (mm)")
+    packaging_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400,
+                                           help_text="Packaging breadth (mm)")
+    packaging_height = models.DecimalField(max_digits=18, decimal_places=8, default=250,
+                                          help_text="Packaging height (mm)")
+    polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16,
+                                        help_text="Polybag length")
+    polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20,
+                                       help_text="Polybag width")
 
-    # User-defined values
-    lifecycle = models.IntegerField(default=0, help_text="Lifecycle count")
-    cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Base cost")
+    # Constants (kept for backward compatibility)
+    NUMBER_OF_PARTS_PER_COST = 288
+    POLYBAG_COST_CONSTANT = 3.56
+
+    # User inputs
+    packaging_type = models.CharField(max_length=20, choices=PACKAGING_TYPE_CHOICES, default='pp_box')
+    lifecycle = models.IntegerField(default=1, help_text="Number of times packaging can be used")
+    cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Cost of packaging")
     maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                  help_text="Maintenance percentage")
     part_per_polybag = models.IntegerField(default=1, help_text="Number of parts per polybag")
-
-    # Fixed constant
-    NUMBER_OF_PARTS_PER_COST = 288  # Fixed value
-    POLYBAG_COST_CONSTANT = 3.56  # Fixed value for polybag calculation
-
-    # Calculated fields
-    maintenance_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                          help_text="Maintenance % of cost")
-    total_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                    help_text="Cost + Maintenance cost")
-    cost_per_part = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                       help_text="Total cost / (Lifecycle × 288)")
-    polybag_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                      help_text="3.56 / Part per polybag")
-    total_packaging_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                              help_text="Cost per part + Polybag cost")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -851,75 +844,59 @@ class Packaging(models.Model):
     def __str__(self):
         return f"{self.get_packaging_type_display()} - {self.quote.name}"
 
-    def save(self, *args, **kwargs):
-        """Calculate all packaging costs before saving"""
+    @property
+    def maintenance_cost(self):
+        """Calculate maintenance cost"""
         from decimal import Decimal
+        return float(Decimal(str(self.cost)) * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
 
-        # Convert to Decimal
-        cost = Decimal(str(self.cost or 0))
-        maintenance_percentage = Decimal(str(self.maintenance_percentage or 0))
-        lifecycle = Decimal(str(self.lifecycle or 1))
-        part_per_polybag = Decimal(str(self.part_per_polybag or 1))
+    @property
+    def total_cost(self):
+        """Calculate total cost"""
+        from decimal import Decimal
+        return float(Decimal(str(self.cost)) + Decimal(str(self.maintenance_cost)))
 
-        # Calculate maintenance cost = maintenance_percentage % of cost
-        self.maintenance_cost = cost * (maintenance_percentage / Decimal('100'))
+    @property
+    def cost_per_part(self):
+        """Calculate cost per part"""
+        from decimal import Decimal
+        if self.lifecycle > 0:
+            return float(Decimal(str(self.total_cost)) / (Decimal(str(self.lifecycle)) * Decimal(str(self.NUMBER_OF_PARTS_PER_COST))))
+        return 0
 
-        # Calculate total cost = cost + maintenance_cost
-        self.total_cost = cost + self.maintenance_cost
+    @property
+    def polybag_cost(self):
+        """Calculate polybag cost"""
+        from decimal import Decimal
+        if self.part_per_polybag > 0:
+            return float(Decimal(str(self.POLYBAG_COST_CONSTANT)) / Decimal(str(self.part_per_polybag)))
+        return 0
 
-        # Calculate cost per part = total_cost / (lifecycle × 288)
-        if lifecycle > 0:
-            total_parts = lifecycle * Decimal(str(self.NUMBER_OF_PARTS_PER_COST))
-            self.cost_per_part = self.total_cost / total_parts
-        else:
-            self.cost_per_part = Decimal('0')
-
-        # Calculate polybag cost = 3.56 / part_per_polybag
-        if part_per_polybag > 0:
-            self.polybag_cost = Decimal(str(self.POLYBAG_COST_CONSTANT)) / part_per_polybag
-        else:
-            self.polybag_cost = Decimal('0')
-
-        # Calculate total packaging cost = cost_per_part + polybag_cost
-        self.total_packaging_cost = self.cost_per_part + self.polybag_cost
-
-        super().save(*args, **kwargs)
+    @property
+    def total_packaging_cost(self):
+        """Calculate total packaging cost per part"""
+        from decimal import Decimal
+        return float(Decimal(str(self.cost_per_part)) + Decimal(str(self.polybag_cost)))
 
 
 class Transport(models.Model):
-    """Transport details for a quote"""
+    """Transport for a quote"""
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='transports')
-    packaging = models.ForeignKey(Packaging, on_delete=models.CASCADE, related_name='transports',
-                                 help_text="Associated packaging type")
+    packaging = models.ForeignKey(Packaging, on_delete=models.SET_NULL, null=True, blank=True,
+                                  related_name='transports', help_text="Related packaging")
 
-    # User-defined transport dimensions
+    # Transport dimensions
     transport_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                          help_text="Overall length of transport vehicle")
+                                          help_text="Transport length")
     transport_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                           help_text="Overall breadth of transport vehicle")
+                                           help_text="Transport breadth")
     transport_height = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                          help_text="Overall height of transport vehicle")
+                                          help_text="Transport height")
 
-    # User-defined cost
+    # Cost details
     trip_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                    help_text="Cost per trip")
-
-    # User-defined parts per box
     parts_per_box = models.IntegerField(default=1, help_text="Number of parts per box")
-
-    # Calculated fields
-    boxes_on_length = models.IntegerField(default=0, editable=False,
-                                         help_text="Transport length / Box length (rounded down)")
-    boxes_on_breadth = models.IntegerField(default=0, editable=False,
-                                          help_text="Transport breadth / Box breadth (rounded down)")
-    boxes_on_height = models.IntegerField(default=0, editable=False,
-                                         help_text="Transport height / Box height (rounded down)")
-    total_boxes = models.IntegerField(default=0, editable=False,
-                                     help_text="Boxes on length × breadth × height")
-    total_parts_per_trip = models.IntegerField(default=0, editable=False,
-                                              help_text="Total boxes × Parts per box")
-    trip_cost_per_part = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                            help_text="Trip cost / Total parts per trip")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -930,54 +907,49 @@ class Transport(models.Model):
         verbose_name_plural = 'Transports'
 
     def __str__(self):
-        return f"Transport for {self.packaging.get_packaging_type_display()} - {self.quote.name}"
+        return f"Transport - {self.quote.name}"
 
-    def save(self, *args, **kwargs):
-        """Calculate all transport values before saving"""
-        from decimal import Decimal
-        import math
+    @property
+    def boxes_on_length(self):
+        """Calculate boxes on length"""
+        if self.packaging and self.transport_length > 0 and self.packaging.packaging_length > 0:
+            from decimal import Decimal
+            return int(Decimal(str(self.transport_length)) / Decimal(str(self.packaging.packaging_length)))
+        return 0
 
-        # Get packaging dimensions (box dimensions)
-        box_length = self.packaging.length
-        box_breadth = self.packaging.breadth
-        box_height = self.packaging.height
+    @property
+    def boxes_on_breadth(self):
+        """Calculate boxes on breadth"""
+        if self.packaging and self.transport_breadth > 0 and self.packaging.packaging_breadth > 0:
+            from decimal import Decimal
+            return int(Decimal(str(self.transport_breadth)) / Decimal(str(self.packaging.packaging_breadth)))
+        return 0
 
-        # Convert to Decimal
-        transport_length = Decimal(str(self.transport_length or 0))
-        transport_breadth = Decimal(str(self.transport_breadth or 0))
-        transport_height = Decimal(str(self.transport_height or 0))
-        trip_cost = Decimal(str(self.trip_cost or 0))
-        parts_per_box = int(self.parts_per_box or 1)
+    @property
+    def boxes_on_height(self):
+        """Calculate boxes on height"""
+        if self.packaging and self.transport_height > 0 and self.packaging.packaging_height > 0:
+            from decimal import Decimal
+            return int(Decimal(str(self.transport_height)) / Decimal(str(self.packaging.packaging_height)))
+        return 0
 
-        # Calculate number of boxes on each dimension (rounded down)
-        if box_length > 0:
-            self.boxes_on_length = int(math.floor(transport_length / box_length))
-        else:
-            self.boxes_on_length = 0
+    @property
+    def total_boxes(self):
+        """Calculate total boxes"""
+        return self.boxes_on_length * self.boxes_on_breadth * self.boxes_on_height
 
-        if box_breadth > 0:
-            self.boxes_on_breadth = int(math.floor(transport_breadth / box_breadth))
-        else:
-            self.boxes_on_breadth = 0
+    @property
+    def total_parts_per_trip(self):
+        """Calculate total parts per trip"""
+        return self.total_boxes * self.parts_per_box
 
-        if box_height > 0:
-            self.boxes_on_height = int(math.floor(transport_height / box_height))
-        else:
-            self.boxes_on_height = 0
-
-        # Calculate total boxes = boxes_on_length × boxes_on_breadth × boxes_on_height
-        self.total_boxes = self.boxes_on_length * self.boxes_on_breadth * self.boxes_on_height
-
-        # Calculate total parts per trip = total_boxes × parts_per_box
-        self.total_parts_per_trip = self.total_boxes * parts_per_box
-
-        # Calculate trip cost per part = trip_cost / total_parts_per_trip
+    @property
+    def trip_cost_per_part(self):
+        """Calculate trip cost per part"""
         if self.total_parts_per_trip > 0:
-            self.trip_cost_per_part = trip_cost / Decimal(str(self.total_parts_per_trip))
-        else:
-            self.trip_cost_per_part = Decimal('0')
-
-        super().save(*args, **kwargs)
+            from decimal import Decimal
+            return float(Decimal(str(self.trip_cost)) / Decimal(str(self.total_parts_per_trip)))
+        return 0
 
 
 class QuoteTimeline(models.Model):

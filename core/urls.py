@@ -90,4 +90,7 @@ urlpatterns = [
     # Manufacturing/Printing Cost edit
     path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/manufacturing-costs/<int:cost_id>/edit/',
          views.manufacturing_printing_cost_edit, name='manufacturing_printing_cost_edit'),
+    # Packaging edit
+     path('projects/<int:project_id>/quotes/<int:quote_id>/packaging/<int:packaging_id>/edit/',
+          views.packaging_edit, name='packaging_edit'),
 ]

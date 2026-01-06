@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Packaging{% endblock %}
+{% block title %}Edit Packaging{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -9,102 +9,106 @@
             <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i> Back to Quote
             </a>
-            <h1 class="mb-0">Add Packaging</h1>
+            <h1 class="mb-0">Edit Packaging</h1>
         </div>
 
         <div class="card">
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-
+                    
                     <h5 class="mb-3">Packaging Type</h5>
-
+                    
                     <div class="mb-3">
                         <label for="packaging_type" class="form-label">Packaging Type <span class="text-danger">*</span></label>
                         <select class="form-select" id="packaging_type" name="packaging_type" required>
-                            <option value="pp_box">PP Box</option>
-                            <option value="pp_box_partition">PP Box with Partition</option>
-                            <option value="cg_box">CG Box</option>
-                            <option value="bin">Bin</option>
+                            <option value="pp_box" {% if packaging.packaging_type == 'pp_box' %}selected{% endif %}>PP Box</option>
+                            <option value="pp_box_partition" {% if packaging.packaging_type == 'pp_box_partition' %}selected{% endif %}>PP Box with Partition</option>
+                            <option value="cg_box" {% if packaging.packaging_type == 'cg_box' %}selected{% endif %}>CG Box</option>
+                            <option value="bin" {% if packaging.packaging_type == 'bin' %}selected{% endif %}>Bin</option>
                         </select>
                     </div>
-
+                    
                     <hr class="my-4">
-
+                    
                     <h5 class="mb-3">Packaging Dimensions</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="packaging_length" class="form-label">Length (mm) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_length" name="packaging_length"
-                                   step="0.00000001" value="600" required>
+                            <input type="number" class="form-control" id="packaging_length" name="packaging_length" 
+                                   step="0.00000001" value="{{ packaging.packaging_length }}" required>
                         </div>
-
+                        
                         <div class="col-md-4 mb-3">
                             <label for="packaging_breadth" class="form-label">Breadth (mm) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_breadth" name="packaging_breadth"
-                                   step="0.00000001" value="400" required>
+                            <input type="number" class="form-control" id="packaging_breadth" name="packaging_breadth" 
+                                   step="0.00000001" value="{{ packaging.packaging_breadth }}" required>
                         </div>
-
+                        
                         <div class="col-md-4 mb-3">
                             <label for="packaging_height" class="form-label">Height (mm) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_height" name="packaging_height"
-                                   step="0.00000001" value="250" required>
+                            <input type="number" class="form-control" id="packaging_height" name="packaging_height" 
+                                   step="0.00000001" value="{{ packaging.packaging_height }}" required>
                         </div>
                     </div>
-
+                    
                     <hr class="my-4">
-
+                    
                     <h5 class="mb-3">Polybag Dimensions</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="polybag_length" class="form-label">Polybag Length <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="polybag_length" name="polybag_length"
-                                   step="0.00000001" value="16" required>
+                            <input type="number" class="form-control" id="polybag_length" name="polybag_length" 
+                                   step="0.00000001" value="{{ packaging.polybag_length }}" required>
                         </div>
-
+                        
                         <div class="col-md-6 mb-3">
                             <label for="polybag_width" class="form-label">Polybag Width <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="polybag_width" name="polybag_width"
-                                   step="0.00000001" value="20" required>
+                            <input type="number" class="form-control" id="polybag_width" name="polybag_width" 
+                                   step="0.00000001" value="{{ packaging.polybag_width }}" required>
                         </div>
                     </div>
-
+                    
                     <hr class="my-4">
-
+                    
                     <h5 class="mb-3">Cost Details</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="lifecycle" class="form-label">Lifecycle <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="lifecycle" name="lifecycle"
-                                   min="1" value="1" required>
+                            <input type="number" class="form-control" id="lifecycle" name="lifecycle" 
+                                   min="1" value="{{ packaging.lifecycle }}" required>
                             <div class="form-text">Number of times packaging can be used</div>
                         </div>
-
+                        
                         <div class="col-md-6 mb-3">
                             <label for="cost" class="form-label">Cost <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="cost" name="cost"
-                                   step="0.00000001" value="0" required>
+                            <input type="number" class="form-control" id="cost" name="cost" 
+                                   step="0.00000001" value="{{ packaging.cost }}" required>
                         </div>
                     </div>
-
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="maintenance_percentage" class="form-label">Maintenance %</label>
-                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage"
-                                   step="0.00000001" value="0" min="0" max="100">
+                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage" 
+                                   step="0.00000001" value="{{ packaging.maintenance_percentage }}" min="0" max="100">
                         </div>
-
+                        
                         <div class="col-md-6 mb-3">
                             <label for="part_per_polybag" class="form-label">Parts per Polybag <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="part_per_polybag" name="part_per_polybag"
-                                   min="1" value="1" required>
+                            <input type="number" class="form-control" id="part_per_polybag" name="part_per_polybag" 
+                                   min="1" value="{{ packaging.part_per_polybag }}" required>
                         </div>
                     </div>
-
+                    
+                    <div class="alert alert-info">
+                        <strong>Current Total Packaging Cost:</strong> {{ packaging.total_packaging_cost|floatformat:8 }}
+                    </div>
+                    
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Add Packaging
+                            <i class="bi bi-save"></i> Update Packaging
                         </button>
                     </div>
                 </form>

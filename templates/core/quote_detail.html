@@ -513,7 +513,7 @@
             <div class="card-body">
                 {% if packagings %}
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover">
+                        <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
                                     <th>Type</th>
@@ -521,45 +521,36 @@
                                     <th>Polybag (L×W)</th>
                                     <th>Lifecycle</th>
                                     <th>Cost</th>
-                                    <th>Maintenance %</th>
-                                    <th>Total Cost</th>
                                     <th>Parts/Polybag</th>
-                                    <th>Cost/Part</th>
-                                    <th>Polybag Cost</th>
-                                    <th>Total Pkg Cost</th>
+                                    <th>Total Cost</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for pkg in packagings %}
                                 <tr>
-                                    <td><strong>{{ pkg.get_packaging_type_display }}</strong></td>
-                                    <td>{{ pkg.length }} × {{ pkg.breadth }} × {{ pkg.height }}</td>
+                                    <td>{{ pkg.get_packaging_type_display }}</td>
+                                    <td>{{ pkg.packaging_length }} × {{ pkg.packaging_breadth }} × {{ pkg.packaging_height }}</td>
                                     <td>{{ pkg.polybag_length }} × {{ pkg.polybag_width }}</td>
                                     <td>{{ pkg.lifecycle }}</td>
-                                    <td>{{ pkg.cost|floatformat:2 }}</td>
-                                    <td>{{ pkg.maintenance_percentage }}%</td>
-                                    <td>{{ pkg.total_cost|floatformat:2 }}</td>
+                                    <td>{{ pkg.cost|floatformat:4 }}</td>
                                     <td>{{ pkg.part_per_polybag }}</td>
-                                    <td>{{ pkg.cost_per_part|floatformat:4 }}</td>
-                                    <td>{{ pkg.polybag_cost|floatformat:4 }}</td>
-                                    <td><strong class="text-success">{{ pkg.total_packaging_cost|floatformat:4 }}</strong></td>
+                                    <td><strong>{{ pkg.total_packaging_cost|floatformat:8 }}</strong></td>
                                     <td>
+                                        <a href="{% url 'packaging_edit' project.id quote.id pkg.id %}"
+                                           class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
+                                           title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <a href="{% url 'packaging_delete' project.id quote.id pkg.id %}"
-                                           class="btn btn-sm btn-outline-danger"
-                                           onclick="return confirm('Delete this packaging?')">
+                                           class="btn btn-sm btn-outline-danger {% if not quote.can_edit_sections %}disabled{% endif %}"
+                                           onclick="return confirm('Are you sure you want to delete this packaging?')">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot class="table-light">
-                                <tr>
-                                    <td colspan="10" class="text-end"><strong>Total Packaging Cost:</strong></td>
-                                    <td colspan="2"><strong class="text-success">{{ total_packaging_cost|floatformat:4 }}</strong></td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
                 {% else %}
