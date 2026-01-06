@@ -2,6 +2,8 @@
 
 {% block title %}Assembly Detail{% endblock %}
 
+{% load custom_filters %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
@@ -28,7 +30,7 @@
                         </p>
                     </div>
                     <div class="text-end">
-                        <h4 class="text-success mb-0">Total: {{ assembly.total_assembly_cost|floatformat:2 }}</h4>
+                        <h4 class="text-success mb-0">Total: {{ assembly.total_assembly_cost|smart_decimal }}</h4>
                     </div>
                 </div>
             </div>
@@ -52,35 +54,35 @@
                             
                             {% if assembly.assembly_type == 'manual' %}
                             <dt class="col-sm-6">Manual Cost:</dt>
-                            <dd class="col-sm-6">{{ assembly.manual_cost|floatformat:2 }}</dd>
+                            <dd class="col-sm-6">{{ assembly.manual_cost|smart_decimal }}</dd>
                             {% else %}
                             <dt class="col-sm-6">Assembly Type Config:</dt>
                             <dd class="col-sm-6">{{ assembly.assembly_type_config|default:"-" }}</dd>
                             {% endif %}
                             
                             <dt class="col-sm-6">Other Cost:</dt>
-                            <dd class="col-sm-6">{{ assembly.other_cost|floatformat:2 }}</dd>
+                            <dd class="col-sm-6">{{ assembly.other_cost|smart_decimal }}</dd>
                             
                             <dt class="col-sm-6">Total Assembly RM Cost:</dt>
-                            <dd class="col-sm-6"><strong>{{ assembly.total_assembly_rm_cost|floatformat:2 }}</strong></dd>
+                            <dd class="col-sm-6"><strong>{{ assembly.total_assembly_rm_cost|smart_decimal }}</strong></dd>
                             
                             <dt class="col-sm-6">Total Manufacturing Cost:</dt>
-                            <dd class="col-sm-6"><strong>{{ assembly.total_manufacturing_printing_cost|floatformat:2 }}</strong></dd>
+                            <dd class="col-sm-6"><strong>{{ assembly.total_manufacturing_printing_cost|smart_decimal }}</strong></dd>
                         </dl>
                     </div>
                     <div class="col-md-6">
                         <dl class="row">
-                            <dt class="col-sm-6">Profit ({{ assembly.profit_percentage }}%):</dt>
-                            <dd class="col-sm-6">{{ assembly.profit_cost|floatformat:2 }}</dd>
+                            <dt class="col-sm-6">Profit ({{ assembly.profit_percentage|percentage_display }}%):</dt>
+                            <dd class="col-sm-6">{{ assembly.profit_cost|smart_decimal }}</dd>
                             
-                            <dt class="col-sm-6">Rejection ({{ assembly.rejection_percentage }}%):</dt>
-                            <dd class="col-sm-6">{{ assembly.rejection_cost|floatformat:2 }}</dd>
+                            <dt class="col-sm-6">Rejection ({{ assembly.rejection_percentage|percentage_display }}%):</dt>
+                            <dd class="col-sm-6">{{ assembly.rejection_cost|smart_decimal }}</dd>
                             
-                            <dt class="col-sm-6">Inspection + Handling ({{ assembly.inspection_handling_percentage }}%):</dt>
-                            <dd class="col-sm-6">{{ assembly.inspection_handling_cost|floatformat:2 }}</dd>
+                            <dt class="col-sm-6">Inspection + Handling ({{ assembly.inspection_handling_percentage|percentage_display }}%):</dt>
+                            <dd class="col-sm-6">{{ assembly.inspection_handling_cost|smart_decimal }}</dd>
                             
                             <dt class="col-sm-6"><strong>Total Assembly Cost:</strong></dt>
-                            <dd class="col-sm-6"><strong class="text-success">{{ assembly.total_assembly_cost|floatformat:2 }}</strong></dd>
+                            <dd class="col-sm-6"><strong class="text-success">{{ assembly.total_assembly_cost|smart_decimal }}</strong></dd>
                         </dl>
                     </div>
                 </div>
@@ -117,11 +119,11 @@
                         {% for rm in assembly_raw_materials %}
                         <tr>
                             <td>{{ rm.description }}</td>
-                            <td>{{ rm.production_quantity }}</td>
-                            <td>{{ rm.production_weight }}</td>
+                            <td>{{ rm.production_quantity|smart_decimal }}</td>
+                            <td>{{ rm.production_weight|smart_decimal }}</td>
                             <td>{{ rm.unit }}</td>
-                            <td>{{ rm.cost_per_unit|floatformat:2 }}</td>
-                            <td><strong>{{ rm.total_cost|floatformat:2 }}</strong></td>
+                            <td>{{ rm.cost_per_unit|smart_decimal }}</td>
+                            <td><strong>{{ rm.total_cost|smart_decimal }}</strong></td>
                             <td>
                                 <a href="{% url 'assembly_raw_material_edit' project.id quote.id assembly.id rm.id %}"
                                    class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
@@ -140,7 +142,7 @@
                     <tfoot class="table-light">
                         <tr>
                             <td colspan="5" class="text-end"><strong>Total:</strong></td>
-                            <td><strong>{{ total_assembly_rm_cost|floatformat:2 }}</strong></td>
+                            <td><strong>{{ total_assembly_rm_cost|smart_decimal }}</strong></td>
                             <td></td>
                         </tr>
                     </tfoot>
@@ -180,9 +182,9 @@
                         <tr>
                             <td>{{ cost.process }}</td>
                             <td>{{ cost.mc_tonnage }}</td>
-                            <td>{{ cost.mc_rate_per_hour|floatformat:2 }}</td>
+                            <td>{{ cost.mc_rate_per_hour|smart_decimal }}</td>
                             <td>{{ cost.cycle_time }}</td>
-                            <td><strong>{{ cost.per_cost|floatformat:2 }}</strong></td>
+                            <td><strong>{{ cost.per_cost|smart_decimal }}</strong></td>
                             <td>
                                 <a href="{% url 'manufacturing_printing_cost_edit' project.id quote.id assembly.id cost.id %}"
                                    class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
@@ -201,7 +203,7 @@
                     <tfoot class="table-light">
                         <tr>
                             <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                            <td><strong>{{ total_manufacturing_printing_cost|floatformat:2 }}</strong></td>
+                            <td><strong>{{ total_manufacturing_printing_cost|smart_decimal }}</strong></td>
                             <td></td>
                         </tr>
                     </tfoot>

@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load custom_filters %}
+
 {% block title %}{{ quote.name }} - Quote Details{% endblock %}
 
 {% block content %}
@@ -313,13 +315,13 @@
                                     <td>{{ rm.material_name }}</td>
                                     <td>{{ rm.grade|default:"-" }}</td>
                                     <td><code>{{ rm.rm_code }}</code></td>
-                                    <td>{{ rm.gross_weight }}</td>
-                                    <td>{{ rm.base_rm_cost|floatformat:2 }}</td>
-                                    <td>{{ rm.rejection_percentage }}%</td>
-                                    <td>{{ rm.overhead_percentage }}%</td>
-                                    <td>{{ rm.maintenance_percentage }}%</td>
-                                    <td>{{ rm.profit_percentage }}%</td>
-                                    <td><strong>{{ rm.rm_cost|floatformat:2 }}</strong></td>
+                                    <td>{{ rm.gross_weight|smart_decimal }}</td>
+                                    <td>{{ rm.base_rm_cost|smart_decimal }}</td>
+                                    <td>{{ rm.rejection_percentage|percentage_display }}%</td>
+                                    <td>{{ rm.overhead_percentage|percentage_display }}%</td>
+                                    <td>{{ rm.maintenance_percentage|percentage_display }}%</td>
+                                    <td>{{ rm.profit_percentage|percentage_display }}%</td>
+                                    <td><strong>{{ rm.rm_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'raw_material_edit' project.id quote.id rm.id %}"
                                            class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
@@ -393,16 +395,16 @@
                                 <tr>
                                     <td>{{ mm.moulding_machine_type.name|default:"-" }}</td>
                                     <td>{{ mm.cavity }}</td>
-                                    <td>{{ mm.cycle_time }}</td>
+                                    <td>{{ mm.cycle_time|smart_decimal }}</td>
                                     <td>{{ mm.number_of_parts_per_shift }}</td>
                                     <td>{{ mm.mtc_count }}</td>
-                                    <td>{{ mm.mtc_cost|floatformat:2 }}</td>
-                                    <td>{{ mm.base_conversion_cost|floatformat:2 }}</td>
-                                    <td>{{ mm.rejection_percentage }}%</td>
-                                    <td>{{ mm.overhead_percentage }}%</td>
-                                    <td>{{ mm.maintenance_percentage }}%</td>
-                                    <td>{{ mm.profit_percentage }}%</td>
-                                    <td><strong>{{ mm.conversion_cost|floatformat:2 }}</strong></td>
+                                    <td>{{ mm.mtc_cost|smart_decimal }}</td>
+                                    <td>{{ mm.base_conversion_cost|smart_decimal }}</td>
+                                    <td>{{ mm.rejection_percentage|percentage_display }}%</td>
+                                    <td>{{ mm.overhead_percentage|percentage_display }}%</td>
+                                    <td>{{ mm.maintenance_percentage|percentage_display }}%</td>
+                                    <td>{{ mm.profit_percentage|percentage_display }}%</td>
+                                    <td><strong>{{ mm.conversion_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'moulding_machine_edit' project.id quote.id mm.id %}"
                                            class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
@@ -465,12 +467,12 @@
                                 <tr>
                                     <td><strong>{{ assembly.name }}</strong></td>
                                     <td>{{ assembly.assembly_type_config.name|default:"-" }}</td>
-                                    <td>{{ assembly.manual_cost|floatformat:2 }}</td>
-                                    <td>{{ assembly.other_cost|floatformat:2 }}</td>
-                                    <td>{{ assembly.profit_percentage }}%</td>
-                                    <td>{{ assembly.rejection_percentage }}%</td>
-                                    <td>{{ assembly.inspection_handling_percentage }}%</td>
-                                    <td><strong>{{ assembly.total_assembly_cost|floatformat:2 }}</strong></td>
+                                    <td>{{ assembly.manual_cost|smart_decimal }}</td>
+                                    <td>{{ assembly.other_cost|smart_decimal }}</td>
+                                    <td>{{ assembly.profit_percentage|percentage_display }}%</td>
+                                    <td>{{ assembly.rejection_percentage|percentage_display }}%</td>
+                                    <td>{{ assembly.inspection_handling_percentage|percentage_display }}%</td>
+                                    <td><strong>{{ assembly.total_assembly_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}"
                                            class="btn btn-sm btn-outline-info" title="View Details">
@@ -530,12 +532,12 @@
                                 {% for pkg in packagings %}
                                 <tr>
                                     <td>{{ pkg.get_packaging_type_display }}</td>
-                                    <td>{{ pkg.packaging_length }} × {{ pkg.packaging_breadth }} × {{ pkg.packaging_height }}</td>
-                                    <td>{{ pkg.polybag_length }} × {{ pkg.polybag_width }}</td>
+                                    <td>{{ pkg.packaging_length|smart_decimal }} × {{ pkg.packaging_breadth|smart_decimal }} × {{ pkg.packaging_height|smart_decimal }}</td>
+                                    <td>{{ pkg.polybag_length|smart_decimal }} × {{ pkg.polybag_width|smart_decimal }}</td>
                                     <td>{{ pkg.lifecycle }}</td>
-                                    <td>{{ pkg.cost|floatformat:4 }}</td>
+                                    <td>{{ pkg.cost|smart_decimal }}</td>
                                     <td>{{ pkg.part_per_polybag }}</td>
-                                    <td><strong>{{ pkg.total_packaging_cost|floatformat:8 }}</strong></td>
+                                    <td><strong>{{ pkg.total_packaging_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'packaging_edit' project.id quote.id pkg.id %}"
                                            class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
@@ -600,7 +602,7 @@
                                 {% for transport in transports %}
                                 <tr>
                                     <td><strong>{{ transport.packaging.get_packaging_type_display }}</strong></td>
-                                    <td>{{ transport.packaging.length }} × {{ transport.packaging.breadth }} × {{ transport.packaging.height }}</td>
+                                    <td>{{ transport.packaging.length|smart_decimal }} × {{ transport.packaging.breadth|smart_decimal }} × {{ transport.packaging.height|smart_decimal }}</td>
                                     <td>{{ transport.transport_length }} × {{ transport.transport_breadth }} × {{ transport.transport_height }}</td>
                                     <td>{{ transport.boxes_on_length }}</td>
                                     <td>{{ transport.boxes_on_breadth }}</td>
@@ -608,8 +610,8 @@
                                     <td><strong>{{ transport.total_boxes }}</strong></td>
                                     <td>{{ transport.parts_per_box }}</td>
                                     <td><strong>{{ transport.total_parts_per_trip }}</strong></td>
-                                    <td>{{ transport.trip_cost|floatformat:2 }}</td>
-                                    <td><strong class="text-success">{{ transport.trip_cost_per_part|floatformat:4 }}</strong></td>
+                                    <td>{{ transport.trip_cost|smart_decimal }}</td>
+                                    <td><strong class="text-success">{{ transport.trip_cost_per_part|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'transport_delete' project.id quote.id transport.id %}"
                                            class="btn btn-sm btn-outline-danger"
@@ -623,7 +625,7 @@
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="10" class="text-end"><strong>Total Transport Cost per Part:</strong></td>
-                                    <td colspan="2"><strong class="text-success">{{ total_transport_cost|floatformat:4 }}</strong></td>
+                                    <td colspan="2"><strong class="text-success">{{ total_transport_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>

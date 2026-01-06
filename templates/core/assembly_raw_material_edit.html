@@ -2,6 +2,8 @@
 
 {% block title %}Edit Assembly Raw Material{% endblock %}
 
+{% load custom_filters %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -60,7 +62,7 @@
                     </div>
                     
                     <div class="alert alert-info">
-                        <strong>Current Total Cost:</strong> {{ assembly_rm.total_cost|floatformat:2 }}
+                        <strong>Current Total Cost:</strong> {{ assembly_rm.total_cost|smart_decimal }}
                         <br>
                         <small>Formula: (Production Weight × Cost per Unit) / Production Quantity</small>
                     </div>

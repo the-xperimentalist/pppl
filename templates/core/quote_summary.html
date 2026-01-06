@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load custom_filters %}
+
 {% block title %}Quote Summary - {{ quote.name }}{% endblock %}
 
 {% block content %}
@@ -40,7 +42,7 @@
                         <div class="card bg-primary text-white">
                             <div class="card-body">
                                 <h6 class="mb-2">Total Quote Cost</h6>
-                                <h2 class="mb-0">{{ grand_total|floatformat:2 }}</h2>
+                                <h2 class="mb-0">{{ grand_total|smart_decimal }}</h2>
                             </div>
                         </div>
                         <div class="progress mt-3" style="height: 25px;">
@@ -72,7 +74,7 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <h4 class="text-primary">{{ total_rm_cost|floatformat:2 }}</h4>
+                <h4 class="text-primary">{{ total_rm_cost|smart_decimal }}</h4>
                 <p class="mb-0 text-muted">{{ raw_materials_count }} material{{ raw_materials_count|pluralize }}</p>
             </div>
         </div>
@@ -88,7 +90,7 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <h4 class="text-primary">{{ total_conversion_cost|floatformat:2 }}</h4>
+                <h4 class="text-primary">{{ total_conversion_cost|smart_decimal }}</h4>
                 <p class="mb-0 text-muted">{{ moulding_machines_count }} machine{{ moulding_machines_count|pluralize }}</p>
             </div>
         </div>
@@ -104,7 +106,7 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <h4 class="text-primary">{{ total_assembly_cost|floatformat:2 }}</h4>
+                <h4 class="text-primary">{{ total_assembly_cost|smart_decimal }}</h4>
                 <p class="mb-0 text-muted">{{ assemblies_count }} assembl{{ assemblies_count|pluralize:"y,ies" }}</p>
             </div>
         </div>
@@ -120,7 +122,7 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <h4 class="text-primary">{{ total_packaging_cost|floatformat:4 }}</h4>
+                <h4 class="text-primary">{{ total_packaging_cost|smart_decimal }}</h4>
                 <p class="mb-0 text-muted">{{ packagings_count }} packaging{{ packagings_count|pluralize }}</p>
             </div>
         </div>
@@ -136,7 +138,7 @@
                 {% endif %}
             </div>
             <div class="card-body">
-                <h4 class="text-primary">{{ total_transport_cost|floatformat:4 }}</h4>
+                <h4 class="text-primary">{{ total_transport_cost|smart_decimal }}</h4>
                 <p class="mb-0 text-muted">{{ transports_count }} transport{{ transports_count|pluralize }}</p>
             </div>
         </div>
@@ -149,7 +151,7 @@
                 <strong><i class="bi bi-calculator"></i> Grand Total</strong>
             </div>
             <div class="card-body">
-                <h3 class="text-success mb-0">{{ grand_total|floatformat:2 }}</h3>
+                <h3 class="text-success mb-0">{{ grand_total|smart_decimal }}</h3>
             </div>
         </div>
     </div>
@@ -190,15 +192,15 @@
                                     <td>{{ rm.grade|default:"-" }}</td>
                                     <td><code>{{ rm.rm_code }}</code></td>
                                     <td>{{ rm.net_weight }}</td>
-                                    <td>{{ rm.gross_weight }}</td>
-                                    <td class="text-end">{{ rm.rm_cost|floatformat:2 }}</td>
+                                    <td>{{ rm.gross_weight|smart_decimal }}</td>
+                                    <td class="text-end">{{ rm.rm_cost|smart_decimal }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="5" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>{{ total_rm_cost|floatformat:2 }}</strong></td>
+                                    <td class="text-end"><strong>{{ total_rm_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -242,14 +244,14 @@
                                     <td>{{ mm.cycle_time }}</td>
                                     <td>{{ mm.efficiency }}%</td>
                                     <td>{{ mm.number_of_parts_per_shift }}</td>
-                                    <td class="text-end">{{ mm.conversion_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ mm.conversion_cost|smart_decimal }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="6" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>{{ total_conversion_cost|floatformat:2 }}</strong></td>
+                                    <td class="text-end"><strong>{{ total_conversion_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -286,16 +288,16 @@
                                 <tr>
                                     <td><strong>{{ assembly.name }}</strong></td>
                                     <td>{{ assembly.assembly_type_config.name|default:"-" }}</td>
-                                    <td class="text-end">{{ assembly.manual_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ assembly.other_cost|floatformat:2 }}</td>
-                                    <td class="text-end"><strong>{{ assembly.total_assembly_cost|floatformat:2 }}</strong></td>
+                                    <td class="text-end">{{ assembly.manual_cost|smart_decimal }}</td>
+                                    <td class="text-end">{{ assembly.other_cost|smart_decimal }}</td>
+                                    <td class="text-end"><strong>{{ assembly.total_assembly_cost|smart_decimal }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>{{ total_assembly_cost|floatformat:2 }}</strong></td>
+                                    <td class="text-end"><strong>{{ total_assembly_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -335,18 +337,18 @@
                                 <tr>
                                     <td>{{ pkg.get_packaging_type_display }}</td>
                                     <td>{{ pkg.lifecycle }}</td>
-                                    <td class="text-end">{{ pkg.cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ pkg.total_cost|floatformat:2 }}</td>
-                                    <td class="text-end">{{ pkg.cost_per_part|floatformat:4 }}</td>
-                                    <td class="text-end">{{ pkg.polybag_cost|floatformat:4 }}</td>
-                                    <td class="text-end"><strong>{{ pkg.total_packaging_cost|floatformat:4 }}</strong></td>
+                                    <td class="text-end">{{ pkg.cost|smart_decimal }}</td>
+                                    <td class="text-end">{{ pkg.total_cost|smart_decimal }}</td>
+                                    <td class="text-end">{{ pkg.cost_per_part|smart_decimal }}</td>
+                                    <td class="text-end">{{ pkg.polybag_cost|smart_decimal }}</td>
+                                    <td class="text-end"><strong>{{ pkg.total_packaging_cost|smart_decimal }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="6" class="text-end"><strong>Total:</strong></td>
-                                    <td class="text-end"><strong>{{ total_packaging_cost|floatformat:4 }}</strong></td>
+                                    <td class="text-end"><strong>{{ total_packaging_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -387,15 +389,15 @@
                                     <td>{{ transport.total_boxes }}</td>
                                     <td>{{ transport.parts_per_box }}</td>
                                     <td>{{ transport.total_parts_per_trip }}</td>
-                                    <td class="text-end">{{ transport.trip_cost|floatformat:2 }}</td>
-                                    <td class="text-end"><strong>{{ transport.trip_cost_per_part|floatformat:4 }}</strong></td>
+                                    <td class="text-end">{{ transport.trip_cost|smart_decimal }}</td>
+                                    <td class="text-end"><strong>{{ transport.trip_cost_per_part|smart_decimal }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
                                     <td colspan="5" class="text-end"><strong>Total Cost/Part:</strong></td>
-                                    <td class="text-end"><strong>{{ total_transport_cost|floatformat:4 }}</strong></td>
+                                    <td class="text-end"><strong>{{ total_transport_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -422,39 +424,39 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Raw Materials Cost:</strong></td>
-                                    <td class="text-end">{{ total_rm_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ total_rm_cost|smart_decimal }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Moulding Machine (Conversion) Cost:</strong></td>
-                                    <td class="text-end">{{ total_conversion_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ total_conversion_cost|smart_decimal }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Assembly Cost:</strong></td>
-                                    <td class="text-end">{{ total_assembly_cost|floatformat:2 }}</td>
+                                    <td class="text-end">{{ total_assembly_cost|smart_decimal }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Packaging Cost:</strong></td>
-                                    <td class="text-end">{{ total_packaging_cost|floatformat:4 }}</td>
+                                    <td class="text-end">{{ total_packaging_cost|smart_decimal }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Transport Cost per Part:</strong></td>
-                                    <td class="text-end">{{ total_transport_cost|floatformat:4 }}</td>
+                                    <td class="text-end">{{ total_transport_cost|smart_decimal }}</td>
                                 </tr>
                                 <tr class="border-top">
                                     <td><strong>Base Cost:</strong></td>
-                                    <td class="text-end"><strong>{{ quote.get_base_cost|floatformat:2 }}</strong></td>
+                                    <td class="text-end"><strong>{{ quote.get_base_cost|smart_decimal }}</strong></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>Profit ({{ quote.profit_percentage }}%):</strong></td>
-                                    <td class="text-end">{{ quote.get_profit_amount|floatformat:2 }}</td>
+                                    <td><strong>Profit ({{ quote.profit_percentage|percentage_display }}%):</strong></td>
+                                    <td class="text-end">{{ quote.get_profit_amount|smart_decimal }}</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Handling Charge:</strong></td>
-                                    <td class="text-end">{{ quote.handling_charge|floatformat:2 }}</td>
+                                    <td class="text-end">{{ quote.handling_charge|smart_decimal }}</td>
                                 </tr>
                                 <tr class="border-top">
                                     <td><h4 class="mb-0"><strong>Grand Total:</strong></h4></td>
-                                    <td class="text-end"><h4 class="mb-0 text-success"><strong>{{ quote.get_grand_total|floatformat:2 }}</strong></h4></td>
+                                    <td class="text-end"><h4 class="mb-0 text-success"><strong>{{ quote.get_grand_total|smart_decimal }}</strong></h4></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -489,11 +491,11 @@
             labels: ['Raw Materials', 'Moulding Machine', 'Assembly', 'Packaging', 'Transport'],
             datasets: [{
                 data: [
-                    {{ total_rm_cost|floatformat:2 }},
-                    {{ total_conversion_cost|floatformat:2 }},
-                    {{ total_assembly_cost|floatformat:2 }},
-                    {{ total_packaging_cost|floatformat:4 }},
-                    {{ total_transport_cost|floatformat:4 }}
+                    {{ total_rm_cost|smart_decimal }},
+                    {{ total_conversion_cost|smart_decimal }},
+                    {{ total_assembly_cost|smart_decimal }},
+                    {{ total_packaging_cost|smart_decimal }},
+                    {{ total_transport_cost|smart_decimal }}
                 ],
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.8)',

@@ -2,6 +2,8 @@
 
 {% block title %}Edit Manufacturing/Printing Cost{% endblock %}
 
+{% load custom_filters %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -49,7 +51,7 @@
                     </div>
                     
                     <div class="alert alert-info">
-                        <strong>Current Per Cost:</strong> {{ mfg_cost.per_cost|floatformat:2 }}
+                        <strong>Current Per Cost:</strong> {{ mfg_cost.per_cost|smart_decimal }}
                         <br>
                         <small>Formula: (Machine Rate per Hour × Cycle Time) / 3600</small>
                     </div>

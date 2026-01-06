@@ -2,6 +2,8 @@
 
 {% block title %}Configuration{% endblock %}
 
+{% load custom_filters %}
+
 {% block content %}
 <div class="row mb-4">
     <div class="col-md-12">
@@ -120,7 +122,7 @@
                                             <td><strong>{{ material.raw_material_name }}</strong></td>
                                             <td>{{ material.raw_material_grade }}</td>
                                             <td><code>{{ material.raw_material_code }}</code></td>
-                                            <td>{{ material.raw_material_rate|floatformat:2 }}</td>
+                                            <td>{{ material.raw_material_rate|smart_decimal }}</td>
                                             <td>{{ material.created_by.username }}</td>
                                             <td>
                                                 <a href="{% url 'material_type_delete' material.id %}"
@@ -169,10 +171,10 @@
                                         {% for machine in moulding_machine_types %}
                                         <tr>
                                             <td><strong>{{ machine.name }}</strong></td>
-                                            <td>{{ machine.shift_rate|floatformat:2 }}</td>
-                                            <td>{{ machine.shift_rate_for_mtc|floatformat:2 }}</td>
+                                            <td>{{ machine.shift_rate|smart_decimal }}</td>
+                                            <td>{{ machine.shift_rate_for_mtc|smart_decimal }}</td>
                                             <td>{{ machine.mtc_count }}</td>
-                                            <td>{{ machine.mtc_cost|floatformat:2 }}</td>
+                                            <td>{{ machine.mtc_cost|smart_decimal }}</td>
                                             <td>{{ machine.created_by.username }}</td>
                                             <td>
                                                 <a href="{% url 'moulding_machine_type_delete' machine.id %}"

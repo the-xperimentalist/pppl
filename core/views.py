@@ -13,8 +13,6 @@ from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse
 from .excel_utils import ExcelTemplateGenerator, ExcelParser
 
-from pprint import pprint
-
 
 # Check if user is superuser
 def superuser_required(user):
@@ -153,7 +151,6 @@ def quote_detail(request, project_id, quote_id):
         'total_packaging_cost': quote.get_total_packaging_cost(),
         'total_transport_cost': quote.get_total_transport_cost(),
     }
-    pprint(context)
     return render(request, 'core/quote_detail.html', context)
 
 
