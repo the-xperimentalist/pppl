@@ -55,6 +55,7 @@ class MouldingMachineType(models.Model):
         from decimal import Decimal
         return float(Decimal(str(self.mtc_count)) * Decimal(str(self.shift_rate_for_mtc)))
 
+
 class MaterialType(models.Model):
     """Material Type - belongs to a customer group"""
     customer_group = models.ForeignKey(CustomerGroup, on_delete=models.CASCADE, related_name='material_types',
@@ -348,7 +349,7 @@ class RawMaterial(models.Model):
     # Pricing
     frozen_rate = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True,
                                      help_text="Frozen rate if applicable")
-    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate")
+    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate (per gram)")
 
     # Weight details
     part_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0)
@@ -383,64 +384,90 @@ class RawMaterial(models.Model):
         return f"{self.material_name} - {self.quote.name}"
 
     @property
-    def net_weight(self):
-        """Calculate net weight"""
-        return self.part_weight
+    def gross_weight(self):
+        """Calculate gross weight (part + runner)"""
+        from decimal import Decimal
+        return float(Decimal(str(self.part_weight)) + Decimal(str(self.runner_weight)))
 
     @property
-    def gross_weight(self):
-        """Calculate gross weight"""
-        return self.part_weight + self.runner_weight
+    def gross_weight_in_grams(self):
+        """Convert gross weight to grams based on unit of measurement"""
+        from decimal import Decimal
+
+        gross = Decimal(str(self.gross_weight))
+
+        # Convert to grams based on unit
+        if self.unit_of_measurement == 'kg':
+            # 1 kg = 1000 grams
+            return float(gross * Decimal('1000'))
+        elif self.unit_of_measurement == 'ton':
+            # 1 ton = 1,000,000 grams
+            return float(gross * Decimal('1000000'))
+        else:  # 'gm'
+            # Already in grams
+            return float(gross)
+
+    @property
+    def effective_rate(self):
+        """Get effective rate (frozen rate if available, otherwise rm_rate)"""
+        if self.frozen_rate is not None and self.frozen_rate > 0:
+            return float(self.frozen_rate)
+        return float(self.rm_rate)
 
     @property
     def base_rm_cost(self):
-        """Calculate base RM cost before percentages"""
+        """Calculate base RM cost using gross weight in grams and rate per gram"""
         from decimal import Decimal
-        rate = self.frozen_rate if self.frozen_rate else self.rm_rate
-        base_cost = Decimal(str(self.gross_weight)) * Decimal(str(rate))
-        icc_cost = base_cost * (Decimal(str(self.icc_percentage)) / Decimal('100'))
-        total = base_cost + Decimal(str(self.process_losses)) + Decimal(str(self.purging_loss_cost)) + icc_cost
-        return float(total)
+
+        # Use gross weight in grams
+        weight_in_grams = Decimal(str(self.gross_weight_in_grams))
+
+        # Rate is per gram
+        rate = Decimal(str(self.effective_rate))
+
+        # Base cost = weight in grams × rate per gram + additional costs
+        base = (weight_in_grams * rate) + Decimal(str(self.process_losses)) + Decimal(str(self.purging_loss_cost))
+
+        # Add ICC percentage
+        icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
+
+        return float(base + icc_cost)
 
     @property
     def rejection_cost(self):
         """Calculate rejection cost"""
         from decimal import Decimal
-        base = Decimal(str(self.base_rm_cost))
-        return float(base * (Decimal(str(self.rejection_percentage)) / Decimal('100')))
+        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.rejection_percentage)) / Decimal('100')))
 
     @property
     def overhead_cost(self):
         """Calculate overhead cost"""
         from decimal import Decimal
-        base = Decimal(str(self.base_rm_cost))
-        return float(base * (Decimal(str(self.overhead_percentage)) / Decimal('100')))
+        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.overhead_percentage)) / Decimal('100')))
 
     @property
     def maintenance_cost(self):
         """Calculate maintenance cost"""
         from decimal import Decimal
-        base = Decimal(str(self.base_rm_cost))
-        return float(base * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
+        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
 
     @property
-    def rm_profit_cost(self):
+    def profit_cost(self):
         """Calculate profit cost"""
         from decimal import Decimal
-        base = Decimal(str(self.base_rm_cost))
-        return float(base * (Decimal(str(self.profit_percentage)) / Decimal('100')))
+        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.profit_percentage)) / Decimal('100')))
 
     @property
     def rm_cost(self):
-        """Calculate total RM cost including all percentages"""
+        """Calculate total RM cost"""
         from decimal import Decimal
-        base = Decimal(str(self.base_rm_cost))
-        rejection = Decimal(str(self.rejection_cost))
-        overhead = Decimal(str(self.overhead_cost))
-        maintenance = Decimal(str(self.maintenance_cost))
-        profit = Decimal(str(self.rm_profit_cost))
-        total = base + rejection + overhead + maintenance + profit
-        return float(total)
+        return float(
+            Decimal(str(self.base_rm_cost)) +
+            Decimal(str(self.rejection_cost)) +
+            Decimal(str(self.overhead_cost)) +
+            Decimal(str(self.maintenance_cost)) +
+            Decimal(str(self.profit_cost))
+        )
 
 
 class AssemblyType(models.Model):
@@ -714,8 +741,6 @@ class AssemblyRawMaterial(models.Model):
 
     description = models.CharField(max_length=200, default="")
     production_quantity = models.IntegerField(default=1, help_text="Production quantity")
-    production_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                           help_text="Production weight/amount")
     unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='kg')
     cost_per_unit = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                        help_text="Cost per unit")
@@ -739,12 +764,11 @@ class AssemblyRawMaterial(models.Model):
         """Calculate total cost before saving"""
         from decimal import Decimal
 
-        production_weight = Decimal(str(self.production_weight or 0))
         cost_per_unit = Decimal(str(self.cost_per_unit or 0))
         production_quantity = Decimal(str(self.production_quantity or 1))
 
         if production_quantity > 0:
-            self.total_cost = (production_weight * cost_per_unit) / production_quantity
+            self.total_cost = production_quantity * cost_per_unit
         else:
             self.total_cost = Decimal('0')
 

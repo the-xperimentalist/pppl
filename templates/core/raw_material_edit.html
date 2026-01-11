@@ -80,13 +80,14 @@
                     <h5 class="mb-3">Pricing</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="rm_rate" class="form-label">RM Rate <span class="text-danger">*</span></label>
+                            <label for="rm_rate" class="form-label">RM Rate (per gm) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="rm_rate" name="rm_rate" 
                                    step="0.00000001" value="{{ raw_material.rm_rate }}" required>
+                            <div class="form-text">Rate per gram of material</div>
                         </div>
                         
                         <div class="col-md-6 mb-3">
-                            <label for="frozen_rate" class="form-label">Frozen Rate (Optional)</label>
+                            <label for="frozen_rate" class="form-label">Frozen Rate (Optional)(per gm)</label>
                             <input type="number" class="form-control" id="frozen_rate" name="frozen_rate" 
                                    step="0.00000001" value="{{ raw_material.frozen_rate|default:'' }}">
                             <div class="form-text">If specified, this rate will be used instead of RM Rate</div>
@@ -101,12 +102,14 @@
                             <label for="part_weight" class="form-label">Part Weight <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="part_weight" name="part_weight" 
                                    step="0.001" value="{{ raw_material.part_weight }}" required>
+                            <div class="form-text">Weight in selected unit (will be converted to grams for calculation)</div>
                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="runner_weight" class="form-label">Runner Weight <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="runner_weight" name="runner_weight" 
                                    step="0.001" value="{{ raw_material.runner_weight }}" required>
+                            <div class="form-text">Weight in selected unit (will be converted to grams for calculation)</div>
                         </div>
                     </div>
                     

@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-{% load custom_filters %}
-
 {% block title %}Add Raw Material{% endblock %}
 
 {% block content %}
@@ -16,30 +14,31 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="post" id="rawMaterialForm">
+                <form method="post">
                     {% csrf_token %}
 
+                    <!-- Material Selection Section -->
                     <h5 class="mb-3">Material Selection</h5>
-
                     <div class="mb-3">
-                        <label for="material_type" class="form-label">Material Type (Optional)</label>
+                        <label for="material_type" class="form-label">Material Type (Optional - Auto-fill)</label>
                         <select class="form-select" id="material_type" name="material_type">
-                            <option value="">-- Select Material Type to Auto-Fill --</option>
-                            {% for mt in material_types %}
-                                <option value="{{ mt.id }}"
-                                        data-name="{{ mt.raw_material_name }}"
-                                        data-grade="{{ mt.raw_material_grade }}"
-                                        data-code="{{ mt.raw_material_code }}"
-                                        data-rate="{{ mt.raw_material_rate }}">
-                                    {{ mt.raw_material_name }} - {{ mt.raw_material_grade }} ({{ mt.raw_material_code }})
+                            <option value="">-- Select Material Type to Auto-fill --</option>
+                            {% for type in material_types %}
+                                <option value="{{ type.id }}"
+                                        data-name="{{ type.raw_material_name }}"
+                                        data-grade="{{ type.raw_material_grade }}"
+                                        data-code="{{ type.raw_material_code }}"
+                                        data-rate="{{ type.raw_material_rate }}">
+                                    {{ type.raw_material_name }} - {{ type.raw_material_grade }}
                                 </option>
                             {% endfor %}
                         </select>
-                        <div class="form-text">Select a material type to automatically fill the fields below, or leave blank to enter manually</div>
+                        <div class="form-text">Select a material type to automatically fill in the details below</div>
                     </div>
 
                     <hr class="my-4">
 
+                    <!-- Material Details Section -->
                     <h5 class="mb-3">Material Details</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -60,88 +59,111 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="unit_of_measurement" class="form-label">Unit of Measurement</label>
-                            <select class="form-select" id="unit_of_measurement" name="unit_of_measurement">
-                                {% for value, label in unit_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                {% endfor %}
+                            <label for="unit_of_measurement" class="form-label">Unit of Measurement <span class="text-danger">*</span></label>
+                            <select class="form-select" id="unit_of_measurement" name="unit_of_measurement" required>
+                                <option value="kg">Kilogram (kg)</option>
+                                <option value="gm">Gram (gm)</option>
+                                <option value="ton">Ton</option>
                             </select>
+                            <div class="form-text">Unit for part weight and runner weight</div>
                         </div>
                     </div>
 
                     <hr class="my-4">
 
+                    <!-- Pricing Section -->
                     <h5 class="mb-3">Pricing</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="rm_rate" class="form-label">RM Rate <span class="text-danger">*</span></label>
+                            <label for="rm_rate" class="form-label">RM Rate (per gram) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="rm_rate" name="rm_rate" step="0.00000001" required>
+                            <div class="form-text">Rate per gram of material</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="frozen_rate" class="form-label">Frozen Rate (Optional)</label>
+                            <label for="frozen_rate" class="form-label">Frozen Rate (per gram)</label>
                             <input type="number" class="form-control" id="frozen_rate" name="frozen_rate" step="0.00000001">
-                            <div class="form-text">If specified, this rate will be used instead of RM Rate</div>
+                            <div class="form-text">Optional: Overrides RM rate if provided</div>
                         </div>
                     </div>
 
                     <hr class="my-4">
 
+                    <!-- Weight Details Section -->
                     <h5 class="mb-3">Weight Details</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="part_weight" class="form-label">Part Weight <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="part_weight" name="part_weight" step="0.001" required>
+                            <input type="number" class="form-control" id="part_weight" name="part_weight"
+                                   step="0.00000001" required>
+                            <div class="form-text">Weight in selected unit (will be converted to grams for calculation)</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="runner_weight" class="form-label">Runner Weight <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="runner_weight" name="runner_weight" step="0.001" required>
+                            <input type="number" class="form-control" id="runner_weight" name="runner_weight"
+                                   step="0.00000001" required>
+                            <div class="form-text">Weight in selected unit (will be converted to grams for calculation)</div>
                         </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Gross weight = Part weight + Runner weight (in selected unit)
+                        <br>
+                        <small>For cost calculation, the gross weight will be converted to grams based on your selected unit, then multiplied by the rate per gram.</small>
                     </div>
 
                     <hr class="my-4">
 
+                    <!-- Additional Costs Section -->
                     <h5 class="mb-3">Additional Costs</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="process_losses" class="form-label">Process Losses</label>
-                            <input type="number" class="form-control" id="process_losses" name="process_losses" step="0.00000001" value="0">
+                            <input type="number" class="form-control" id="process_losses" name="process_losses"
+                                   step="0.00000001" value="0">
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="purging_loss_cost" class="form-label">Purging Loss Cost</label>
-                            <input type="number" class="form-control" id="purging_loss_cost" name="purging_loss_cost" step="0.00000001" value="0">
+                            <input type="number" class="form-control" id="purging_loss_cost" name="purging_loss_cost"
+                                   step="0.00000001" value="0">
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="icc_percentage" class="form-label">ICC %</label>
-                            <input type="number" class="form-control" id="icc_percentage" name="icc_percentage" step="0.00000001" value="0">
+                            <input type="number" class="form-control" id="icc_percentage" name="icc_percentage"
+                                   step="0.00000001" value="0" min="0" max="100">
                         </div>
                     </div>
 
                     <hr class="my-4">
 
+                    <!-- Cost Percentages Section -->
                     <h5 class="mb-3">Cost Percentages</h5>
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label for="rejection_percentage" class="form-label">Rejection %</label>
-                            <input type="number" class="form-control" id="rejection_percentage" name="rejection_percentage" step="0.00000001" value="0" min="0" max="100">
+                            <input type="number" class="form-control" id="rejection_percentage" name="rejection_percentage"
+                                   step="0.00000001" value="0" min="0" max="100">
                         </div>
 
                         <div class="col-md-3 mb-3">
                             <label for="overhead_percentage" class="form-label">Overhead %</label>
-                            <input type="number" class="form-control" id="overhead_percentage" name="overhead_percentage" step="0.00000001" value="0" min="0" max="100">
+                            <input type="number" class="form-control" id="overhead_percentage" name="overhead_percentage"
+                                   step="0.00000001" value="0" min="0" max="100">
                         </div>
 
                         <div class="col-md-3 mb-3">
                             <label for="maintenance_percentage" class="form-label">Maintenance %</label>
-                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage" step="0.00000001" value="0" min="0" max="100">
+                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage"
+                                   step="0.00000001" value="0" min="0" max="100">
                         </div>
 
                         <div class="col-md-3 mb-3">
                             <label for="profit_percentage" class="form-label">Profit %</label>
-                            <input type="number" class="form-control" id="profit_percentage" name="profit_percentage" step="0.00000001" value="0" min="0" max="100">
+                            <input type="number" class="form-control" id="profit_percentage" name="profit_percentage"
+                                   step="0.00000001" value="0" min="0" max="100">
                         </div>
                     </div>
 
@@ -159,20 +181,13 @@
 
 <script>
 document.getElementById('material_type').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
+    var selectedOption = this.options[this.selectedIndex];
 
     if (selectedOption.value) {
-        // Auto-fill fields from selected material type
         document.getElementById('material_name').value = selectedOption.dataset.name || '';
         document.getElementById('grade').value = selectedOption.dataset.grade || '';
         document.getElementById('rm_code').value = selectedOption.dataset.code || '';
         document.getElementById('rm_rate').value = selectedOption.dataset.rate || '';
-    } else {
-        // Clear fields if "Select Material Type" is chosen
-        document.getElementById('material_name').value = '';
-        document.getElementById('grade').value = '';
-        document.getElementById('rm_code').value = '';
-        document.getElementById('rm_rate').value = '';
     }
 });
 </script>

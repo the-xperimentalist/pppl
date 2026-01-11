@@ -267,6 +267,8 @@
         </div>
     </div>
 
+    {% load custom_filters %}
+
     <!-- Raw Materials Tab -->
     <div class="tab-pane fade" id="raw-materials" role="tabpanel">
         <div class="card">
@@ -278,16 +280,10 @@
                             <i class="bi bi-check-circle"></i> Mark Complete
                         </a>
                     {% endif %}
-                    <div class="btn-group" role="group">
-                        <a href="{% url 'raw_material_add' project.id quote.id %}"
-                           class="btn btn-primary btn-sm {% if not quote.can_edit_sections %}disabled{% endif %}">
-                            <i class="bi bi-plus-circle"></i> Add Manually
-                        </a>
-                        <a href="{% url 'upload_raw_materials' project.id quote.id %}"
-                           class="btn btn-success btn-sm {% if not quote.can_edit_sections %}disabled{% endif %}">
-                            <i class="bi bi-upload"></i> Upload Excel
-                        </a>
-                    </div>
+                    <a href="{% url 'raw_material_add' project.id quote.id %}"
+                       class="btn btn-primary btn-sm {% if not quote.can_edit_sections %}disabled{% endif %}">
+                        <i class="bi bi-plus-circle"></i> Add Raw Material
+                    </a>
                 </div>
             </div>
             <div class="card-body">
@@ -296,16 +292,19 @@
                         <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Material Name</th>
+                                    <th>Material</th>
                                     <th>Grade</th>
-                                    <th>RM Code</th>
+                                    <th>Code</th>
+                                    <th>Unit</th>
                                     <th>Gross Weight</th>
+                                    <th>Weight (grams)</th>
+                                    <th>Rate/gram</th>
                                     <th>Base Cost</th>
                                     <th>Rejection %</th>
                                     <th>Overhead %</th>
                                     <th>Maintenance %</th>
                                     <th>Profit %</th>
-                                    <th>Total RM Cost</th>
+                                    <th>Total Cost</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -314,8 +313,11 @@
                                 <tr>
                                     <td>{{ rm.material_name }}</td>
                                     <td>{{ rm.grade|default:"-" }}</td>
-                                    <td><code>{{ rm.rm_code }}</code></td>
+                                    <td>{{ rm.rm_code }}</td>
+                                    <td>{{ rm.unit_of_measurement }}</td>
                                     <td>{{ rm.gross_weight|smart_decimal }}</td>
+                                    <td>{{ rm.gross_weight_in_grams|smart_decimal }}</td>
+                                    <td>{{ rm.effective_rate|smart_decimal }}</td>
                                     <td>{{ rm.base_rm_cost|smart_decimal }}</td>
                                     <td>{{ rm.rejection_percentage|percentage_display }}%</td>
                                     <td>{{ rm.overhead_percentage|percentage_display }}%</td>
@@ -345,7 +347,6 @@
             </div>
         </div>
     </div>
-
     <!-- Moulding Machine Tab -->
     <div class="tab-pane fade" id="moulding-machine" role="tabpanel">
         <div class="card">
@@ -361,10 +362,6 @@
                         <a href="{% url 'moulding_machine_add' project.id quote.id %}"
                            class="btn btn-primary btn-sm {% if not quote.can_edit_sections %}disabled{% endif %}">
                             <i class="bi bi-plus-circle"></i> Add Manually
-                        </a>
-                        <a href="{% url 'upload_moulding_machines' project.id quote.id %}"
-                           class="btn btn-success btn-sm {% if not quote.can_edit_sections %}disabled{% endif %}">
-                            <i class="bi bi-upload"></i> Upload Excel
                         </a>
                     </div>
                 </div>

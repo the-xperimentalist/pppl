@@ -169,7 +169,7 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0"><i class="bi bi-box"></i> Raw Materials Details</h5>
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Raw Materials Detail</h5>
             </div>
             <div class="card-body">
                 {% if raw_materials %}
@@ -177,12 +177,14 @@
                         <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Material Name</th>
+                                    <th>Material</th>
                                     <th>Grade</th>
-                                    <th>RM Code</th>
-                                    <th>Net Weight</th>
+                                    <th>Unit</th>
                                     <th>Gross Weight</th>
-                                    <th>RM Cost</th>
+                                    <th>Weight (grams)</th>
+                                    <th>Rate/gram</th>
+                                    <th>Base Cost</th>
+                                    <th>Total Cost</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -190,20 +192,25 @@
                                 <tr>
                                     <td>{{ rm.material_name }}</td>
                                     <td>{{ rm.grade|default:"-" }}</td>
-                                    <td><code>{{ rm.rm_code }}</code></td>
-                                    <td>{{ rm.net_weight }}</td>
-                                    <td>{{ rm.gross_weight|smart_decimal }}</td>
-                                    <td class="text-end">{{ rm.rm_cost|smart_decimal }}</td>
+                                    <td>{{ rm.unit_of_measurement }}</td>
+                                    <td class="text-end">{{ rm.gross_weight|smart_decimal }}</td>
+                                    <td class="text-end">{{ rm.gross_weight_in_grams|smart_decimal }}</td>
+                                    <td class="text-end">{{ rm.effective_rate|smart_decimal }}</td>
+                                    <td class="text-end">{{ rm.base_rm_cost|smart_decimal }}</td>
+                                    <td class="text-end"><strong>{{ rm.rm_cost|smart_decimal }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>Total:</strong></td>
+                                    <td colspan="7" class="text-end"><strong>Total:</strong></td>
                                     <td class="text-end"><strong>{{ total_rm_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <small><strong>Note:</strong> Costs are calculated using weight in grams. The gross weight is converted based on the selected unit (kg → ×1000, ton → ×1,000,000, gm → ×1).</small>
                     </div>
                 {% else %}
                     <p class="text-muted mb-0">No raw materials added.</p>

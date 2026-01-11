@@ -92,37 +92,6 @@ class QuoteAdmin(admin.ModelAdmin):
     get_completion_percentage.short_description = 'Completion'
 
 
-@admin.register(RawMaterial)
-class RawMaterialAdmin(admin.ModelAdmin):
-    list_display = ['material_name', 'grade', 'material_type', 'rm_code', 'quote', 'rm_rate', 'created_at']
-    list_filter = ['material_type', 'created_at']
-    search_fields = ['material_name', 'grade', 'rm_code', 'quote__name']
-    readonly_fields = ['created_at', 'updated_at', 'net_weight', 'gross_weight', 'rm_cost']
-
-    fieldsets = (
-        ('Quote', {
-            'fields': ('quote',)
-        }),
-        ('Material Information', {
-            'fields': ('material_type', 'material_name', 'grade', 'rm_code', 'unit_of_measurement')
-        }),
-        ('Pricing', {
-            'fields': ('rm_rate', 'frozen_rate')
-        }),
-        ('Weight', {
-            'fields': ('part_weight', 'runner_weight', 'net_weight', 'gross_weight')
-        }),
-        ('Additional Costs', {
-            'fields': ('process_losses', 'purging_loss_cost', 'icc_percentage')
-        }),
-        ('Calculated', {
-            'fields': ('rm_cost',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at')
-        }),
-    )
-
 @admin.register(MouldingMachineDetail)
 class MouldingMachineDetailAdmin(admin.ModelAdmin):
     list_display = ['quote', 'moulding_machine_type', 'cavity', 'machine_tonnage', 'cycle_time',
@@ -154,14 +123,6 @@ class MouldingMachineDetailAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at')
         }),
     )
-
-
-@admin.register(AssemblyRawMaterial)
-class AssemblyRawMaterialAdmin(admin.ModelAdmin):
-    list_display = ['description', 'assembly', 'production_quantity', 'production_weight',
-                    'cost_per_unit', 'total_cost']
-    list_filter = ['assembly']
-    readonly_fields = ['total_cost', 'created_at', 'updated_at']
 
 
 @admin.register(ManufacturingPrintingCost)
