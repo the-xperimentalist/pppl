@@ -609,6 +609,7 @@ class Assembly(models.Model):
     name = models.CharField(max_length=200, default="", help_text="Assembly name/identifier")
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='assemblies')
     assembly_type = models.CharField(max_length=20, choices=ASSEMBLY_TYPE_CHOICES, default='manual')
+    remarks = models.TextField(blank=True, null=True, default="", help_text="Additional notes or remarks")
 
     # For manual assembly
     manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,

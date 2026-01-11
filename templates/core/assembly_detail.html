@@ -29,6 +29,17 @@
                             </span>
                         </p>
                     </div>
+                    {% if assembly.remarks %}
+                    <hr class="my-3">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <strong>Remarks:</strong>
+                            <div class="mt-2 p-3 bg-light rounded">
+                                {{ assembly.remarks|linebreaks }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="text-end">
                         <h4 class="text-success mb-0">Total: {{ assembly.total_assembly_cost|smart_decimal }}</h4>
                     </div>

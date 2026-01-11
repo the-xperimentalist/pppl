@@ -430,7 +430,10 @@ def assembly_add(request, project_id, quote_id):
     """Add assembly to quote"""
     project = get_object_or_404(Project, id=project_id, is_active=True)
     quote = get_object_or_404(Quote, id=quote_id, project=project)
-    assembly_types = AssemblyType.objects.filter(is_active=True)
+    assembly_types = AssemblyType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
 
     # Check if quote can be edited
     if not quote.can_edit_sections():
@@ -439,26 +442,24 @@ def assembly_add(request, project_id, quote_id):
 
     if request.method == 'POST':
         try:
-            assembly_type = request.POST.get('assembly_type', 'manual')
+            assembly_type_id = request.POST.get('assembly_type_config')
 
-            assembly = Assembly(
+            assembly = Assembly.objects.create(
                 quote=quote,
-                assembly_type=assembly_type,
+                assembly_type_config_id=assembly_type_id if assembly_type_id else None,
                 name=request.POST.get('name', ''),
-                manual_cost=float(request.POST.get('manual_cost', 0)) if assembly_type == 'manual' else 0,
-                assembly_type_config_id=request.POST.get('assembly_type_config') or None if assembly_type == 'automated' else None,
+                remarks=request.POST.get('remarks', ''),
+                manual_cost=float(request.POST.get('manual_cost', 0)),
                 other_cost=float(request.POST.get('other_cost', 0)),
                 profit_percentage=float(request.POST.get('profit_percentage', 0)),
                 rejection_percentage=float(request.POST.get('rejection_percentage', 0)),
                 inspection_handling_percentage=float(request.POST.get('inspection_handling_percentage', 0)),
             )
-            assembly.save()
-            assembly.calculate_costs()
 
             # Increment version and add timeline entry
-            quote.increment_version(request.user, f'{assembly.get_assembly_type_display()} assembly added', 'assembly_added')
+            quote.increment_version(request.user, f'Assembly "{assembly.name}" added')
 
-            messages.success(request, 'Assembly added successfully!')
+            messages.success(request, f'Assembly "{assembly.name}" added successfully!')
             return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
         except ValueError as e:
             messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
@@ -472,6 +473,54 @@ def assembly_add(request, project_id, quote_id):
     }
     return render(request, 'core/assembly_add.html', context)
 
+
+@login_required
+def assembly_edit(request, project_id, quote_id, assembly_id):
+    """Edit assembly"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    assembly = get_object_or_404(Assembly, id=assembly_id, quote=quote)
+    assembly_types = AssemblyType.objects.filter(
+        customer_group=quote.client_group,
+        is_active=True
+    ) if quote.client_group else []
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+
+    if request.method == 'POST':
+        try:
+            assembly_type_id = request.POST.get('assembly_type_config')
+
+            assembly.assembly_type_config_id = assembly_type_id if assembly_type_id else None
+            assembly.name = request.POST.get('name', '')
+            assembly.remarks = request.POST.get('remarks', '')
+            assembly.manual_cost = float(request.POST.get('manual_cost', 0))
+            assembly.other_cost = float(request.POST.get('other_cost', 0))
+            assembly.profit_percentage = float(request.POST.get('profit_percentage', 0))
+            assembly.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
+            assembly.inspection_handling_percentage = float(request.POST.get('inspection_handling_percentage', 0))
+            assembly.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Assembly "{assembly.name}" updated')
+
+            messages.success(request, f'Assembly "{assembly.name}" updated successfully!')
+            return redirect('assembly_detail', project_id=project.id, quote_id=quote.id, assembly_id=assembly.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating assembly: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'assembly': assembly,
+        'assembly_types': assembly_types,
+    }
+    return render(request, 'core/assembly_edit.html', context)
 
 @login_required
 def assembly_detail(request, project_id, quote_id, assembly_id):
@@ -1796,7 +1845,7 @@ def download_multiple_quotes_template(request):
 
 @login_required
 def upload_multiple_quotes(request, project_id):
-    """Upload multiple quotes to a project from Excel"""
+    """Upload multiple complete quotes to a project from Excel"""
     project = get_object_or_404(Project, id=project_id, is_active=True)
     customer_groups = CustomerGroup.objects.filter(is_active=True)
 
@@ -1809,16 +1858,35 @@ def upload_multiple_quotes(request, project_id):
             try:
                 customer_group = get_object_or_404(CustomerGroup, id=customer_group_id)
                 excel_file = request.FILES['excel_file']
-                count, errors = ExcelParser.parse_multiple_quotes(
+
+                results = ExcelParser.parse_multiple_quotes_complete(
                     excel_file, project, customer_group, request.user
                 )
 
-                if errors:
-                    for error in errors:
+                if results['errors']:
+                    for error in results['errors']:
                         messages.error(request, error)
-                else:
-                    messages.success(request, f'Successfully created {count} quotes!')
+
+                if results['quotes'] > 0:
+                    messages.success(request, f'Successfully created {results["quotes"]} quotes!')
+
+                    # Show component counts
+                    components = results['components']
+                    if components['raw_materials'] > 0:
+                        messages.info(request, f'Added {components["raw_materials"]} raw materials')
+                    if components['moulding_machines'] > 0:
+                        messages.info(request, f'Added {components["moulding_machines"]} moulding machines')
+                    if components['assemblies'] > 0:
+                        messages.info(request, f'Added {components["assemblies"]} assemblies')
+                    if components['packaging'] > 0:
+                        messages.info(request, f'Added {components["packaging"]} packaging entries')
+                    if components['transport'] > 0:
+                        messages.info(request, f'Added {components["transport"]} transport entries')
+
                     return redirect('project_detail', project_id=project.id)
+                else:
+                    messages.warning(request, 'No quotes were created. Please check your file.')
+
             except Exception as e:
                 messages.error(request, f'Error processing file: {str(e)}')
 
@@ -1827,3 +1895,47 @@ def upload_multiple_quotes(request, project_id):
         'customer_groups': customer_groups,
     }
     return render(request, 'core/upload_multiple_quotes.html', context)
+
+
+@login_required
+def transport_edit(request, project_id, quote_id, transport_id):
+    """Edit transport"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+    transport = get_object_or_404(Transport, id=transport_id, quote=quote)
+    packagings = quote.packagings.all()
+
+    # Check if quote can be edited
+    if not quote.can_edit_sections():
+        messages.error(request, 'This quote is completed or discarded and cannot be edited. Reopen it to make changes.')
+        return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+
+    if request.method == 'POST':
+        try:
+            packaging_id = request.POST.get('packaging')
+
+            transport.packaging_id = packaging_id if packaging_id else None
+            transport.transport_length = float(request.POST.get('transport_length', 0))
+            transport.transport_breadth = float(request.POST.get('transport_breadth', 0))
+            transport.transport_height = float(request.POST.get('transport_height', 0))
+            transport.trip_cost = float(request.POST.get('trip_cost', 0))
+            transport.parts_per_box = int(request.POST.get('parts_per_box', 1))
+            transport.save()
+
+            # Increment version and add timeline entry
+            quote.increment_version(request.user, f'Transport updated')
+
+            messages.success(request, 'Transport updated successfully!')
+            return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
+        except ValueError as e:
+            messages.error(request, f'Invalid numeric value provided. Please check your inputs.')
+        except Exception as e:
+            messages.error(request, f'Error updating transport: {str(e)}')
+
+    context = {
+        'project': project,
+        'quote': quote,
+        'transport': transport,
+        'packagings': packagings,
+    }
+    return render(request, 'core/transport_edit.html', context)

@@ -39,6 +39,9 @@ urlpatterns = [
     path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/manufacturing-costs/add/', views.manufacturing_printing_cost_add, name='manufacturing_printing_cost_add'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/manufacturing-costs/<int:mpc_id>/delete/', views.manufacturing_printing_cost_delete, name='manufacturing_printing_cost_delete'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/complete/', views.assembly_complete, name='assembly_complete'),
+    # Assembly edit
+     path('projects/<int:project_id>/quotes/<int:quote_id>/assemblies/<int:assembly_id>/edit/',
+          views.assembly_edit, name='assembly_edit'),
     # Packaging
     path('projects/<int:project_id>/quotes/<int:quote_id>/packaging/add/', views.packaging_add, name='packaging_add'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/packaging/<int:packaging_id>/delete/', views.packaging_delete, name='packaging_delete'),
@@ -96,4 +99,7 @@ urlpatterns = [
      # Multiple quotes template and upload
      path('templates/multiple-quotes/', views.download_multiple_quotes_template, name='download_multiple_quotes_template'),
      path('projects/<int:project_id>/upload-quotes/', views.upload_multiple_quotes, name='upload_multiple_quotes'),
+     # Transport edit
+     path('projects/<int:project_id>/quotes/<int:quote_id>/transport/<int:transport_id>/edit/',
+          views.transport_edit, name='transport_edit'),
 ]

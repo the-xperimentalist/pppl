@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
-{% block title %}Add Transport{% endblock %}
+{% block title %}Edit Transport{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -9,78 +10,94 @@
             <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i> Back to Quote
             </a>
-            <h1 class="mb-0">Add Transport</h1>
+            <h1 class="mb-0">Edit Transport</h1>
         </div>
 
         <div class="card">
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-
+                    
                     <h5 class="mb-3">Transport Details</h5>
-
+                    
                     <div class="mb-3">
                         <label for="packaging" class="form-label">Related Packaging (Optional)</label>
                         <select class="form-select" id="packaging" name="packaging">
                             <option value="">-- Select Packaging --</option>
                             {% for pkg in packagings %}
-                                <option value="{{ pkg.id }}">
+                                <option value="{{ pkg.id }}" {% if transport.packaging and transport.packaging.id == pkg.id %}selected{% endif %}>
                                     {{ pkg.get_packaging_type_display }} ({{ pkg.packaging_length }} × {{ pkg.packaging_breadth }} × {{ pkg.packaging_height }})
                                 </option>
                             {% endfor %}
                         </select>
                         <div class="form-text">Select packaging to calculate box fit automatically</div>
                     </div>
-
+                    
                     <hr class="my-4">
-
+                    
                     <h5 class="mb-3">Transport Dimensions</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label for="transport_length" class="form-label">Transport Length <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="transport_length" name="transport_length"
-                                   step="0.00000001" value="0" required>
+                            <input type="number" class="form-control" id="transport_length" name="transport_length" 
+                                   step="0.00000001" value="{{ transport.transport_length }}" required>
                             <div class="form-text">Length of transport vehicle</div>
                         </div>
-
+                        
                         <div class="col-md-4 mb-3">
                             <label for="transport_breadth" class="form-label">Transport Breadth <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="transport_breadth" name="transport_breadth"
-                                   step="0.00000001" value="0" required>
+                            <input type="number" class="form-control" id="transport_breadth" name="transport_breadth" 
+                                   step="0.00000001" value="{{ transport.transport_breadth }}" required>
                             <div class="form-text">Breadth/width of transport vehicle</div>
                         </div>
-
+                        
                         <div class="col-md-4 mb-3">
                             <label for="transport_height" class="form-label">Transport Height <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="transport_height" name="transport_height"
-                                   step="0.00000001" value="0" required>
+                            <input type="number" class="form-control" id="transport_height" name="transport_height" 
+                                   step="0.00000001" value="{{ transport.transport_height }}" required>
                             <div class="form-text">Height of transport vehicle</div>
                         </div>
                     </div>
-
+                    
                     <hr class="my-4">
-
+                    
                     <h5 class="mb-3">Cost Details</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="trip_cost" class="form-label">Trip Cost <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="trip_cost" name="trip_cost"
-                                   step="0.00000001" value="0" required>
+                            <input type="number" class="form-control" id="trip_cost" name="trip_cost" 
+                                   step="0.00000001" value="{{ transport.trip_cost }}" required>
                             <div class="form-text">Cost per trip</div>
                         </div>
-
+                        
                         <div class="col-md-6 mb-3">
                             <label for="parts_per_box" class="form-label">Parts per Box <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="parts_per_box" name="parts_per_box"
-                                   min="1" value="1" required>
+                            <input type="number" class="form-control" id="parts_per_box" name="parts_per_box" 
+                                   min="1" value="{{ transport.parts_per_box }}" required>
                             <div class="form-text">Number of parts in each box</div>
                         </div>
                     </div>
-
+                    
+                    <div class="alert alert-info">
+                        <h6 class="mb-2"><strong>Current Calculations:</strong></h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Boxes on Length:</strong> {{ transport.boxes_on_length }}<br>
+                                <strong>Boxes on Breadth:</strong> {{ transport.boxes_on_breadth }}<br>
+                                <strong>Boxes on Height:</strong> {{ transport.boxes_on_height }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Total Boxes:</strong> {{ transport.total_boxes }}<br>
+                                <strong>Total Parts per Trip:</strong> {{ transport.total_parts_per_trip }}<br>
+                                <strong>Trip Cost per Part:</strong> {{ transport.trip_cost_per_part|smart_decimal }}
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Add Transport
+                            <i class="bi bi-save"></i> Update Transport
                         </button>
                     </div>
                 </form>
