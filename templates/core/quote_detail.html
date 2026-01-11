@@ -423,6 +423,7 @@
             </div>
         </div>
     </div>
+
     <!-- Assembly Tab -->
     <div class="tab-pane fade" id="assembly" role="tabpanel">
         <div class="card">
@@ -448,11 +449,12 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Type</th>
+                                    <th>Remarks</th>
                                     <th>Manual Cost</th>
                                     <th>Other Cost</th>
+                                    <th>Inspection & Handling</th>
                                     <th>Profit %</th>
                                     <th>Rejection %</th>
-                                    <th>Inspection %</th>
                                     <th>Total Cost</th>
                                     <th>Actions</th>
                                 </tr>
@@ -462,11 +464,21 @@
                                 <tr>
                                     <td><strong>{{ assembly.name }}</strong></td>
                                     <td>{{ assembly.assembly_type_config.name|default:"-" }}</td>
+                                    <td>
+                                        {% if assembly.remarks %}
+                                            <span class="text-truncate d-inline-block" style="max-width: 200px;"
+                                                  title="{{ assembly.remarks }}">
+                                                {{ assembly.remarks|truncatewords:10 }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ assembly.manual_cost|smart_decimal }}</td>
                                     <td>{{ assembly.other_cost|smart_decimal }}</td>
+                                    <td>{{ assembly.inspection_handling_cost|smart_decimal }}</td>
                                     <td>{{ assembly.profit_percentage|percentage_display }}%</td>
                                     <td>{{ assembly.rejection_percentage|percentage_display }}%</td>
-                                    <td>{{ assembly.inspection_handling_percentage|percentage_display }}%</td>
                                     <td><strong>{{ assembly.total_assembly_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}"

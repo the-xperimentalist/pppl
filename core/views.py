@@ -453,7 +453,7 @@ def assembly_add(request, project_id, quote_id):
                 other_cost=float(request.POST.get('other_cost', 0)),
                 profit_percentage=float(request.POST.get('profit_percentage', 0)),
                 rejection_percentage=float(request.POST.get('rejection_percentage', 0)),
-                inspection_handling_percentage=float(request.POST.get('inspection_handling_percentage', 0)),
+                inspection_handling_cost=float(request.POST.get('inspection_handling_cost', 0)),
             )
 
             # Increment version and add timeline entry
@@ -501,7 +501,7 @@ def assembly_edit(request, project_id, quote_id, assembly_id):
             assembly.other_cost = float(request.POST.get('other_cost', 0))
             assembly.profit_percentage = float(request.POST.get('profit_percentage', 0))
             assembly.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
-            assembly.inspection_handling_percentage = float(request.POST.get('inspection_handling_percentage', 0))
+            assembly.inspection_handling_cost = float(request.POST.get('inspection_handling_cost', 0))
             assembly.save()
 
             # Increment version and add timeline entry
@@ -521,6 +521,7 @@ def assembly_edit(request, project_id, quote_id, assembly_id):
         'assembly_types': assembly_types,
     }
     return render(request, 'core/assembly_edit.html', context)
+
 
 @login_required
 def assembly_detail(request, project_id, quote_id, assembly_id):

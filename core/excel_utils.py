@@ -320,7 +320,7 @@ class ExcelTemplateGenerator:
         ws_asm = wb.create_sheet("Assemblies")
         asm_headers = [
             'Quote Name*', 'Assembly Name*', 'Assembly Type', 'Remarks',
-        'Manual Cost', 'Other Cost', 'Profit %', 'Rejection %', 'Inspection & Handling %'
+        'Manual Cost', 'Other Cost', 'Profit %', 'Rejection %', 'Inspection & Handling Cost'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_asm, asm_headers, "FFC000")
 
@@ -514,7 +514,7 @@ class ExcelTemplateGenerator:
             'Other Cost',
             'Profit %',
             'Rejection %',
-            'Inspection & Handling %'
+            'Inspection & Handling Cost'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_asm, asm_headers, "FFC000")
 
@@ -1237,12 +1237,12 @@ class ExcelParser:
                     Assembly.objects.create(
                         quote=quote,
                         name=worksheet.cell(2, col_num).value or '',
-                        remarks=worksheet.cell(4, col_num).value or '',  # Added remarks
+                        remarks=worksheet.cell(4, col_num).value or '',
                         manual_cost=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
                         other_cost=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else 0,
-                        profit_percentage=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
-                        rejection_percentage=float(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
-                        inspection_handling_percentage=float(worksheet.cell(9, col_num).value) if worksheet.cell(9, col_num).value else 0,
+                        inspection_handling_cost=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
+                        profit_percentage=float(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
+                        rejection_percentage=float(worksheet.cell(9, col_num).value) if worksheet.cell(9, col_num).value else 0,
                     )
                     quote.increment_version(user, f'Assembly added via bulk upload')
 

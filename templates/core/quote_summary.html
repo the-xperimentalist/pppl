@@ -270,6 +270,7 @@
         </div>
     </div>
 </div>
+
 <!-- Assembly Detail -->
 <div class="row mb-4">
     <div class="col-md-12">
@@ -285,8 +286,10 @@
                                 <tr>
                                     <th>Name</th>
                                     <th>Type</th>
+                                    <th>Remarks</th>
                                     <th>Manual Cost</th>
                                     <th>Other Cost</th>
+                                    <th>Inspection & Handling</th>
                                     <th>Total Cost</th>
                                 </tr>
                             </thead>
@@ -295,15 +298,23 @@
                                 <tr>
                                     <td><strong>{{ assembly.name }}</strong></td>
                                     <td>{{ assembly.assembly_type_config.name|default:"-" }}</td>
+                                    <td>
+                                        {% if assembly.remarks %}
+                                            {{ assembly.remarks|truncatewords:15 }}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-end">{{ assembly.manual_cost|smart_decimal }}</td>
                                     <td class="text-end">{{ assembly.other_cost|smart_decimal }}</td>
+                                    <td class="text-end">{{ assembly.inspection_handling_cost|smart_decimal }}</td>
                                     <td class="text-end"><strong>{{ assembly.total_assembly_cost|smart_decimal }}</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
                                     <td class="text-end"><strong>{{ total_assembly_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>

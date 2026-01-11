@@ -628,43 +628,25 @@ class MouldingMachineDetail(models.Model):
 
 
 class Assembly(models.Model):
-    """Assembly details for a quote"""
-    ASSEMBLY_TYPE_CHOICES = [
-        ('manual', 'Manual'),
-        ('automated', 'Automated'),
-    ]
-
-    name = models.CharField(max_length=200, default="", help_text="Assembly name/identifier")
+    """Assembly for a quote"""
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='assemblies')
-    assembly_type = models.CharField(max_length=20, choices=ASSEMBLY_TYPE_CHOICES, default='manual')
-    remarks = models.TextField(blank=True, null=True, default="", help_text="Additional notes or remarks")
-
-    # For manual assembly
-    manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                     help_text="Cost for manual assembly")
-
-    # For automated assembly
     assembly_type_config = models.ForeignKey(AssemblyType, on_delete=models.SET_NULL, null=True, blank=True,
-                                            help_text="Assembly type from configuration")
+                                             related_name='assemblies', help_text="Assembly type configuration")
 
-    # Other costs
-    other_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    # Assembly details
+    name = models.CharField(max_length=200, default="", help_text="Assembly name/identifier")
+    remarks = models.TextField(blank=True, null=True, default="", help_text="Additional notes or remarks")
+    manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                     help_text="Manual assembly cost (used if automated)")
+    other_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                    help_text="Other miscellaneous costs")
 
-    # Percentages for calculations
-    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                           help_text="Profit percentage")
-    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                              help_text="Rejection percentage")
-    inspection_handling_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                                        help_text="Inspection + Handling percentage")
-
-    # Calculated fields
-    total_assembly_rm_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
-    total_manufacturing_printing_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
-    profit_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
-    rejection_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
-    inspection_handling_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
-    total_assembly_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False)
+    # Percentages and fixed costs
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0)
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0)
+    inspection_handling_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                                   verbose_name="Inspection & Handling Cost",
+                                                   help_text="Fixed cost for inspection and handling")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -675,58 +657,79 @@ class Assembly(models.Model):
         verbose_name_plural = 'Assemblies'
 
     def __str__(self):
-        return f"Assembly {self.id} - {self.name} - {self.quote.name} ({self.assembly_type})"
+        if self.name:
+            return f"{self.name} - {self.quote.name}"
+        return f"Assembly - {self.quote.name}"
 
     def calculate_costs(self):
         """Calculate all assembly costs"""
         from decimal import Decimal
 
-        # Calculate total assembly raw material cost
-        self.total_assembly_rm_cost = sum(
-            Decimal(str(arm.total_cost)) for arm in self.assembly_raw_materials.all()
+        # Get total assembly RM cost
+        total_assembly_rm_cost = sum(
+            Decimal(str(rm.total_cost)) for rm in self.assembly_raw_materials.all()
         )
 
-        # Calculate total manufacturing printing cost
-        self.total_manufacturing_printing_cost = sum(
-            Decimal(str(mpc.per_cost)) for mpc in self.manufacturing_printing_costs.all()
+        # Get total manufacturing/printing cost
+        total_manufacturing_printing_cost = sum(
+            Decimal(str(cost.per_cost)) for cost in self.manufacturing_printing_costs.all()
         )
 
-        # Base cost = assembly RM cost + manufacturing printing cost
-        base_cost = self.total_assembly_rm_cost + self.total_manufacturing_printing_cost
+        # Base cost is sum of manual cost, assembly RM, and manufacturing/printing
+        base_cost = (Decimal(str(self.manual_cost)) +
+                    total_assembly_rm_cost +
+                    total_manufacturing_printing_cost)
 
-        # Convert percentages to Decimal
-        profit_percentage = Decimal(str(self.profit_percentage or 0))
-        rejection_percentage = Decimal(str(self.rejection_percentage or 0))
-        inspection_handling_percentage = Decimal(str(self.inspection_handling_percentage or 0))
+        # Calculate percentage-based costs
+        profit_cost = base_cost * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+        rejection_cost = base_cost * (Decimal(str(self.rejection_percentage)) / Decimal('100'))
 
-        # Calculate profit, rejection, and inspection+handling costs
-        self.profit_cost = base_cost * (profit_percentage / Decimal('100'))
-        self.rejection_cost = base_cost * (rejection_percentage / Decimal('100'))
-        self.inspection_handling_cost = base_cost * (inspection_handling_percentage / Decimal('100'))
+        # Inspection & handling is now a fixed cost (not percentage-based)
+        inspection_handling_cost = Decimal(str(self.inspection_handling_cost))
 
         # Total assembly cost
-        if self.assembly_type == 'manual':
-            manual_cost = Decimal(str(self.manual_cost or 0))
-            other_cost = Decimal(str(self.other_cost or 0))
-            self.total_assembly_cost = (
-                manual_cost +
-                other_cost +
-                self.profit_cost +
-                self.rejection_cost +
-                self.inspection_handling_cost
-            )
-        else:
-            other_cost = Decimal(str(self.other_cost or 0))
-            self.total_assembly_cost = (
-                base_cost +
-                other_cost +
-                self.profit_cost +
-                self.rejection_cost +
-                self.inspection_handling_cost
-            )
+        total = (base_cost +
+                Decimal(str(self.other_cost)) +
+                profit_cost +
+                rejection_cost +
+                inspection_handling_cost)
 
-        self.save()
+        return {
+            'base_cost': float(base_cost),
+            'profit_cost': float(profit_cost),
+            'rejection_cost': float(rejection_cost),
+            'inspection_handling_cost': float(inspection_handling_cost),
+            'total_assembly_cost': float(total),
+        }
 
+    @property
+    def base_cost(self):
+        """Get base cost"""
+        return self.calculate_costs()['base_cost']
+
+    @property
+    def profit_cost(self):
+        """Get profit cost"""
+        return self.calculate_costs()['profit_cost']
+
+    @property
+    def rejection_cost(self):
+        """Get rejection cost"""
+        return self.calculate_costs()['rejection_cost']
+
+    @property
+    def inspection_handling_cost_calculated(self):
+        """Get inspection & handling cost (already a fixed value)"""
+        return self.calculate_costs()['inspection_handling_cost']
+
+    @property
+    def total_assembly_cost(self):
+        """Get total assembly cost"""
+        return self.calculate_costs()['total_assembly_cost']
+
+    def save(self, *args, **kwargs):
+        """Override save to trigger cost recalculation"""
+        super().save(*args, **kwargs)
 
 class AssemblyRawMaterial(models.Model):
     """Raw materials used in assembly"""
