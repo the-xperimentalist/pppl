@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Multiple Quotes{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Project
+            </a>
+            <h1 class="mb-0">Upload Multiple Quotes</h1>
+        </div>
+
+        <div class="alert alert-info">
+            <h5><i class="bi bi-info-circle"></i> Instructions</h5>
+            <ol class="mb-0">
+                <li>Download the Excel template using the button below</li>
+                <li>Each column represents one quote (starting from column B)</li>
+                <li>Fill in quote details in each column</li>
+                <li>You can add as many quotes as needed (add more columns)</li>
+                <li>Select the customer group for all quotes</li>
+                <li>Upload the completed file</li>
+            </ol>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Step 1: Download Template</h5>
+            </div>
+            <div class="card-body text-center">
+                <a href="{% url 'download_multiple_quotes_template' %}" class="btn btn-success btn-lg">
+                    <i class="bi bi-download"></i> Download Multiple Quotes Template
+                </a>
+                <p class="text-muted mt-2 mb-0">Excel file with vertical headers and sample quotes</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Step 2: Upload Completed File</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="customer_group" class="form-label">Customer Group <span class="text-danger">*</span></label>
+                        <select class="form-select" id="customer_group" name="customer_group" required>
+                            <option value="">Select Customer Group</option>
+                            {% for group in customer_groups %}
+                                <option value="{{ group.id }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">All quotes in the file will be assigned to this customer group</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Select Excel File <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="excel_file" name="excel_file" 
+                               accept=".xlsx,.xls" required>
+                        <div class="form-text">Only .xlsx and .xls files are supported</div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>Note:</strong> This will create multiple quotes in the project. Make sure you've filled in all required fields marked with *.
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Upload & Create Quotes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

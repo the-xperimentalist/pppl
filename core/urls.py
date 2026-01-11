@@ -93,4 +93,7 @@ urlpatterns = [
     # Packaging edit
      path('projects/<int:project_id>/quotes/<int:quote_id>/packaging/<int:packaging_id>/edit/',
           views.packaging_edit, name='packaging_edit'),
+     # Multiple quotes template and upload
+     path('templates/multiple-quotes/', views.download_multiple_quotes_template, name='download_multiple_quotes_template'),
+     path('projects/<int:project_id>/upload-quotes/', views.upload_multiple_quotes, name='upload_multiple_quotes'),
 ]

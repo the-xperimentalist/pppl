@@ -1779,3 +1779,51 @@ def packaging_edit(request, project_id, quote_id, packaging_id):
         'packaging_types': packaging_types,
     }
     return render(request, 'core/packaging_edit.html', context)
+
+
+@login_required
+def download_multiple_quotes_template(request):
+    """Download template for creating multiple quotes"""
+    wb = ExcelTemplateGenerator.create_multiple_quotes_template()
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=multiple_quotes_template.xlsx'
+    wb.save(response)
+    return response
+
+
+@login_required
+def upload_multiple_quotes(request, project_id):
+    """Upload multiple quotes to a project from Excel"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    customer_groups = CustomerGroup.objects.filter(is_active=True)
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        customer_group_id = request.POST.get('customer_group')
+
+        if not customer_group_id:
+            messages.error(request, 'Please select a customer group.')
+        else:
+            try:
+                customer_group = get_object_or_404(CustomerGroup, id=customer_group_id)
+                excel_file = request.FILES['excel_file']
+                count, errors = ExcelParser.parse_multiple_quotes(
+                    excel_file, project, customer_group, request.user
+                )
+
+                if errors:
+                    for error in errors:
+                        messages.error(request, error)
+                else:
+                    messages.success(request, f'Successfully created {count} quotes!')
+                    return redirect('project_detail', project_id=project.id)
+            except Exception as e:
+                messages.error(request, f'Error processing file: {str(e)}')
+
+    context = {
+        'project': project,
+        'customer_groups': customer_groups,
+    }
+    return render(request, 'core/upload_multiple_quotes.html', context)

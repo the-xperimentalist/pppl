@@ -11,6 +11,9 @@
             <a href="{% url 'projects' %}" class="btn btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i> Back to Projects
             </a>
+            <a href="{% url 'upload_multiple_quotes' project.id %}" class="btn btn-success">
+                <i class="bi bi-cloud-upload"></i> Bulk Upload Quotes
+            </a>
         </div>
         
         <div class="card">
