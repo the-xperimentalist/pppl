@@ -30,7 +30,7 @@
                         </p>
                         <div class="text-muted small">
                             <i class="bi bi-person"></i> Created by {{ project.created_by.username }} • 
-                            <i class="bi bi-calendar"></i> {{ project.created_at|date:"M d, Y" }}
+                            <i class="bi bi-calendar"></i> {{ project.created_at|date:"M d, Y, h:i A" }}
                         </div>
                     </div>
                     <div>
@@ -89,7 +89,7 @@
                             </td>
                             <td>{{ quote.client_name }}</td>
                             <td>{{ quote.created_by.username }}</td>
-                            <td>{{ quote.created_at|date:"M d, Y" }}</td>
+                            <td>{{ quote.created_at|date:"M d, Y, h:i A" }}</td>
                             <td>
                                 <a href="{% url 'quote_detail' project.id quote.id %}"
                                    class="btn btn-sm btn-outline-primary" title="View Details">
