@@ -267,8 +267,6 @@
         </div>
     </div>
 
-    {% load custom_filters %}
-
     <!-- Raw Materials Tab -->
     <div class="tab-pane fade" id="raw-materials" role="tabpanel">
         <div class="card">
@@ -563,7 +561,6 @@
             </div>
         </div>
     </div>
-    {% load custom_filters %}
 
     <!-- Transport Tab -->
     <div class="tab-pane fade" id="transport" role="tabpanel">
@@ -588,8 +585,9 @@
                         <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Dimensions (L×B×H)</th>
-                                    <th>Boxes (L×B×H)</th>
+                                    <th>Dimensions (ft)<br><small class="text-muted">L×B×H</small></th>
+                                    <th>Dimensions (mm)<br><small class="text-muted">L×B×H</small></th>
+                                    <th>Boxes<br><small class="text-muted">L×B×H</small></th>
                                     <th>Total Boxes</th>
                                     <th>Parts/Box</th>
                                     <th>Parts/Trip</th>
@@ -602,6 +600,7 @@
                                 {% for transport in transports %}
                                 <tr>
                                     <td>{{ transport.transport_length|smart_decimal }} × {{ transport.transport_breadth|smart_decimal }} × {{ transport.transport_height|smart_decimal }}</td>
+                                    <td><small class="text-muted">{{ transport.transport_length_mm|smart_decimal }} × {{ transport.transport_breadth_mm|smart_decimal }} × {{ transport.transport_height_mm|smart_decimal }}</small></td>
                                     <td>{{ transport.boxes_on_length }} × {{ transport.boxes_on_breadth }} × {{ transport.boxes_on_height }}</td>
                                     <td>{{ transport.total_boxes }}</td>
                                     <td>{{ transport.parts_per_box }}</td>

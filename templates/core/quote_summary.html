@@ -381,10 +381,10 @@
                         <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Packaging Type</th>
+                                    <th>Dimensions (ft)</th>
+                                    <th>Dimensions (mm)</th>
                                     <th>Total Boxes</th>
                                     <th>Parts/Box</th>
-                                    <th>Total Parts/Trip</th>
                                     <th>Trip Cost</th>
                                     <th>Cost/Part</th>
                                 </tr>
@@ -392,10 +392,10 @@
                             <tbody>
                                 {% for transport in transports %}
                                 <tr>
-                                    <td>{{ transport.packaging.get_packaging_type_display }}</td>
-                                    <td>{{ transport.total_boxes }}</td>
-                                    <td>{{ transport.parts_per_box }}</td>
-                                    <td>{{ transport.total_parts_per_trip }}</td>
+                                    <td>{{ transport.transport_length|smart_decimal }} × {{ transport.transport_breadth|smart_decimal }} × {{ transport.transport_height|smart_decimal }}</td>
+                                    <td class="text-muted"><small>{{ transport.transport_length_mm|smart_decimal }} × {{ transport.transport_breadth_mm|smart_decimal }} × {{ transport.transport_height_mm|smart_decimal }}</small></td>
+                                    <td class="text-end">{{ transport.total_boxes }}</td>
+                                    <td class="text-end">{{ transport.parts_per_box }}</td>
                                     <td class="text-end">{{ transport.trip_cost|smart_decimal }}</td>
                                     <td class="text-end"><strong>{{ transport.trip_cost_per_part|smart_decimal }}</strong></td>
                                 </tr>
@@ -403,11 +403,14 @@
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>Total Cost/Part:</strong></td>
+                                    <td colspan="5" class="text-end"><strong>Total Transport Cost per Part:</strong></td>
                                     <td class="text-end"><strong>{{ total_transport_cost|smart_decimal }}</strong></td>
                                 </tr>
                             </tfoot>
                         </table>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <small><strong>Note:</strong> Transport dimensions entered in feet (1 ft = 304.8 mm). Box calculations use millimeters for accuracy.</small>
                     </div>
                 {% else %}
                     <p class="text-muted mb-0">No transport added.</p>

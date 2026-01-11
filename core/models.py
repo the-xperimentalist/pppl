@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from decimal import Decimal
 
 
 class CustomerGroup(models.Model):
@@ -305,11 +306,11 @@ class Quote(models.Model):
     def get_base_cost(self):
         """Calculate base cost before profit and handling charge"""
         return (
-            self.get_total_raw_material_cost() +
-            self.get_total_conversion_cost() +
-            self.get_total_assembly_cost() +
-            self.get_total_packaging_cost() +
-            self.get_total_transport_cost()
+            Decimal(self.get_total_raw_material_cost()) +
+            Decimal(self.get_total_conversion_cost()) +
+            Decimal(self.get_total_assembly_cost()) +
+            Decimal(self.get_total_packaging_cost()) +
+            Decimal(self.get_total_transport_cost())
         )
 
     def get_profit_amount(self):
@@ -910,13 +911,13 @@ class Transport(models.Model):
     packaging = models.ForeignKey(Packaging, on_delete=models.SET_NULL, null=True, blank=True,
                                   related_name='transports', help_text="Related packaging")
 
-    # Transport dimensions
+    # Transport dimensions in feet
     transport_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                          help_text="Transport length")
+                                          help_text="Transport length (ft)")
     transport_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                           help_text="Transport breadth")
+                                           help_text="Transport breadth (ft)")
     transport_height = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                          help_text="Transport height")
+                                          help_text="Transport height (ft)")
 
     # Cost details
     trip_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
@@ -935,27 +936,45 @@ class Transport(models.Model):
         return f"Transport - {self.quote.name}"
 
     @property
+    def transport_length_mm(self):
+        """Convert transport length from feet to mm (1 ft = 304.8 mm)"""
+        from decimal import Decimal
+        return float(Decimal(str(self.transport_length)) * Decimal('304.8'))
+
+    @property
+    def transport_breadth_mm(self):
+        """Convert transport breadth from feet to mm (1 ft = 304.8 mm)"""
+        from decimal import Decimal
+        return float(Decimal(str(self.transport_breadth)) * Decimal('304.8'))
+
+    @property
+    def transport_height_mm(self):
+        """Convert transport height from feet to mm (1 ft = 304.8 mm)"""
+        from decimal import Decimal
+        return float(Decimal(str(self.transport_height)) * Decimal('304.8'))
+
+    @property
     def boxes_on_length(self):
         """Calculate boxes on length"""
-        if self.packaging and self.transport_length > 0 and self.packaging.packaging_length > 0:
+        if self.packaging and self.transport_length_mm > 0 and self.packaging.packaging_length > 0:
             from decimal import Decimal
-            return int(Decimal(str(self.transport_length)) / Decimal(str(self.packaging.packaging_length)))
+            return int(Decimal(str(self.transport_length_mm)) / Decimal(str(self.packaging.packaging_length)))
         return 0
 
     @property
     def boxes_on_breadth(self):
         """Calculate boxes on breadth"""
-        if self.packaging and self.transport_breadth > 0 and self.packaging.packaging_breadth > 0:
+        if self.packaging and self.transport_breadth_mm > 0 and self.packaging.packaging_breadth > 0:
             from decimal import Decimal
-            return int(Decimal(str(self.transport_breadth)) / Decimal(str(self.packaging.packaging_breadth)))
+            return int(Decimal(str(self.transport_breadth_mm)) / Decimal(str(self.packaging.packaging_breadth)))
         return 0
 
     @property
     def boxes_on_height(self):
         """Calculate boxes on height"""
-        if self.packaging and self.transport_height > 0 and self.packaging.packaging_height > 0:
+        if self.packaging and self.transport_height_mm > 0 and self.packaging.packaging_height > 0:
             from decimal import Decimal
-            return int(Decimal(str(self.transport_height)) / Decimal(str(self.packaging.packaging_height)))
+            return int(Decimal(str(self.transport_height_mm)) / Decimal(str(self.packaging.packaging_height)))
         return 0
 
     @property
@@ -975,7 +994,6 @@ class Transport(models.Model):
             from decimal import Decimal
             return float(Decimal(str(self.trip_cost)) / Decimal(str(self.total_parts_per_trip)))
         return 0
-
 
 class QuoteTimeline(models.Model):
     """Timeline tracking for quote changes and activities"""

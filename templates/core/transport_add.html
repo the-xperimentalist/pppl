@@ -25,7 +25,7 @@
                             <option value="">-- Select Packaging --</option>
                             {% for pkg in packagings %}
                                 <option value="{{ pkg.id }}">
-                                    {{ pkg.get_packaging_type_display }} ({{ pkg.packaging_length }} × {{ pkg.packaging_breadth }} × {{ pkg.packaging_height }})
+                                    {{ pkg.get_packaging_type_display }} ({{ pkg.packaging_length }} × {{ pkg.packaging_breadth }} × {{ pkg.packaging_height }} mm)
                                 </option>
                             {% endfor %}
                         </select>
@@ -34,28 +34,32 @@
 
                     <hr class="my-4">
 
-                    <h5 class="mb-3">Transport Dimensions</h5>
+                    <h5 class="mb-3">Transport Dimensions (in feet)</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label for="transport_length" class="form-label">Transport Length <span class="text-danger">*</span></label>
+                            <label for="transport_length" class="form-label">Transport Length (ft) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="transport_length" name="transport_length"
                                    step="0.00000001" value="0" required>
-                            <div class="form-text">Length of transport vehicle</div>
+                            <div class="form-text">Length of transport vehicle in feet</div>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="transport_breadth" class="form-label">Transport Breadth <span class="text-danger">*</span></label>
+                            <label for="transport_breadth" class="form-label">Transport Breadth (ft) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="transport_breadth" name="transport_breadth"
                                    step="0.00000001" value="0" required>
-                            <div class="form-text">Breadth/width of transport vehicle</div>
+                            <div class="form-text">Breadth/width of transport vehicle in feet</div>
                         </div>
 
                         <div class="col-md-4 mb-3">
-                            <label for="transport_height" class="form-label">Transport Height <span class="text-danger">*</span></label>
+                            <label for="transport_height" class="form-label">Transport Height (ft) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="transport_height" name="transport_height"
                                    step="0.00000001" value="0" required>
-                            <div class="form-text">Height of transport vehicle</div>
+                            <div class="form-text">Height of transport vehicle in feet</div>
                         </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> Dimensions entered in feet will be converted to millimeters (1 ft = 304.8 mm) for calculating box fit with packaging.
                     </div>
 
                     <hr class="my-4">
