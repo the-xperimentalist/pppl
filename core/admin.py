@@ -53,14 +53,6 @@ class AssemblyTypeAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at', 'updated_at']
 
 
-@admin.register(PackagingType)
-class PackagingTypeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'value', 'is_active', 'created_by', 'created_at']
-    list_filter = ['is_active', 'created_at']
-    search_fields = ['name', 'value', 'description']
-    readonly_fields = ['created_at', 'updated_at']
-
-
 @admin.register(Quote)
 class QuoteAdmin(admin.ModelAdmin):
     list_display = ['name', 'project', 'client_name', 'status', 'get_completion_percentage', 'created_by', 'created_at']

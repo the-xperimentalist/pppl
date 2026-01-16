@@ -349,8 +349,8 @@ class RawMaterial(models.Model):
 
     # Pricing
     frozen_rate = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True,
-                                     help_text="Frozen rate if applicable")
-    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate (per gram)")
+                                     help_text="Frozen rate if applicable (per kg)")
+    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate (per kg)")
 
     # Weight details
     part_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0)
@@ -386,7 +386,7 @@ class RawMaterial(models.Model):
 
     @property
     def gross_weight(self):
-        """Calculate gross weight (part + runner)"""
+        """Calculate gross weight (part + runner) in the selected unit"""
         from decimal import Decimal
         return float(Decimal(str(self.part_weight)) + Decimal(str(self.runner_weight)))
 
@@ -409,11 +409,19 @@ class RawMaterial(models.Model):
             return float(gross)
 
     @property
-    def effective_rate(self):
-        """Get effective rate (frozen rate if available, otherwise rm_rate)"""
+    def effective_rate_per_kg(self):
+        """Get effective rate per kg (frozen rate if available, otherwise rm_rate)"""
         if self.frozen_rate is not None and self.frozen_rate > 0:
             return float(self.frozen_rate)
         return float(self.rm_rate)
+
+    @property
+    def effective_rate_per_gram(self):
+        """Convert effective rate from per kg to per gram (divide by 1000)"""
+        from decimal import Decimal
+        rate_per_kg = Decimal(str(self.effective_rate_per_kg))
+        # 1 kg = 1000 grams, so rate per gram = rate per kg / 1000
+        return float(rate_per_kg / Decimal('1000'))
 
     @property
     def base_rm_cost(self):
@@ -423,11 +431,11 @@ class RawMaterial(models.Model):
         # Use gross weight in grams
         weight_in_grams = Decimal(str(self.gross_weight_in_grams))
 
-        # Rate is per gram
-        rate = Decimal(str(self.effective_rate))
+        # Rate per gram (converted from per kg)
+        rate_per_gram = Decimal(str(self.effective_rate_per_gram))
 
         # Base cost = weight in grams × rate per gram + additional costs
-        base = (weight_in_grams * rate) + Decimal(str(self.process_losses)) + Decimal(str(self.purging_loss_cost))
+        base = (weight_in_grams * rate_per_gram) + Decimal(str(self.process_losses)) + Decimal(str(self.purging_loss_cost))
 
         # Add ICC percentage
         icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
@@ -493,24 +501,45 @@ class AssemblyType(models.Model):
 
 
 class PackagingType(models.Model):
-    """Packaging Type configuration - belongs to customer group"""
-    customer_group = models.ForeignKey(CustomerGroup, on_delete=models.CASCADE, related_name='packaging_types',
-                                       null=True, blank=True, default=None)
-    name = models.CharField(max_length=100, default="")
-    value = models.CharField(max_length=100, default="", help_text="Unique identifier/code")
-    description = models.TextField(blank=True, null=True, default="")
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='packaging_types')
+    """Packaging type configuration for customer groups"""
+    PACKAGING_TYPE_CHOICES = [
+        ('pp_box', 'PP Box'),
+        ('pp_box_partition', 'PP Box by Partition'),
+        ('cg_box', 'CG Box'),
+        ('bin', 'Bin'),
+        ('custom', 'Custom'),
+    ]
+
+    customer_group = models.ForeignKey(CustomerGroup, on_delete=models.CASCADE,
+                                      related_name='packaging_types', null=True)
+    name = models.CharField(max_length=100, help_text="Packaging type name")
+    packaging_type = models.CharField(max_length=50, choices=PACKAGING_TYPE_CHOICES,
+                                     default='pp_box')
+
+    # Default dimensions
+    default_length = models.DecimalField(max_digits=18, decimal_places=8, default=600,
+                                        help_text="Default packaging length (mm)")
+    default_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400,
+                                         help_text="Default packaging breadth (mm)")
+    default_height = models.DecimalField(max_digits=18, decimal_places=8, default=250,
+                                        help_text="Default packaging height (mm)")
+    default_polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16,
+                                                 help_text="Default polybag length")
+    default_polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20,
+                                               help_text="Default polybag width")
+
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ['customer_group', 'name']
+        ordering = ['packaging_type', 'name']
         verbose_name = 'Packaging Type'
         verbose_name_plural = 'Packaging Types'
+        unique_together = ['customer_group', 'name']
 
     def __str__(self):
-        return f"{self.name} ({self.value}) - {self.customer_group.name if self.customer_group else 'No Group'}"
+        return f"{self.name} - {self.customer_group.name}"
 
 
 class MouldingMachineDetail(models.Model):
@@ -731,27 +760,23 @@ class Assembly(models.Model):
         """Override save to trigger cost recalculation"""
         super().save(*args, **kwargs)
 
+
 class AssemblyRawMaterial(models.Model):
-    """Raw materials used in assembly"""
+    """Raw Material for an assembly"""
     UNIT_CHOICES = [
         ('kg', 'Kilogram (kg)'),
-        ('g', 'Gram (g)'),
-        ('piece', 'Piece'),
-        ('meter', 'Meter (m)'),
-        ('liter', 'Liter (L)'),
+        ('gm', 'Gram (gm)'),
+        ('nos', 'Numbers (nos)'),
+        ('mtr', 'Meter (mtr)'),
     ]
 
     assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE, related_name='assembly_raw_materials')
-
     description = models.CharField(max_length=200, default="")
-    production_quantity = models.IntegerField(default=1, help_text="Production quantity")
-    unit = models.CharField(max_length=20, choices=UNIT_CHOICES, default='kg')
-    cost_per_unit = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                       help_text="Cost per unit")
-
-    # Calculated field
-    total_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, editable=False,
-                                    help_text="(Production Weight × Cost/Unit) / Production Quantity")
+    production_quantity = models.IntegerField(default=1)
+    production_weight = models.CharField(max_length=100, blank=True, null=True, default="",
+                                        help_text="Optional production weight (text field, not used in calculations)")
+    unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='kg')
+    cost_per_unit = models.DecimalField(max_digits=18, decimal_places=8, default=0)
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -762,25 +787,21 @@ class AssemblyRawMaterial(models.Model):
         verbose_name_plural = 'Assembly Raw Materials'
 
     def __str__(self):
-        return f"{self.description} - Assembly {self.assembly.id}"
+        return f"{self.description} - {self.assembly.quote.name}"
+
+    @property
+    def total_cost(self):
+        """Calculate total cost"""
+        from decimal import Decimal
+        if self.production_quantity > 0:
+            total = Decimal(str(self.cost_per_unit)) / Decimal(str(self.production_quantity))
+            return float(total)
+        return 0
 
     def save(self, *args, **kwargs):
-        """Calculate total cost before saving"""
-        from decimal import Decimal
-
-        cost_per_unit = Decimal(str(self.cost_per_unit or 0))
-        production_quantity = Decimal(str(self.production_quantity or 1))
-
-        if production_quantity > 0:
-            self.total_cost = production_quantity * cost_per_unit
-        else:
-            self.total_cost = Decimal('0')
-
+        """Override save to trigger assembly recalculation"""
         super().save(*args, **kwargs)
-
-        # Update parent assembly costs (avoid recursion issues)
-        if self.assembly_id:
-            self.assembly.calculate_costs()
+        self.assembly.save()
 
 
 class ManufacturingPrintingCost(models.Model):
@@ -831,36 +852,37 @@ class Packaging(models.Model):
     """Packaging for a quote"""
     PACKAGING_TYPE_CHOICES = [
         ('pp_box', 'PP Box'),
-        ('pp_box_partition', 'PP Box with Partition'),
+        ('pp_box_partition', 'PP Box by Partition'),
         ('cg_box', 'CG Box'),
         ('bin', 'Bin'),
+        ('custom', 'Custom'),
     ]
 
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='packagings')
+    packaging_type = models.ForeignKey(PackagingType, on_delete=models.SET_NULL,
+                                      null=True, blank=True,
+                                      related_name='packagings',
+                                      help_text="Select packaging type")
 
-    # Editable dimensions (previously constants)
-    packaging_length = models.DecimalField(max_digits=18, decimal_places=8, default=600,
+    # Dimensions (editable)
+    packaging_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Packaging length (mm)")
-    packaging_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400,
+    packaging_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                            help_text="Packaging breadth (mm)")
-    packaging_height = models.DecimalField(max_digits=18, decimal_places=8, default=250,
+    packaging_height = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Packaging height (mm)")
-    polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16,
+    polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                         help_text="Polybag length")
-    polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20,
+    polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                        help_text="Polybag width")
 
-    # Constants (kept for backward compatibility)
-    NUMBER_OF_PARTS_PER_COST = 288
-    POLYBAG_COST_CONSTANT = 3.56
-
-    # User inputs
-    packaging_type = models.CharField(max_length=20, choices=PACKAGING_TYPE_CHOICES, default='pp_box')
-    lifecycle = models.IntegerField(default=1, help_text="Number of times packaging can be used")
-    cost = models.DecimalField(max_digits=18, decimal_places=8, default=0, help_text="Cost of packaging")
+    # Cost details
+    lifecycle = models.IntegerField(default=0, help_text="Lifecycle count")
+    cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                              help_text="Packaging cost")
     maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                                 help_text="Maintenance percentage")
-    part_per_polybag = models.IntegerField(default=1, help_text="Number of parts per polybag")
+                                                help_text="Maintenance percentage")
+    parts_per_polybag = models.IntegerField(default=0, help_text="Parts per polybag")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -871,7 +893,8 @@ class Packaging(models.Model):
         verbose_name_plural = 'Packagings'
 
     def __str__(self):
-        return f"{self.get_packaging_type_display()} - {self.quote.name}"
+        type_display = self.packaging_type.name if self.packaging_type else "Custom"
+        return f"{type_display} - {self.quote.name}"
 
     @property
     def maintenance_cost(self):
@@ -881,32 +904,36 @@ class Packaging(models.Model):
 
     @property
     def total_cost(self):
-        """Calculate total cost"""
+        """Calculate total packaging cost"""
         from decimal import Decimal
         return float(Decimal(str(self.cost)) + Decimal(str(self.maintenance_cost)))
 
     @property
     def cost_per_part(self):
-        """Calculate cost per part"""
+        """Calculate packaging cost per part"""
         from decimal import Decimal
-        if self.lifecycle > 0:
-            return float(Decimal(str(self.total_cost)) / (Decimal(str(self.lifecycle)) * Decimal(str(self.NUMBER_OF_PARTS_PER_COST))))
+
+        if self.lifecycle > 0 and self.parts_per_polybag > 0:
+            parts_per_pkg = Decimal(str(self.lifecycle)) * Decimal(str(self.parts_per_polybag))
+            if parts_per_pkg > 0:
+                return float(Decimal(str(self.total_cost)) / parts_per_pkg)
         return 0
 
-    @property
-    def polybag_cost(self):
-        """Calculate polybag cost"""
-        from decimal import Decimal
-        if self.part_per_polybag > 0:
-            return float(Decimal(str(self.POLYBAG_COST_CONSTANT)) / Decimal(str(self.part_per_polybag)))
-        return 0
+    def save(self, *args, **kwargs):
+        """Override save to auto-populate dimensions from packaging type if available"""
+        if self.packaging_type and not self.pk:  # Only on creation
+            if self.packaging_length == 0:
+                self.packaging_length = self.packaging_type.default_length
+            if self.packaging_breadth == 0:
+                self.packaging_breadth = self.packaging_type.default_breadth
+            if self.packaging_height == 0:
+                self.packaging_height = self.packaging_type.default_height
+            if self.polybag_length == 0:
+                self.polybag_length = self.packaging_type.default_polybag_length
+            if self.polybag_width == 0:
+                self.polybag_width = self.packaging_type.default_polybag_width
 
-    @property
-    def total_packaging_cost(self):
-        """Calculate total packaging cost per part"""
-        from decimal import Decimal
-        return float(Decimal(str(self.cost_per_part)) + Decimal(str(self.polybag_cost)))
-
+        super().save(*args, **kwargs)
 
 class Transport(models.Model):
     """Transport for a quote"""
@@ -997,6 +1024,7 @@ class Transport(models.Model):
             from decimal import Decimal
             return float(Decimal(str(self.trip_cost)) / Decimal(str(self.total_parts_per_trip)))
         return 0
+
 
 class QuoteTimeline(models.Model):
     """Timeline tracking for quote changes and activities"""

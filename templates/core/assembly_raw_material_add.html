@@ -2,41 +2,46 @@
 
 {% block title %}Add Assembly Raw Material{% endblock %}
 
-{% load custom_filters %}
-
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <div class="d-flex align-items-center mb-4">
             <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}" class="btn btn-outline-secondary me-3">
-                <i class="bi bi-arrow-left"></i> Back
+                <i class="bi bi-arrow-left"></i> Back to Assembly
             </a>
-            <div>
-                <h1 class="mb-0">Add Assembly Raw Material</h1>
-                <small class="text-muted">Assembly #{{ assembly.id }}</small>
-            </div>
+            <h1 class="mb-0">Add Assembly Raw Material</h1>
         </div>
 
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Assembly: {{ assembly.name }}</h5>
+            </div>
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    
+
                     <div class="mb-3">
                         <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="description" name="description" required>
+                        <input type="text" class="form-control" id="description" name="description" required
+                               placeholder="e.g., Steel screw, Rubber gasket, Adhesive">
                     </div>
-                    
+
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="production_quantity" class="form-label">Production Quantity <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="production_quantity" name="production_quantity" min="1" value="1" required>
+                            <input type="number" class="form-control" id="production_quantity" name="production_quantity"
+                                   min="1" value="1" required>
+                            <div class="form-text">Number of units produced</div>
                         </div>
-                        
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+
+                        <div class="col-md-4 mb-3">
+                            <label for="production_weight" class="form-label">Production Weight</label>
+                            <input type="text" class="form-control" id="production_weight" name="production_weight"
+                                   placeholder="e.g., 5kg, 200gm">
+                            <div class="form-text">Optional: Production weight (text field)</div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label for="unit" class="form-label">Unit <span class="text-danger">*</span></label>
                             <select class="form-select" id="unit" name="unit" required>
                                 {% for value, label in unit_choices %}
@@ -44,20 +49,23 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="cost_per_unit" class="form-label">Cost per Unit <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="cost_per_unit" name="cost_per_unit" step="0.00000001" min="0" required>
-                        </div>
                     </div>
-                    
+
+                    <div class="mb-3">
+                        <label for="cost_per_unit" class="form-label">Cost per Unit <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="cost_per_unit" name="cost_per_unit"
+                               step="0.00000001" value="0" required>
+                    </div>
+
                     <div class="alert alert-info">
-                        <strong>Formula:</strong> Total Cost = (Production Weight × Cost/Unit) / Production Quantity
+                        <strong>Formula:</strong> Total Cost = Cost per Unit / Production Quantity
+                        <br>
+                        <small class="text-muted">Note: Production Weight is optional and does not affect calculations</small>
                     </div>
-                    
-                    <div class="d-flex justify-content-end gap-2">
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
                         <a href="{% url 'assembly_detail' project.id quote.id assembly.id %}" class="btn btn-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> Add Raw Material
                         </button>
                     </div>

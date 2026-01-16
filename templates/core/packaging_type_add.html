@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Packaging Type{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Configuration
+            </a>
+            <h1 class="mb-0">Add Packaging Type</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Customer Group: {{ customer_group.name }}</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Packaging Type Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div class="form-text">E.g., "PP Box", "Custom Wooden Crate"</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="packaging_type" class="form-label">Type Category <span class="text-danger">*</span></label>
+                        <select class="form-select" id="packaging_type" name="packaging_type" required>
+                            <option value="pp_box">PP Box</option>
+                            <option value="pp_box_partition">PP Box by Partition</option>
+                            <option value="cg_box">CG Box</option>
+                            <option value="bin">Bin</option>
+                            <option value="custom" selected>Custom</option>
+                        </select>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Default Dimensions (mm)</h5>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="default_length" class="form-label">Default Length <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="default_length" name="default_length" 
+                                   step="0.00000001" value="600" required>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="default_breadth" class="form-label">Default Breadth <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="default_breadth" name="default_breadth" 
+                                   step="0.00000001" value="400" required>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="default_height" class="form-label">Default Height <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="default_height" name="default_height" 
+                                   step="0.00000001" value="250" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="default_polybag_length" class="form-label">Default Polybag Length <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="default_polybag_length" name="default_polybag_length" 
+                                   step="0.00000001" value="16" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="default_polybag_width" class="form-label">Default Polybag Width <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="default_polybag_width" name="default_polybag_width" 
+                                   step="0.00000001" value="20" required>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> These default dimensions will be pre-filled when creating packaging for quotes in this customer group.
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{% url 'config' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Create Packaging Type
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

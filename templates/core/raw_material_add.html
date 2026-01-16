@@ -75,13 +75,13 @@
                     <h5 class="mb-3">Pricing</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="rm_rate" class="form-label">RM Rate (per gram) <span class="text-danger">*</span></label>
+                            <label for="rm_rate" class="form-label">RM Rate (per kg) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="rm_rate" name="rm_rate" step="0.00000001" required>
-                            <div class="form-text">Rate per gram of material</div>
+                            <div class="form-text">Rate per kilogram of material (will be converted to per gram for calculation)</div>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="frozen_rate" class="form-label">Frozen Rate (per gram)</label>
+                            <label for="frozen_rate" class="form-label">Frozen Rate (per kg)</label>
                             <input type="number" class="form-control" id="frozen_rate" name="frozen_rate" step="0.00000001">
                             <div class="form-text">Optional: Overrides RM rate if provided</div>
                         </div>
@@ -108,9 +108,15 @@
                     </div>
 
                     <div class="alert alert-info">
-                        <strong>Note:</strong> Gross weight = Part weight + Runner weight (in selected unit)
+                        <strong>Calculation Formula:</strong>
                         <br>
-                        <small>For cost calculation, the gross weight will be converted to grams based on your selected unit, then multiplied by the rate per gram.</small>
+                        Gross weight = Part weight + Runner weight (in selected unit)
+                        <br>
+                        Gross weight is converted to grams: kg → ×1000, ton → ×1,000,000, gm → ×1
+                        <br>
+                        Rate per gram = Rate per kg ÷ 1000
+                        <br>
+                        Base Cost = (Gross weight in grams × Rate per gram) + Process losses + Purging loss + ICC%
                     </div>
 
                     <hr class="my-4">

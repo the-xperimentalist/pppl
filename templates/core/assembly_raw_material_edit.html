@@ -1,8 +1,7 @@
 {% extends 'base.html' %}
+{% load custom_filters %}
 
 {% block title %}Edit Assembly Raw Material{% endblock %}
-
-{% load custom_filters %}
 
 {% block content %}
 <div class="row">
@@ -21,24 +20,30 @@
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    
+
                     <div class="mb-3">
                         <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="description" name="description" 
+                        <input type="text" class="form-control" id="description" name="description"
                                value="{{ assembly_rm.description }}" required>
                     </div>
-                    
+
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="production_quantity" class="form-label">Production Quantity <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="production_quantity" name="production_quantity" 
+                            <input type="number" class="form-control" id="production_quantity" name="production_quantity"
                                    min="1" value="{{ assembly_rm.production_quantity }}" required>
+                            <div class="form-text">Number of units produced</div>
                         </div>
-                        
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+
+                        <div class="col-md-4 mb-3">
+                            <label for="production_weight" class="form-label">Production Weight</label>
+                            <input type="text" class="form-control" id="production_weight" name="production_weight"
+                                   value="{{ assembly_rm.production_weight|default:'' }}"
+                                   placeholder="e.g., 5kg, 200gm">
+                            <div class="form-text">Optional: Production weight (text field)</div>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
                             <label for="unit" class="form-label">Unit <span class="text-danger">*</span></label>
                             <select class="form-select" id="unit" name="unit" required>
                                 {% for value, label in unit_choices %}
@@ -48,18 +53,20 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="cost_per_unit" class="form-label">Cost per Unit <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="cost_per_unit" name="cost_per_unit" 
-                                   step="0.00000001" value="{{ assembly_rm.cost_per_unit }}" required>
-                        </div>
                     </div>
-                    
+
+                    <div class="mb-3">
+                        <label for="cost_per_unit" class="form-label">Cost per Unit <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="cost_per_unit" name="cost_per_unit"
+                               step="0.00000001" value="{{ assembly_rm.cost_per_unit }}" required>
+                    </div>
+
                     <div class="alert alert-info">
                         <strong>Current Total Cost:</strong> {{ assembly_rm.total_cost|smart_decimal }}
                         <br>
-                        <small>Formula: (Production Weight × Cost per Unit) / Production Quantity</small>
+                        <small>Formula: Cost per Unit / Production Quantity</small>
+                        <br>
+                        <small class="text-muted">Note: Production Weight is optional and does not affect calculations</small>
                     </div>
                     
                     <div class="d-flex justify-content-end gap-2 mt-4">

@@ -120,6 +120,7 @@
                         <tr>
                             <th>Description</th>
                             <th>Production Qty</th>
+                            <th>Production Weight</th>
                             <th>Unit</th>
                             <th>Cost per Unit</th>
                             <th>Total Cost</th>
@@ -131,6 +132,13 @@
                         <tr>
                             <td>{{ rm.description }}</td>
                             <td>{{ rm.production_quantity }}</td>
+                            <td>
+                                {% if rm.production_weight %}
+                                    {{ rm.production_weight }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td>{{ rm.unit }}</td>
                             <td>{{ rm.cost_per_unit|smart_decimal }}</td>
                             <td><strong>{{ rm.total_cost|smart_decimal }}</strong></td>
@@ -151,7 +159,7 @@
                     </tbody>
                     <tfoot class="table-light">
                         <tr>
-                            <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                            <td colspan="5" class="text-end"><strong>Total:</strong></td>
                             <td><strong>{{ total_assembly_rm_cost|smart_decimal }}</strong></td>
                             <td></td>
                         </tr>
@@ -163,6 +171,7 @@
         {% endif %}
     </div>
 </div>
+
 <!-- Manufacturing/Printing Costs Card -->
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">

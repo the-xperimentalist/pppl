@@ -45,8 +45,8 @@ def generate_raw_materials_test():
         'Grade',
         'RM Code*',
         'Unit (kg/gm/ton)*',
-        'RM Rate (per gram)*',
-        'Frozen Rate (per gram)',
+        'RM Rate (per kg)*',
+        'Frozen Rate (per kg)',
         'Part Weight*',
         'Runner Weight*',
         'Process Losses',
@@ -60,13 +60,13 @@ def generate_raw_materials_test():
 
     add_vertical_headers(ws, headers, "4472C4")
 
-    # Add 5 sample raw materials
+    # Add 5 sample raw materials (rates in per kg)
     materials = [
-        ['Polypropylene', 'PP-H340R', 'RM-PP-001', 'kg', 0.12550, None, 0.0234, 0.0045, 2.5, 1.2, 0.5, 2.0, 5.0, 3.0, 10.0],
-        ['ABS Resin', 'ABS-750', 'RM-ABS-002', 'kg', 0.18575, 0.18000, 0.0456, 0.0089, 3.0, 1.5, 0.75, 2.5, 4.5, 2.5, 12.0],
-        ['Nylon 6', 'PA6-GF30', 'RM-PA6-003', 'kg', 0.21500, None, 0.0678, 0.0123, 4.5, 2.0, 1.0, 3.0, 6.0, 4.0, 15.0],
-        ['Polycarbonate', 'PC-1500', 'RM-PC-004', 'kg', 0.29550, 0.29000, 0.0345, 0.0067, 2.0, 1.0, 0.5, 1.5, 4.0, 2.0, 8.0],
-        ['PVC Compound', 'PVC-SG5', 'RM-PVC-005', 'gm', 0.09525, None, 28.9, 5.6, 1.5, 0.8, 0.25, 1.8, 3.5, 2.2, 9.0],
+        ['Polypropylene', 'PP-H340R', 'RM-PP-001', 'kg', 125.50, None, 0.0234, 0.0045, 2.5, 1.2, 0.5, 2.0, 5.0, 3.0, 10.0],
+        ['ABS Resin', 'ABS-750', 'RM-ABS-002', 'kg', 185.75, 180.00, 0.0456, 0.0089, 3.0, 1.5, 0.75, 2.5, 4.5, 2.5, 12.0],
+        ['Nylon 6', 'PA6-GF30', 'RM-PA6-003', 'kg', 215.00, None, 0.0678, 0.0123, 4.5, 2.0, 1.0, 3.0, 6.0, 4.0, 15.0],
+        ['Polycarbonate', 'PC-1500', 'RM-PC-004', 'kg', 295.50, 290.00, 0.0345, 0.0067, 2.0, 1.0, 0.5, 1.5, 4.0, 2.0, 8.0],
+        ['PVC Compound', 'PVC-SG5', 'RM-PVC-005', 'kg', 95.25, None, 0.0289, 0.0056, 1.5, 0.8, 0.25, 1.8, 3.5, 2.2, 9.0],
     ]
 
     for col_num, material in enumerate(materials, 2):
@@ -75,7 +75,7 @@ def generate_raw_materials_test():
         ws.column_dimensions[get_column_letter(col_num)].width = 15
 
     wb.save('test_files/test_raw_materials.xlsx')
-    print("✓ Generated test_raw_materials.xlsx (5 raw materials with rate per gram)")
+    print("✓ Generated test_raw_materials.xlsx (5 raw materials with rate per kg)")
 
 
 def generate_moulding_machines_test():
@@ -268,8 +268,8 @@ def generate_complete_quote_test():
         'Grade',
         'RM Code*',
         'Unit (kg/gm/ton)*',
-        'RM Rate (per gram)*',
-        'Frozen Rate (per gram)',
+        'RM Rate (per kg)*',
+        'Frozen Rate (per kg)',
         'Part Weight*',
         'Runner Weight*',
         'Process Losses',
@@ -283,8 +283,8 @@ def generate_complete_quote_test():
     add_vertical_headers(ws_rm, rm_headers, "4472C4")
 
     materials = [
-        ['Polypropylene', 'PP-H340R', 'RM-PP-001', 'kg', 0.12550, None, 0.0234, 0.0045, 2.5, 1.2, 0.5, 2.0, 5.0, 3.0, 10.0],
-        ['ABS Resin', 'ABS-750', 'RM-ABS-002', 'kg', 0.18575, None, 0.0456, 0.0089, 3.0, 1.5, 0.75, 2.5, 4.5, 2.5, 12.0],
+        ['Polypropylene', 'PP-H340R', 'RM-PP-001', 'kg', 125.50, None, 0.0234, 0.0045, 2.5, 1.2, 0.5, 2.0, 5.0, 3.0, 10.0],
+        ['ABS Resin', 'ABS-750', 'RM-ABS-002', 'kg', 185.75, None, 0.0456, 0.0089, 3.0, 1.5, 0.75, 2.5, 4.5, 2.5, 12.0],
     ]
 
     for col_num, material in enumerate(materials, 2):
@@ -409,7 +409,7 @@ def generate_multiple_quotes_test():
         "",
         "Each quote has:",
         "- Quote definition",
-        "- 2-3 raw materials (rates in per gram)",
+        "- 2-3 raw materials (rates in per kg)",
         "- 1-2 moulding machines",
         "- 1 assembly (with fixed inspection & handling cost)",
         "- 1 packaging",
@@ -418,8 +418,8 @@ def generate_multiple_quotes_test():
         "Upload this to a project to test bulk quote creation.",
         "",
         "IMPORTANT NOTES:",
-        "- RM Rate is per gram",
-        "- Weights will be converted to grams based on unit",
+        "- RM Rate is per kg (converted to per gram for calculations)",
+        "- Weights converted to grams: kg→×1000, ton→×1,000,000, gm→×1",
         "- Transport dimensions are in feet (1 ft = 304.8 mm)",
         "- Inspection & Handling is a fixed cost (not percentage)",
     ]
@@ -474,8 +474,8 @@ def generate_multiple_quotes_test():
         'Grade',
         'RM Code*',
         'Unit (kg/gm/ton)*',
-        'RM Rate (per gram)*',
-        'Frozen Rate (per gram)',
+        'RM Rate (per kg)*',
+        'Frozen Rate (per kg)',
         'Part Weight*',
         'Runner Weight*',
         'Process Losses',
@@ -488,18 +488,18 @@ def generate_multiple_quotes_test():
     ]
     add_vertical_headers(ws_rm, rm_headers, "4472C4")
 
-    # Raw materials for each quote (rates in per gram)
+    # Raw materials for each quote (rates in per kg)
     raw_materials = [
         # Quote 1 materials
-        ['Auto Dashboard 2024', 'PP Copolymer', 'PP-R272', 'RM-PP-272', 'kg', 0.13550, None, 0.245, 0.038, 3.5, 1.8, 0.8, 2.2, 5.5, 3.2, 11.0],
-        ['Auto Dashboard 2024', 'ABS High Impact', 'ABS-HI-850', 'RM-ABS-850', 'kg', 0.19500, None, 0.156, 0.024, 2.8, 1.5, 0.6, 2.0, 5.0, 3.0, 10.0],
-        ['Auto Dashboard 2024', 'TPE Soft Touch', 'TPE-ST-60', 'RM-TPE-060', 'kg', 0.24500, 0.24000, 0.089, 0.012, 1.5, 1.0, 0.4, 1.8, 4.5, 2.8, 9.0],
+        ['Auto Dashboard 2024', 'PP Copolymer', 'PP-R272', 'RM-PP-272', 'kg', 135.50, None, 0.245, 0.038, 3.5, 1.8, 0.8, 2.2, 5.5, 3.2, 11.0],
+        ['Auto Dashboard 2024', 'ABS High Impact', 'ABS-HI-850', 'RM-ABS-850', 'kg', 195.00, None, 0.156, 0.024, 2.8, 1.5, 0.6, 2.0, 5.0, 3.0, 10.0],
+        ['Auto Dashboard 2024', 'TPE Soft Touch', 'TPE-ST-60', 'RM-TPE-060', 'kg', 245.00, 240.00, 0.089, 0.012, 1.5, 1.0, 0.4, 1.8, 4.5, 2.8, 9.0],
         # Quote 2 materials
-        ['Electronics Housing Pro', 'PC+ABS Blend', 'PCABS-750', 'RM-PCABS-750', 'kg', 0.26500, None, 0.178, 0.028, 3.2, 1.6, 0.7, 2.5, 6.0, 3.5, 12.0],
-        ['Electronics Housing Pro', 'Glass Filled PA6', 'PA6-GF30', 'RM-PA6-030', 'kg', 0.28500, 0.28000, 0.234, 0.036, 4.0, 2.0, 1.0, 3.0, 6.5, 4.0, 15.0],
+        ['Electronics Housing Pro', 'PC+ABS Blend', 'PCABS-750', 'RM-PCABS-750', 'kg', 265.00, None, 0.178, 0.028, 3.2, 1.6, 0.7, 2.5, 6.0, 3.5, 12.0],
+        ['Electronics Housing Pro', 'Glass Filled PA6', 'PA6-GF30', 'RM-PA6-030', 'kg', 285.00, 280.00, 0.234, 0.036, 4.0, 2.0, 1.0, 3.0, 6.5, 4.0, 15.0],
         # Quote 3 materials
-        ['Medical Device Shell', 'Medical Grade PP', 'PP-MED-H310', 'RM-PP-MED-310', 'kg', 0.38500, None, 0.125, 0.019, 2.0, 1.2, 0.5, 1.5, 4.0, 2.5, 8.0],
-        ['Medical Device Shell', 'Medical Grade PC', 'PC-MED-1800', 'RM-PC-MED-1800', 'kg', 0.49500, 0.49000, 0.167, 0.025, 2.5, 1.5, 0.6, 1.8, 4.5, 2.8, 10.0],
+        ['Medical Device Shell', 'Medical Grade PP', 'PP-MED-H310', 'RM-PP-MED-310', 'kg', 385.00, None, 0.125, 0.019, 2.0, 1.2, 0.5, 1.5, 4.0, 2.5, 8.0],
+        ['Medical Device Shell', 'Medical Grade PC', 'PC-MED-1800', 'RM-PC-MED-1800', 'kg', 495.00, 490.00, 0.167, 0.025, 2.5, 1.5, 0.6, 1.8, 4.5, 2.8, 10.0],
     ]
 
     for col_num, material in enumerate(raw_materials, 2):
@@ -647,7 +647,7 @@ def main():
     print("✓ All test files generated successfully!")
     print("="*70)
     print("\nGenerated files in 'test_files/' directory:")
-    print("  1. test_raw_materials.xlsx - 5 raw materials (rate per gram)")
+    print("  1. test_raw_materials.xlsx - 5 raw materials (rate per kg)")
     print("  2. test_moulding_machines.xlsx - 4 moulding machines")
     print("  3. test_assemblies.xlsx - 3 assemblies (fixed inspection cost)")
     print("  4. test_packaging.xlsx - 3 packaging options")
@@ -655,7 +655,7 @@ def main():
     print("  6. test_complete_quote.xlsx - 1 complete quote")
     print("  7. test_multiple_quotes.xlsx - 3 complete quotes")
     print("\nKey Features:")
-    print("  • RM Rate is per gram (will be multiplied by weight in grams)")
+    print("  • RM Rate is per kg (will be converted to per gram for calculations)")
     print("  • Transport dimensions in feet (1 ft = 304.8 mm)")
     print("  • Inspection & Handling is fixed cost (not percentage)")
     print("  • All numeric fields support up to 8 decimal places")

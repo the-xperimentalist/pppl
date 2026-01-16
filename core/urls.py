@@ -102,4 +102,12 @@ urlpatterns = [
      # Transport edit
      path('projects/<int:project_id>/quotes/<int:quote_id>/transport/<int:transport_id>/edit/',
           views.transport_edit, name='transport_edit'),
+
+     # Packaging Type management
+     path('customer-groups/<int:customer_group_id>/packaging-types/add/',
+          views.packaging_type_add, name='packaging_type_add'),
+     path('packaging-types/<int:packaging_type_id>/edit/',
+          views.packaging_type_edit, name='packaging_type_edit'),
+     path('packaging-types/<int:packaging_type_id>/delete/',
+          views.packaging_type_delete, name='packaging_type_delete'),
 ]
