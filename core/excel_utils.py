@@ -707,7 +707,7 @@ class ExcelParser:
                         cavity=int(worksheet.cell(1, col_num).value) if worksheet.cell(1, col_num).value else 1,
                         machine_tonnage=float(worksheet.cell(2, col_num).value) if worksheet.cell(2, col_num).value else 0,
                         cycle_time=float(worksheet.cell(3, col_num).value) if worksheet.cell(3, col_num).value else 0,
-                        efficiency_percentage=float(worksheet.cell(4, col_num).value) if worksheet.cell(4, col_num).value else 0,
+                        efficiency=float(worksheet.cell(4, col_num).value) if worksheet.cell(4, col_num).value else 0,
                         shift_rate=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
                         shift_rate_for_mtc=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else 0,
                         mtc_count=int(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
@@ -841,7 +841,7 @@ class ExcelParser:
         if "Raw Materials" in wb.sheetnames:
             ws = wb["Raw Materials"]
             count, sheet_errors = ExcelParser._parse_components_by_quote(
-                ws, quotes_dict, 'raw_material', user
+                ws, quotes_dict, 'raw_material', user, customer_group
             )
             component_counts['raw_materials'] = count
             errors.extend(sheet_errors)
@@ -849,7 +849,7 @@ class ExcelParser:
         if "Moulding Machines" in wb.sheetnames:
             ws = wb["Moulding Machines"]
             count, sheet_errors = ExcelParser._parse_components_by_quote(
-                ws, quotes_dict, 'moulding_machine', user
+                ws, quotes_dict, 'moulding_machine', user, customer_group
             )
             component_counts['moulding_machines'] = count
             errors.extend(sheet_errors)
@@ -857,7 +857,7 @@ class ExcelParser:
         if "Assemblies" in wb.sheetnames:
             ws = wb["Assemblies"]
             count, sheet_errors = ExcelParser._parse_components_by_quote(
-                ws, quotes_dict, 'assembly', user
+                ws, quotes_dict, 'assembly', user, customer_group
             )
             component_counts['assemblies'] = count
             errors.extend(sheet_errors)
@@ -865,7 +865,7 @@ class ExcelParser:
         if "Packaging" in wb.sheetnames:
             ws = wb["Packaging"]
             count, sheet_errors = ExcelParser._parse_components_by_quote(
-                ws, quotes_dict, 'packaging', user
+                ws, quotes_dict, 'packaging', user, customer_group
             )
             component_counts['packaging'] = count
             errors.extend(sheet_errors)
@@ -873,7 +873,7 @@ class ExcelParser:
         if "Transport" in wb.sheetnames:
             ws = wb["Transport"]
             count, sheet_errors = ExcelParser._parse_components_by_quote(
-                ws, quotes_dict, 'transport', user
+                ws, quotes_dict, 'transport', user, customer_group
             )
             component_counts['transport'] = count
             errors.extend(sheet_errors)
@@ -885,9 +885,9 @@ class ExcelParser:
         }
 
     @staticmethod
-    def _parse_components_by_quote(worksheet, quotes_dict, component_type, user):
+    def _parse_components_by_quote(worksheet, quotes_dict, component_type, user, customer_group):
         """Parse components that belong to specific quotes"""
-        from core.models import RawMaterial, MouldingMachineDetail, Assembly, Packaging, Transport
+        from core.models import RawMaterial, MouldingMachineDetail, Assembly, Packaging, Transport, PackagingType
 
         count = 0
         errors = []
@@ -940,7 +940,7 @@ class ExcelParser:
                         cavity=int(worksheet.cell(2, col_num).value) if worksheet.cell(2, col_num).value else 1,
                         machine_tonnage=float(worksheet.cell(3, col_num).value) if worksheet.cell(3, col_num).value else 0,
                         cycle_time=float(worksheet.cell(4, col_num).value) if worksheet.cell(4, col_num).value else 0,
-                        efficiency_percentage=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
+                        efficiency=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
                         shift_rate=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else 0,
                         shift_rate_for_mtc=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
                         mtc_count=int(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
@@ -973,7 +973,8 @@ class ExcelParser:
 
                     Packaging.objects.create(
                         quote=quote,
-                        packaging_type=worksheet.cell(2, col_num).value or 'pp_box',
+                        packaging_type=PackagingType.objects.get(packaging_type=worksheet.cell(2, col_num).value or 'pp_box',
+                            customer_group=customer_group),
                         packaging_length=float(worksheet.cell(3, col_num).value) if worksheet.cell(3, col_num).value else 0,
                         packaging_breadth=float(worksheet.cell(4, col_num).value) if worksheet.cell(4, col_num).value else 0,
                         packaging_height=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
