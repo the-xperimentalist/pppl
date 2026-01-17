@@ -297,7 +297,7 @@ class Quote(models.Model):
 
     def get_total_packaging_cost(self):
         """Calculate total packaging cost from all packagings"""
-        return sum(packaging.total_packaging_cost for packaging in self.packagings.all())
+        return sum(packaging.total_cost for packaging in self.packagings.all())
 
     def get_total_transport_cost(self):
         """Calculate total transport cost per part from all transports"""
@@ -934,6 +934,7 @@ class Packaging(models.Model):
                 self.polybag_width = self.packaging_type.default_polybag_width
 
         super().save(*args, **kwargs)
+
 
 class Transport(models.Model):
     """Transport for a quote"""

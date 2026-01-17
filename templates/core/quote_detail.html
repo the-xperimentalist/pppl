@@ -11,11 +11,14 @@
             <a href="{% url 'project_detail' project.id %}" class="btn btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i> Back to Project
             </a>
-            <a href="{% url 'quote_summary' project.id quote.id %}" class="btn btn-success">
+            <a href="{% url 'export_quote' project.id quote.id %}" class="btn btn-success me-2">
+                <i class="bi bi-download"></i> Export Quote
+            </a>
+            <a href="{% url 'quote_summary' project.id quote.id %}" class="btn btn-success me-2">
                 <i class="bi bi-file-text"></i> View Summary
             </a>
             <a href="{% url 'upload_complete_quote' project.id quote.id %}"
-               class="btn btn-info {% if not quote.can_edit_sections %}disabled{% endif %}">
+               class="btn btn-info {% if not quote.can_edit_sections %}disabled{% endif %} me-2">
                 <i class="bi bi-cloud-upload"></i> Bulk Upload All Components
             </a>
         </div>

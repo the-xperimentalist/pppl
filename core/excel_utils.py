@@ -1004,3 +1004,472 @@ class ExcelParser:
                 errors.append(f"{component_type.title()} Column {get_column_letter(col_num)}: {str(e)}")
 
         return count, errors
+
+class ExcelExporter:
+    """Export quotes and projects to Excel with all calculated fields in vertical format"""
+
+    @staticmethod
+    def export_quote(quote):
+        """Export a single quote with all data and calculated fields (vertical format)"""
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        # Sheet 1: Quote Definition
+        ws_def = wb.create_sheet("Quote Definition")
+
+        # Get version string
+        version_str = f"{quote.version_major}.{quote.version_minor}" if hasattr(quote, 'version_major') else 'N/A'
+
+        # Define headers and data
+        definition_data = [
+            ['Quote Name', quote.name],
+            ['Client Name', quote.client_name],
+            ['Client Group', quote.client_group.name if quote.client_group else ''],
+            ['SAP Number', quote.sap_number],
+            ['Part Number', quote.part_number],
+            ['Part Name', quote.part_name],
+            ['Amendment Number', quote.amendment_number],
+            ['Description', quote.description],
+            ['Quantity', quote.quantity],
+            ['Handling Charge', float(quote.handling_charge)],
+            ['Profit %', float(quote.profit_percentage)],
+            ['Notes', quote.notes],
+            ['Status', quote.get_status_display()],
+            ['Version', version_str],
+            ['Created By', quote.created_by.username if quote.created_by else ''],
+            ['Created At', quote.created_at.strftime('%Y-%m-%d %H:%M:%S')],
+            ['Updated At', quote.updated_at.strftime('%Y-%m-%d %H:%M:%S')],
+        ]
+
+        ExcelExporter._add_vertical_data(ws_def, definition_data, "2E75B6")
+
+        # Sheet 2: Raw Materials (vertical format with calculated fields)
+        if quote.raw_materials.exists():
+            ws_rm = wb.create_sheet("Raw Materials")
+            rm_headers = [
+                'Material Name',
+                'Grade',
+                'RM Code',
+                'Unit',
+                'RM Rate (per kg)',
+                'Frozen Rate (per kg)',
+                'Effective Rate (per kg)',
+                'Part Weight',
+                'Runner Weight',
+                'Gross Weight (grams)',
+                'Process Losses',
+                'Purging Loss Cost',
+                'ICC %',
+                'Rejection %',
+                'Overhead %',
+                'Maintenance %',
+                'Profit %',
+                'Base RM Cost',
+                'Total Cost'
+            ]
+
+            # Add headers in column A
+            ExcelExporter._add_vertical_headers(ws_rm, rm_headers, "4472C4")
+
+            # Add data for each raw material in subsequent columns
+            for col_num, rm in enumerate(quote.raw_materials.all(), 2):
+                ws_rm.cell(row=1, column=col_num, value=rm.material_name)
+                ws_rm.cell(row=2, column=col_num, value=rm.grade)
+                ws_rm.cell(row=3, column=col_num, value=rm.rm_code)
+                ws_rm.cell(row=4, column=col_num, value=rm.unit_of_measurement)
+                ws_rm.cell(row=5, column=col_num, value=float(rm.rm_rate))
+                ws_rm.cell(row=6, column=col_num, value=float(rm.frozen_rate) if rm.frozen_rate else None)
+                ws_rm.cell(row=7, column=col_num, value=float(rm.effective_rate_per_kg))
+                ws_rm.cell(row=8, column=col_num, value=float(rm.part_weight))
+                ws_rm.cell(row=9, column=col_num, value=float(rm.runner_weight))
+                ws_rm.cell(row=10, column=col_num, value=float(rm.gross_weight_in_grams))
+                ws_rm.cell(row=11, column=col_num, value=float(rm.process_losses))
+                ws_rm.cell(row=12, column=col_num, value=float(rm.purging_loss_cost))
+                ws_rm.cell(row=13, column=col_num, value=float(rm.icc_percentage))
+                ws_rm.cell(row=14, column=col_num, value=float(rm.rejection_percentage))
+                ws_rm.cell(row=15, column=col_num, value=float(rm.overhead_percentage))
+                ws_rm.cell(row=16, column=col_num, value=float(rm.maintenance_percentage))
+                ws_rm.cell(row=17, column=col_num, value=float(rm.profit_percentage))
+                ws_rm.cell(row=18, column=col_num, value=float(rm.base_rm_cost))
+                ws_rm.cell(row=19, column=col_num, value=float(rm.rm_cost))
+                ws_rm.column_dimensions[get_column_letter(col_num)].width = 18
+
+        # Sheet 3: Moulding Machines (vertical format with calculated fields)
+        if quote.moulding_machines.exists():
+            ws_mm = wb.create_sheet("Moulding Machines")
+            mm_headers = [
+                'Cavity',
+                'Machine Tonnage',
+                'Cycle Time (s)',
+                'Efficiency %',
+                'Shift Rate',
+                'Shift Rate for MTC',
+                'MTC Count',
+                'Rejection %',
+                'Overhead %',
+                'Maintenance %',
+                'Profit %',
+                'Parts per Shift',
+                'MTC Cost',
+                'Total Cost'
+            ]
+
+            ExcelExporter._add_vertical_headers(ws_mm, mm_headers, "70AD47")
+
+            for col_num, mm in enumerate(quote.moulding_machines.all(), 2):
+                ws_mm.cell(row=1, column=col_num, value=mm.cavity)
+                ws_mm.cell(row=2, column=col_num, value=float(mm.machine_tonnage))
+                ws_mm.cell(row=3, column=col_num, value=float(mm.cycle_time))
+                ws_mm.cell(row=4, column=col_num, value=float(mm.efficiency))
+                ws_mm.cell(row=5, column=col_num, value=float(mm.shift_rate))
+                ws_mm.cell(row=6, column=col_num, value=float(mm.shift_rate_for_mtc))
+                ws_mm.cell(row=7, column=col_num, value=mm.mtc_count)
+                ws_mm.cell(row=8, column=col_num, value=float(mm.rejection_percentage))
+                ws_mm.cell(row=9, column=col_num, value=float(mm.overhead_percentage))
+                ws_mm.cell(row=10, column=col_num, value=float(mm.maintenance_percentage))
+                ws_mm.cell(row=11, column=col_num, value=float(mm.profit_percentage))
+                ws_mm.cell(row=13, column=col_num, value=float(mm.number_of_parts_per_shift))
+                ws_mm.cell(row=14, column=col_num, value=float(mm.mtc_cost))
+                ws_mm.cell(row=16, column=col_num, value=float(mm.conversion_cost))
+                ws_mm.column_dimensions[get_column_letter(col_num)].width = 18
+
+        # Sheet 4: Assemblies (vertical format with calculated fields)
+        if quote.assemblies.exists():
+            ws_asm = wb.create_sheet("Assemblies")
+            asm_headers = [
+                'Assembly Name',
+                'Remarks',
+                'Manual Cost',
+                'Other Cost',
+                'Inspection & Handling Cost',
+                'Profit %',
+                'Rejection %',
+                'Base Cost',
+                'Profit Cost',
+                'Rejection Cost',
+                'Total Cost'
+            ]
+
+            ExcelExporter._add_vertical_headers(ws_asm, asm_headers, "FFC000")
+
+            for col_num, asm in enumerate(quote.assemblies.all(), 2):
+                costs = asm.calculate_costs()
+                ws_asm.cell(row=1, column=col_num, value=asm.name)
+                ws_asm.cell(row=2, column=col_num, value=asm.remarks)
+                ws_asm.cell(row=3, column=col_num, value=float(asm.manual_cost))
+                ws_asm.cell(row=4, column=col_num, value=float(asm.other_cost))
+                ws_asm.cell(row=5, column=col_num, value=float(asm.inspection_handling_cost))
+                ws_asm.cell(row=6, column=col_num, value=float(asm.profit_percentage))
+                ws_asm.cell(row=7, column=col_num, value=float(asm.rejection_percentage))
+                ws_asm.cell(row=8, column=col_num, value=float(costs['base_cost']))
+                ws_asm.cell(row=9, column=col_num, value=float(costs['profit_cost']))
+                ws_asm.cell(row=10, column=col_num, value=float(costs['rejection_cost']))
+                ws_asm.cell(row=11, column=col_num, value=float(asm.total_assembly_cost))
+                ws_asm.column_dimensions[get_column_letter(col_num)].width = 18
+
+            # Sheet 4a: Assembly Raw Materials (vertical format)
+            has_assembly_rms = any(
+                hasattr(asm, 'assembly_raw_materials') and asm.assembly_raw_materials.exists()
+                for asm in quote.assemblies.all()
+            )
+
+            if has_assembly_rms:
+                ws_arm = wb.create_sheet("Assembly Raw Materials")
+                arm_headers = [
+                    'Assembly Name',
+                    'Description',
+                    'Production Quantity',
+                    'Production Weight',
+                    'Unit',
+                    'Cost per Unit',
+                    'Total Cost'
+                ]
+
+                ExcelExporter._add_vertical_headers(ws_arm, arm_headers, "FF6B6B")
+
+                col_num = 2
+                for asm in quote.assemblies.all():
+                    if hasattr(asm, 'assembly_raw_materials'):
+                        for arm in asm.assembly_raw_materials.all():
+                            ws_arm.cell(row=1, column=col_num, value=asm.name)
+                            ws_arm.cell(row=2, column=col_num, value=arm.description)
+                            ws_arm.cell(row=3, column=col_num, value=arm.production_quantity)
+                            ws_arm.cell(row=4, column=col_num, value=arm.production_weight)
+                            ws_arm.cell(row=5, column=col_num, value=arm.unit)
+                            ws_arm.cell(row=6, column=col_num, value=float(arm.cost_per_unit))
+                            ws_arm.cell(row=7, column=col_num, value=float(arm.total_cost))
+                            ws_arm.column_dimensions[get_column_letter(col_num)].width = 18
+                            col_num += 1
+
+            # Sheet 4b: Manufacturing Costs (vertical format)
+            has_manufacturing_costs = any(
+                hasattr(asm, 'manufacturing_printing_costs') and asm.manufacturing_printing_costs.exists()
+                for asm in quote.assemblies.all()
+            )
+
+            if has_manufacturing_costs:
+                ws_mpc = wb.create_sheet("Manufacturing Costs")
+                mpc_headers = [
+                    'Assembly Name',
+                    'Process',
+                    'Per Cost'
+                ]
+
+                ExcelExporter._add_vertical_headers(ws_mpc, mpc_headers, "9B59B6")
+
+                col_num = 2
+                for asm in quote.assemblies.all():
+                    if hasattr(asm, 'manufacturing_printing_costs'):
+                        for mpc in asm.manufacturing_printing_costs.all():
+                            ws_mpc.cell(row=1, column=col_num, value=asm.name)
+                            ws_mpc.cell(row=2, column=col_num, value=mpc.process)
+                            ws_mpc.cell(row=3, column=col_num, value=float(mpc.per_cost))
+                            ws_mpc.column_dimensions[get_column_letter(col_num)].width = 18
+                            col_num += 1
+
+        # Sheet 5: Packaging (vertical format with calculated fields)
+        if quote.packagings.exists():
+            ws_pkg = wb.create_sheet("Packaging")
+            pkg_headers = [
+                'Packaging Type',
+                'Length (mm)',
+                'Breadth (mm)',
+                'Height (mm)',
+                'Polybag Length',
+                'Polybag Width',
+                'Lifecycle',
+                'Cost',
+                'Maintenance %',
+                'Parts per Polybag',
+                'Maintenance Cost',
+                'Total Cost',
+                'Cost per Part'
+            ]
+
+            ExcelExporter._add_vertical_headers(ws_pkg, pkg_headers, "E26B0A")
+
+            for col_num, pkg in enumerate(quote.packagings.all(), 2):
+                ws_pkg.cell(row=1, column=col_num, value=pkg.packaging_type.name if pkg.packaging_type else 'Custom')
+                ws_pkg.cell(row=2, column=col_num, value=float(pkg.packaging_length))
+                ws_pkg.cell(row=3, column=col_num, value=float(pkg.packaging_breadth))
+                ws_pkg.cell(row=4, column=col_num, value=float(pkg.packaging_height))
+                ws_pkg.cell(row=5, column=col_num, value=float(pkg.polybag_length))
+                ws_pkg.cell(row=6, column=col_num, value=float(pkg.polybag_width))
+                ws_pkg.cell(row=7, column=col_num, value=pkg.lifecycle)
+                ws_pkg.cell(row=8, column=col_num, value=float(pkg.cost))
+                ws_pkg.cell(row=9, column=col_num, value=float(pkg.maintenance_percentage))
+                ws_pkg.cell(row=10, column=col_num, value=pkg.parts_per_polybag)
+                ws_pkg.cell(row=11, column=col_num, value=float(pkg.maintenance_cost))
+                ws_pkg.cell(row=12, column=col_num, value=float(pkg.total_cost))
+                ws_pkg.cell(row=13, column=col_num, value=float(pkg.cost_per_part))
+                ws_pkg.column_dimensions[get_column_letter(col_num)].width = 18
+
+        # Sheet 6: Transport (vertical format with calculated fields)
+        if quote.transports.exists():
+            ws_trans = wb.create_sheet("Transport")
+            trans_headers = [
+                'Length (ft)',
+                'Breadth (ft)',
+                'Height (ft)',
+                'Length (mm)',
+                'Breadth (mm)',
+                'Height (mm)',
+                'Trip Cost',
+                'Parts per Box',
+                'Total Boxes',
+                'Cost per Part'
+            ]
+
+            ExcelExporter._add_vertical_headers(ws_trans, trans_headers, "9933FF")
+
+            for col_num, trans in enumerate(quote.transports.all(), 2):
+                ws_trans.cell(row=1, column=col_num, value=float(trans.transport_length))
+                ws_trans.cell(row=2, column=col_num, value=float(trans.transport_breadth))
+                ws_trans.cell(row=3, column=col_num, value=float(trans.transport_height))
+                ws_trans.cell(row=4, column=col_num, value=float(trans.transport_length_mm))
+                ws_trans.cell(row=5, column=col_num, value=float(trans.transport_breadth_mm))
+                ws_trans.cell(row=6, column=col_num, value=float(trans.transport_height_mm))
+                ws_trans.cell(row=7, column=col_num, value=float(trans.trip_cost))
+                ws_trans.cell(row=8, column=col_num, value=trans.parts_per_box)
+                ws_trans.cell(row=9, column=col_num, value=float(trans.total_boxes))
+                ws_trans.cell(row=10, column=col_num, value=float(trans.trip_cost_per_part))
+                ws_trans.column_dimensions[get_column_letter(col_num)].width = 18
+
+        # Sheet 7: Summary (vertical format)
+        ws_summary = wb.create_sheet("Summary")
+
+        # Calculate costs safely
+        try:
+            rm_cost = float(quote.get_total_rm_cost())
+        except:
+            rm_cost = 0
+
+        try:
+            moulding_cost = float(quote.get_total_moulding_cost())
+        except:
+            moulding_cost = 0
+
+        try:
+            assembly_cost = float(quote.get_total_assembly_cost())
+        except:
+            assembly_cost = 0
+
+        try:
+            packaging_cost = float(quote.get_total_packaging_cost())
+        except:
+            packaging_cost = 0
+
+        try:
+            transport_cost = float(quote.get_total_transport_cost())
+        except:
+            transport_cost = 0
+
+        try:
+            profit_amount = float(quote.get_profit_amount())
+        except:
+            profit_amount = 0
+
+        try:
+            grand_total = float(quote.get_grand_total())
+        except:
+            grand_total = 0
+
+        # Calculate cost per part
+        cost_per_part = grand_total / quote.quantity if quote.quantity > 0 else 0
+
+        summary_data = [
+            ['Raw Material Cost', rm_cost],
+            ['Moulding Machine Cost', moulding_cost],
+            ['Assembly Cost', assembly_cost],
+            ['Packaging Cost', packaging_cost],
+            ['Transport Cost', transport_cost],
+            ['Handling Charge', float(quote.handling_charge)],
+            ['Profit Amount', profit_amount],
+            ['Grand Total', grand_total],
+            ['Quantity', quote.quantity],
+            ['Cost per Part', cost_per_part],
+        ]
+
+        ExcelExporter._add_vertical_data(ws_summary, summary_data, "FF0000")
+
+        return wb
+
+    @staticmethod
+    def export_project(project):
+        """Export all quotes in a project (vertical format)"""
+        wb = Workbook()
+        wb.remove(wb.active)
+
+        # Sheet 1: Project Information
+        ws_proj = wb.create_sheet("Project Information")
+
+        proj_data = [
+            ['Project Name', project.name],
+            ['Description', project.description],
+            ['Created By', project.created_by.username if project.created_by else ''],
+            ['Created At', project.created_at.strftime('%Y-%m-%d %H:%M:%S')],
+            ['Total Quotes', project.quotes.count()],
+        ]
+
+        ExcelExporter._add_vertical_data(ws_proj, proj_data, "2E75B6")
+
+        # Sheet 2: Quotes Summary (vertical format)
+        ws_quotes = wb.create_sheet("Quotes Summary")
+        quotes_headers = [
+            'Quote Name',
+            'Status',
+            'Version',
+            'Client Name',
+            'Part Number',
+            'Quantity',
+            'Grand Total'
+        ]
+
+        ExcelExporter._add_vertical_headers(ws_quotes, quotes_headers, "70AD47")
+
+        for col_num, quote in enumerate(project.quotes.all(), 2):
+            # Get version string (major.minor format)
+            version_str = f"{quote.version_major}.{quote.version_minor}" if hasattr(quote, 'version_major') else 'N/A'
+
+            # Calculate grand total safely
+            try:
+                grand_total = float(quote.get_grand_total())
+            except:
+                grand_total = 0
+
+            ws_quotes.cell(row=1, column=col_num, value=quote.name)
+            ws_quotes.cell(row=2, column=col_num, value=quote.get_status_display())
+            ws_quotes.cell(row=3, column=col_num, value=version_str)
+            ws_quotes.cell(row=4, column=col_num, value=quote.client_name)
+            ws_quotes.cell(row=5, column=col_num, value=quote.part_number)
+            ws_quotes.cell(row=6, column=col_num, value=quote.quantity)
+            ws_quotes.cell(row=7, column=col_num, value=grand_total)
+            ws_quotes.column_dimensions[get_column_letter(col_num)].width = 20
+
+        # Add each quote as separate sheets
+        for quote in project.quotes.all():
+            try:
+                quote_wb = ExcelExporter.export_quote(quote)
+                for sheet_name in quote_wb.sheetnames:
+                    source_sheet = quote_wb[sheet_name]
+                    # Limit sheet name to 31 characters (Excel limit) and make it unique
+                    safe_sheet_name = f"{quote.name[:10]} - {sheet_name}"[:31]
+                    target_sheet = wb.create_sheet(safe_sheet_name)
+
+                    # Copy all cells with formatting
+                    for row in source_sheet.iter_rows():
+                        for cell in row:
+                            target_cell = target_sheet[cell.coordinate]
+                            target_cell.value = cell.value
+                            if cell.has_style:
+                                target_cell.font = cell.font.copy()
+                                target_cell.fill = cell.fill.copy()
+                                target_cell.alignment = cell.alignment.copy()
+
+                    # Copy column widths
+                    for col_letter in source_sheet.column_dimensions:
+                        if col_letter in source_sheet.column_dimensions:
+                            target_sheet.column_dimensions[col_letter].width = source_sheet.column_dimensions[col_letter].width
+
+            except Exception as e:
+                # If a quote export fails, continue with others
+                print(f"Error exporting quote {quote.name}: {str(e)}")
+                continue
+
+        return wb
+
+    @staticmethod
+    def _add_vertical_headers(worksheet, headers, color):
+        """Add vertical headers in column A with styling"""
+        header_fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for row_num, header in enumerate(headers, 1):
+            cell = worksheet.cell(row=row_num, column=1)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='left', vertical='center')
+
+        worksheet.column_dimensions['A'].width = 30
+
+    @staticmethod
+    def _add_vertical_data(worksheet, data_rows, color):
+        """Add vertical data (headers in column A, values in column B)"""
+        header_fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for row_num, (header, value) in enumerate(data_rows, 1):
+            # Header in column A
+            header_cell = worksheet.cell(row=row_num, column=1)
+            header_cell.value = header
+            header_cell.fill = header_fill
+            header_cell.font = header_font
+            header_cell.alignment = Alignment(horizontal='left', vertical='center')
+
+            # Value in column B
+            value_cell = worksheet.cell(row=row_num, column=2)
+            value_cell.value = value
+
+        worksheet.column_dimensions['A'].width = 30
+        worksheet.column_dimensions['B'].width = 40

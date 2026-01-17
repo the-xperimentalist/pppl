@@ -742,7 +742,7 @@ def packaging_add(request, project_id, quote_id):
             # Create packaging
             packaging = Packaging(
                 quote=quote,
-                packaging_type_id=packaging_type_id if packaging_type_id else None,
+                packaging_type_id=packaging_type_id if packaging_type_id else None,  # Optional
                 packaging_length=float(request.POST.get('packaging_length', 0)),
                 packaging_breadth=float(request.POST.get('packaging_breadth', 0)),
                 packaging_height=float(request.POST.get('packaging_height', 0)),
@@ -753,7 +753,7 @@ def packaging_add(request, project_id, quote_id):
                 maintenance_percentage=float(request.POST.get('maintenance_percentage', 0)),
                 parts_per_polybag=int(request.POST.get('parts_per_polybag', 0)),
             )
-            packaging.save()
+            packaging.save()  # This will auto-populate dimensions from packaging_type if selected
 
             # Increment version and add timeline entry
             quote.increment_version(request.user, f'Packaging added')
@@ -771,7 +771,6 @@ def packaging_add(request, project_id, quote_id):
         'packaging_types': packaging_types,
     }
     return render(request, 'core/packaging_add.html', context)
-
 
 @login_required
 def packaging_delete(request, project_id, quote_id, packaging_id):
@@ -1006,7 +1005,7 @@ def config_create(request, config_type):
 
     customer_group = get_object_or_404(CustomerGroup, id=customer_group_id)
 
-    # Map config_type to model (removed material-group)
+    # Map config_type to model
     model_map = {
         'assembly-type': AssemblyType,
         'packaging-type': PackagingType,
@@ -1025,25 +1024,48 @@ def config_create(request, config_type):
     title = title_map[config_type]
 
     if request.method == 'POST':
-        name = request.POST.get('name')
-        value = request.POST.get('value')
-        description = request.POST.get('description')
+        try:
+            # Handle PackagingType separately since it has different fields
+            if config_type == 'packaging-type':
+                name = request.POST.get('name')
+                if not name:
+                    messages.error(request, 'Name is required.')
+                else:
+                    item = PackagingType.objects.create(
+                        customer_group=customer_group,
+                        name=name,
+                        packaging_type=request.POST.get('packaging_type', 'custom'),
+                        default_length=float(request.POST.get('default_length', 600)),
+                        default_breadth=float(request.POST.get('default_breadth', 400)),
+                        default_height=float(request.POST.get('default_height', 250)),
+                        default_polybag_length=float(request.POST.get('default_polybag_length', 16)),
+                        default_polybag_width=float(request.POST.get('default_polybag_width', 20)),
+                        is_active=True
+                    )
+                    messages.success(request, f'{title} "{item.name}" created successfully!')
+                    return redirect(f'/config/?customer_group={customer_group_id}')
 
-        if name and value:
-            try:
-                item = model.objects.create(
-                    customer_group=customer_group,
-                    name=name,
-                    value=value,
-                    description=description,
-                    created_by=request.user
-                )
-                messages.success(request, f'{title} "{item.name}" created successfully!')
-                return redirect(f'/config/?customer_group={customer_group_id}')
-            except Exception as e:
-                messages.error(request, f'Error creating {title}: {str(e)}')
-        else:
-            messages.error(request, 'Name and Value are required.')
+            # Handle AssemblyType (with value, description, created_by)
+            elif config_type == 'assembly-type':
+                name = request.POST.get('name')
+                value = request.POST.get('value')
+                description = request.POST.get('description')
+
+                if name and value:
+                    item = AssemblyType.objects.create(
+                        customer_group=customer_group,
+                        name=name,
+                        value=value,
+                        description=description,
+                        created_by=request.user
+                    )
+                    messages.success(request, f'{title} "{item.name}" created successfully!')
+                    return redirect(f'/config/?customer_group={customer_group_id}')
+                else:
+                    messages.error(request, 'Name and Value are required.')
+
+        except Exception as e:
+            messages.error(request, f'Error creating {title}: {str(e)}')
 
     context = {
         'config_type': config_type,
@@ -2018,3 +2040,48 @@ def packaging_type_delete(request, packaging_type_id):
         'packaging_type': packaging_type,
     }
     return render(request, 'core/packaging_type_delete.html', context)
+
+
+@login_required
+def export_quote(request, project_id, quote_id):
+    """Export quote to Excel with all calculated fields"""
+    from core.excel_utils import ExcelExporter
+
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+
+    # Generate Excel file
+    wb = ExcelExporter.export_quote(quote)
+
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+    # Get version string for filename
+    version_str = f"{quote.version_major}.{quote.version_minor}" if hasattr(quote, 'version_major') else ''
+    filename = f'Quote_{quote.name}_{version_str}.xlsx'.replace(' ', '_')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response
+
+@login_required
+def export_project(request, project_id):
+    """Export entire project with all quotes to Excel"""
+    from core.excel_utils import ExcelExporter
+
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+
+    # Generate Excel file
+    wb = ExcelExporter.export_project(project)
+
+    # Create response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f'Project_{project.name}.xlsx'.replace(' ', '_')
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response

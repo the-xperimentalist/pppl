@@ -17,12 +17,12 @@
                 <form method="post" id="packagingForm">
                     {% csrf_token %}
 
-                    <h5 class="mb-3">Packaging Type</h5>
+                    <h5 class="mb-3">Packaging Type (Optional)</h5>
 
                     <div class="mb-3">
-                        <label for="packaging_type" class="form-label">Select Packaging Type <span class="text-danger">*</span></label>
-                        <select class="form-select" id="packaging_type" name="packaging_type" required>
-                            <option value="">-- Select Packaging Type --</option>
+                        <label for="packaging_type" class="form-label">Select Packaging Type</label>
+                        <select class="form-select" id="packaging_type" name="packaging_type">
+                            <option value="">-- Custom Packaging (No Template) --</option>
                             {% for pkg_type in packaging_types %}
                                 <option value="{{ pkg_type.id }}"
                                         data-length="{{ pkg_type.default_length }}"
@@ -34,7 +34,7 @@
                                 </option>
                             {% endfor %}
                         </select>
-                        <div class="form-text">Select packaging type - dimensions will be pre-filled with defaults</div>
+                        <div class="form-text">Optional: Select a packaging type to auto-fill dimensions, or enter custom dimensions below</div>
                     </div>
 
                     <hr class="my-4">
@@ -75,7 +75,7 @@
                     </div>
 
                     <div class="alert alert-info">
-                        <strong>Note:</strong> Dimensions are automatically filled from the selected packaging type. You can modify them if needed.
+                        <strong>Note:</strong> If you select a packaging type, dimensions will be automatically filled. You can modify them as needed, or enter custom dimensions without selecting a type.
                     </div>
 
                     <hr class="my-4">
@@ -130,6 +130,7 @@ document.getElementById('packaging_type').addEventListener('change', function() 
         document.getElementById('polybag_length').value = selectedOption.dataset.polybagLength;
         document.getElementById('polybag_width').value = selectedOption.dataset.polybagWidth;
     }
+    // Note: If user selects "Custom Packaging", dimensions remain as they were entered
 });
 </script>
 {% endblock %}

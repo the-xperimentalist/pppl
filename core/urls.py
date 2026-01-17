@@ -110,4 +110,8 @@ urlpatterns = [
           views.packaging_type_edit, name='packaging_type_edit'),
      path('packaging-types/<int:packaging_type_id>/delete/',
           views.packaging_type_delete, name='packaging_type_delete'),
+
+     # Export functionality
+     path('projects/<int:project_id>/quotes/<int:quote_id>/export/', views.export_quote, name='export_quote'),
+     path('projects/<int:project_id>/export/', views.export_project, name='export_project'),
 ]
