@@ -248,7 +248,7 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Packaging Types</h5>
-                        <a href="{% url 'config_create' 'packaging-type' %}?customer_group={{ selected_customer_group.id }}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'packaging_type_add' selected_customer_group.id %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-plus-circle"></i> Add Packaging Type
                         </a>
                     </div>

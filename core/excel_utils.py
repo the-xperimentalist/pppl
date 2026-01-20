@@ -584,11 +584,13 @@ class ExcelParser:
     """Parse Excel files and create database objects"""
 
     @staticmethod
-    def parse_complete_quote(file, project, customer_group, user):
+    def parse_complete_quote(file, quote, user):
         """Parse a complete quote from Excel file"""
         from core.models import Quote, QuoteTimeline
 
         wb = openpyxl.load_workbook(file)
+        project = quote.project
+        customer_group = quote.client_group
 
         # Parse Quote Definition
         if "Quote Definition" not in wb.sheetnames:
@@ -597,31 +599,6 @@ class ExcelParser:
         ws = wb["Quote Definition"]
 
         try:
-            quote = Quote.objects.create(
-                project=project,
-                name=ws.cell(1, 2).value or '',
-                client_group=customer_group,
-                client_name=ws.cell(2, 2).value or '',
-                sap_number=ws.cell(3, 2).value or '',
-                part_number=ws.cell(4, 2).value or '',
-                part_name=ws.cell(5, 2).value or '',
-                amendment_number=ws.cell(6, 2).value or '',
-                description=ws.cell(7, 2).value or '',
-                quantity=int(ws.cell(8, 2).value) if ws.cell(8, 2).value else 1,
-                handling_charge=float(ws.cell(9, 2).value) if ws.cell(9, 2).value else 0,
-                profit_percentage=float(ws.cell(10, 2).value) if ws.cell(10, 2).value else 0,
-                notes=ws.cell(11, 2).value or '',
-                created_by=user,
-                quote_definition_complete=True
-            )
-
-            # Add timeline entry
-            QuoteTimeline.add_entry(
-                quote=quote,
-                activity_type='quote_created',
-                description=f'Quote "{quote.name}" created via complete upload',
-                user=user
-            )
 
             # Parse components
             errors = []
@@ -678,7 +655,7 @@ class ExcelParser:
                     if not worksheet.cell(1, col_num).value:
                         continue
 
-                    RawMaterial.objects.create(
+                    rm = RawMaterial.objects.create(
                         quote=quote,
                         material_name=worksheet.cell(1, col_num).value or '',
                         grade=worksheet.cell(2, col_num).value or '',
@@ -1005,6 +982,7 @@ class ExcelParser:
                 errors.append(f"{component_type.title()} Column {get_column_letter(col_num)}: {str(e)}")
 
         return count, errors
+
 
 class ExcelExporter:
     """Export quotes and projects to Excel with all calculated fields in vertical format"""

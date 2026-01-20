@@ -1577,15 +1577,12 @@ def upload_complete_quote(request, project_id, quote_id):
     if request.method == 'POST' and request.FILES.get('excel_file'):
         try:
             excel_file = request.FILES['excel_file']
-            results = ExcelParser.parse_complete_quote(excel_file, quote)
+            added_quote, errors, results = ExcelParser.parse_complete_quote(excel_file, quote, project.created_by)
 
             # Show results for each section
             for section, data in results.items():
-                if data['errors']:
-                    for error in data['errors']:
-                        messages.error(request, f"{section}: {error}")
-                elif data['count'] > 0:
-                    messages.success(request, f"{section}: {data['count']} items uploaded")
+                if data > 0:
+                    messages.success(request, f"{section}: {data} items uploaded")
 
             quote.increment_version(request.user, 'Complete quote uploaded from Excel', 'quote_updated')
             return redirect('quote_detail', project_id=project.id, quote_id=quote.id)
