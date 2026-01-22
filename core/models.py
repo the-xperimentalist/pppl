@@ -358,9 +358,9 @@ class RawMaterial(models.Model):
     runner_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                        help_text=f"Runner weight in selected unit")
     process_losses = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                        help_text=f"Process losses in selected unit")
+                                        help_text=f"Process losses in percent")
     purging_loss_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                           help_text=f"Purging losses in selected unit")
+                                           help_text=f"Purging losses in percent")
 
     # Cost percentages
     icc_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
@@ -389,9 +389,10 @@ class RawMaterial(models.Model):
     def gross_weight(self):
         """Calculate gross weight (part + runner) in the selected unit"""
         from decimal import Decimal
-        return float(Decimal(str(self.part_weight)) + Decimal(str(self.runner_weight))
-            + Decimal(str(self.process_losses))
-            + Decimal(str(self.purging_loss_cost)))
+        net_wt = Decimal(str(self.part_weight)) + Decimal(str(self.runner_weight))
+        return float(net_wt
+            + Decimal(str(self.process_losses)) * net_wt / Decimal('100')
+            + Decimal(str(self.purging_loss_cost)) * net_wt / Decimal('100'))
 
     @property
     def gross_weight_in_grams(self):

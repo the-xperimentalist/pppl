@@ -110,7 +110,7 @@
                     <div class="alert alert-info">
                         <strong>Calculation Formula:</strong>
                         <br>
-                        Gross weight = Part weight + Runner weight (in selected unit) + Process Losses (in selected unit) + Purging Loss (in selected unit)
+                        Gross weight = Part weight + Runner weight (in selected unit) + Process Losses %age * Net wt (in selected unit) + Purging Loss %age * Net wt (in selected unit)
                         <br>
                         Gross weight is converted to grams: kg → ×1000, ton → ×1,000,000, gm → ×1
                         <br>
@@ -130,14 +130,14 @@
                             <label for="process_losses" class="form-label">Process Losses <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="process_losses" name="process_losses"
                                    step="0.00000001" value="{{ raw_material.process_losses|default:0 }}" required>
-                            <div class="form-text">Process losses in selected unit of measurement</div>
+                            <div class="form-text">Process losses in %age converted to selected unit of measurement</div>
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="purging_loss_cost" class="form-label">Purging Losses <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="purging_loss_cost" name="purging_loss_cost"
                                    step="0.00000001" value="{{ raw_material.purging_loss_cost|default:0 }}" required>
-                            <div class="form-text">Purging losses in selected unit of measurement</div>
+                            <div class="form-text">Purging losses in %age converted to selected unit of measurement</div>
                         </div>
 
                         <div class="col-md-4 mb-3">
