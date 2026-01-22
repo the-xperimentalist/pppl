@@ -114,7 +114,26 @@
                     </div>
                     
                     <hr class="my-4">
+
+                    <!-- New fields for Other RM Cost -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="other_rm_cost" class="form-label">Other RM Cost</label>
+                            <input type="number" class="form-control" id="other_rm_cost" name="other_rm_cost"
+                                   step="0.00000001" value="{{ raw_material.other_rm_cost }}">
+                            <div class="form-text">Additional fixed cost for this raw material</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="other_rm_cost_description" class="form-label">Other RM Cost Description</label>
+                            <textarea class="form-control" id="other_rm_cost_description" name="other_rm_cost_description"
+                                      rows="2">{{ raw_material.other_rm_cost_description }}</textarea>
+                            <div class="form-text">Description of what the other RM cost pertains to</div>
+                        </div>
+                    </div>
                     
+                    <hr class="my-4">
+
                     <h5 class="mb-3">Additional Costs</h5>
                     <div class="row">
                         <div class="col-md-4 mb-3">

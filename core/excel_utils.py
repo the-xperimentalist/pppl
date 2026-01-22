@@ -44,8 +44,10 @@ class ExcelTemplateGenerator:
             'Frozen Rate (per kg)',
             'Part Weight*',
             'Runner Weight*',
-            'Process Losses',
-            'Purging Loss Cost',
+            'Process Losses %',
+            'Purging Losses %',
+            'Other RM Cost',              # NEW
+            'Other RM Cost Description',  # NEW
             'ICC %',
             'Rejection %',
             'Overhead %',
@@ -655,23 +657,25 @@ class ExcelParser:
                     if not worksheet.cell(1, col_num).value:
                         continue
 
-                    rm = RawMaterial.objects.create(
+                    RawMaterial.objects.create(
                         quote=quote,
-                        material_name=worksheet.cell(1, col_num).value or '',
-                        grade=worksheet.cell(2, col_num).value or '',
-                        rm_code=worksheet.cell(3, col_num).value or '',
-                        unit_of_measurement=worksheet.cell(4, col_num).value or 'kg',
-                        rm_rate=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
-                        frozen_rate=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else None,
-                        part_weight=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
-                        runner_weight=float(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
-                        process_losses=float(worksheet.cell(9, col_num).value) if worksheet.cell(9, col_num).value else 0,
-                        purging_loss_cost=float(worksheet.cell(10, col_num).value) if worksheet.cell(10, col_num).value else 0,
-                        icc_percentage=float(worksheet.cell(11, col_num).value) if worksheet.cell(11, col_num).value else 0,
-                        rejection_percentage=float(worksheet.cell(12, col_num).value) if worksheet.cell(12, col_num).value else 0,
-                        overhead_percentage=float(worksheet.cell(13, col_num).value) if worksheet.cell(13, col_num).value else 0,
-                        maintenance_percentage=float(worksheet.cell(14, col_num).value) if worksheet.cell(14, col_num).value else 0,
-                        profit_percentage=float(worksheet.cell(15, col_num).value) if worksheet.cell(15, col_num).value else 0,
+                        material_name=str(material_name),
+                        grade=str(ws_rm.cell(2, col_num).value or ''),
+                        rm_code=str(ws_rm.cell(3, col_num).value or ''),
+                        unit_of_measurement=str(ws_rm.cell(4, col_num).value or 'kg'),
+                        rm_rate=float(ws_rm.cell(5, col_num).value or 0),
+                        frozen_rate=frozen_rate,
+                        part_weight=float(ws_rm.cell(7, col_num).value or 0),
+                        runner_weight=float(ws_rm.cell(8, col_num).value or 0),
+                        process_losses=float(ws_rm.cell(9, col_num).value or 0),
+                        purging_loss_cost=float(ws_rm.cell(10, col_num).value or 0),
+                        other_rm_cost=float(ws_rm.cell(11, col_num).value or 0),                    # NEW
+                        other_rm_cost_description=str(ws_rm.cell(12, col_num).value or ''),        # NEW
+                        icc_percentage=float(ws_rm.cell(13, col_num).value or 0),                  # Shifted
+                        rejection_percentage=float(ws_rm.cell(14, col_num).value or 0),            # Shifted
+                        overhead_percentage=float(ws_rm.cell(15, col_num).value or 0),             # Shifted
+                        maintenance_percentage=float(ws_rm.cell(16, col_num).value or 0),          # Shifted
+                        profit_percentage=float(ws_rm.cell(17, col_num).value or 0),               # Shifted
                     )
                     count += 1
 
@@ -1043,6 +1047,8 @@ class ExcelExporter:
                 'Overhead %',
                 'Maintenance %',
                 'Profit %',
+                'Other rm cost',
+                'Other rm cost description',
                 'Base RM Cost',
                 'Total Cost'
             ]
@@ -1069,8 +1075,10 @@ class ExcelExporter:
                 ws_rm.cell(row=15, column=col_num, value=float(rm.overhead_percentage))
                 ws_rm.cell(row=16, column=col_num, value=float(rm.maintenance_percentage))
                 ws_rm.cell(row=17, column=col_num, value=float(rm.profit_percentage))
-                ws_rm.cell(row=18, column=col_num, value=float(rm.base_rm_cost))
-                ws_rm.cell(row=19, column=col_num, value=float(rm.rm_cost))
+                ws_rm.cell(row=18, column=col_num, value=float(rm.other_rm_cost))
+                ws_rm.cell(row=19, column=col_num, value=rm.other_rm_cost_description)
+                ws_rm.cell(row=20, column=col_num, value=float(rm.base_rm_cost))
+                ws_rm.cell(row=21, column=col_num, value=float(rm.rm_cost))
                 ws_rm.column_dimensions[get_column_letter(col_num)].width = 18
 
         # Sheet 3: Moulding Machines (vertical format with calculated fields)

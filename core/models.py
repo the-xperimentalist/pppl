@@ -362,6 +362,12 @@ class RawMaterial(models.Model):
     purging_loss_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                            help_text=f"Purging losses in percent")
 
+    # Other costs
+    other_rm_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                        help_text="Additional fixed cost for this raw material")
+    other_rm_cost_description = models.TextField(blank=True,
+                                                  help_text="Description of what the other RM cost pertains to")
+
     # Cost percentages
     icc_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                         verbose_name="ICC %", help_text="ICC percentage")
@@ -477,7 +483,8 @@ class RawMaterial(models.Model):
             Decimal(str(self.rejection_cost)) +
             Decimal(str(self.overhead_cost)) +
             Decimal(str(self.maintenance_cost)) +
-            Decimal(str(self.profit_cost))
+            Decimal(str(self.profit_cost)) +
+            Decimal(str(self.other_rm_cost))
         )
 
 

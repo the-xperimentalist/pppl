@@ -110,7 +110,7 @@
                     <div class="alert alert-info">
                         <strong>Calculation Formula:</strong>
                         <br>
-                        Gross weight = Part weight + Runner weight (in selected unit) + Process Losses %age * Net wt (in selected unit) + Purging Loss %age * Net wt (in selected unit)
+                        Gross weight = Part weight + Runner weight (in selected unit) + Process Losses %age * Net wt (in selected unit) + Purging Loss %age * Net wt (in selected unit) + Other rm cost
                         <br>
                         Gross weight is converted to grams: kg → ×1000, ton → ×1,000,000, gm → ×1
                         <br>
@@ -119,6 +119,25 @@
                         Base Cost = (Gross weight in grams × Rate per gram) + ICC%
                         <br>
                         Total Cost = Base Cost + Base Cost * Profit% + Base Cost * Rejection% + Base Cost * Overhead% + Base Cost * Maintainence%
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- New fields for Other RM Cost -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="other_rm_cost" class="form-label">Other RM Cost</label>
+                            <input type="number" class="form-control" id="other_rm_cost" name="other_rm_cost"
+                                   step="0.00000001" value="0">
+                            <div class="form-text">Additional fixed cost for this raw material</div>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="other_rm_cost_description" class="form-label">Other RM Cost Description</label>
+                            <textarea class="form-control" id="other_rm_cost_description" name="other_rm_cost_description"
+                                      rows="2"></textarea>
+                            <div class="form-text">Description of what the other RM cost pertains to</div>
+                        </div>
                     </div>
 
                     <hr class="my-4">

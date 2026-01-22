@@ -249,6 +249,8 @@ def raw_material_add(request, project_id, quote_id):
                 overhead_percentage=float(request.POST.get('overhead_percentage', 0)),
                 maintenance_percentage=float(request.POST.get('maintenance_percentage', 0)),
                 profit_percentage=float(request.POST.get('profit_percentage', 0)),
+                other_rm_cost=float(request.POST.get('other_rm_cost', 0)),
+                other_rm_cost_description=request.POST.get('other_rm_cost_description', ''),
             )
             raw_material.save()
 
@@ -1635,6 +1637,8 @@ def raw_material_edit(request, project_id, quote_id, rm_id):
             raw_material.overhead_percentage = float(request.POST.get('overhead_percentage', 0))
             raw_material.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))
             raw_material.profit_percentage = float(request.POST.get('profit_percentage', 0))
+            raw_material.other_rm_cost = float(request.POST.get('other_rm_cost', 0))
+            raw_material.other_rm_cost_description = request.POST.get('other_rm_cost_description', '')
 
             raw_material.save()
 
