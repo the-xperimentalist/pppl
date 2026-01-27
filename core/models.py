@@ -472,7 +472,10 @@ class RawMaterial(models.Model):
     def profit_cost(self):
         """Calculate profit cost"""
         from decimal import Decimal
-        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.profit_percentage)) / Decimal('100')))
+
+        return float(
+            Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+            )
 
     @property
     def rm_cost(self):
@@ -678,6 +681,8 @@ class Assembly(models.Model):
                                      help_text="Manual assembly cost (used if automated)")
     other_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                     help_text="Other miscellaneous costs")
+    other_cost_description = models.TextField(blank=True,
+                                                  help_text="Description of what the other cost pertains to")
 
     # Percentages and fixed costs
     profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0)

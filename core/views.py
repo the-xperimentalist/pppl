@@ -453,6 +453,7 @@ def assembly_add(request, project_id, quote_id):
                 remarks=request.POST.get('remarks', ''),
                 manual_cost=float(request.POST.get('manual_cost', 0)),
                 other_cost=float(request.POST.get('other_cost', 0)),
+                other_cost_description=request.POST.get('other_cost_description', ''),
                 profit_percentage=float(request.POST.get('profit_percentage', 0)),
                 rejection_percentage=float(request.POST.get('rejection_percentage', 0)),
                 inspection_handling_cost=float(request.POST.get('inspection_handling_cost', 0)),
@@ -501,6 +502,7 @@ def assembly_edit(request, project_id, quote_id, assembly_id):
             assembly.remarks = request.POST.get('remarks', '')
             assembly.manual_cost = float(request.POST.get('manual_cost', 0))
             assembly.other_cost = float(request.POST.get('other_cost', 0))
+            assembly.other_cost_description = request.POST.get('other_cost_description', '')
             assembly.profit_percentage = float(request.POST.get('profit_percentage', 0))
             assembly.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
             assembly.inspection_handling_cost = float(request.POST.get('inspection_handling_cost', 0))

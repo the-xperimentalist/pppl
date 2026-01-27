@@ -119,6 +119,7 @@ class ExcelTemplateGenerator:
             'Remarks',
             'Manual Cost',
             'Other Cost',
+            'Other Cost Description',
             'Inspection & Handling Cost',
             'Profit %',
             'Rejection %'
@@ -128,8 +129,9 @@ class ExcelTemplateGenerator:
 
         # Add sample data for 2 assemblies
         assemblies = [
-            ['Manual Screw Assembly', 'Manual', 'Standard assembly', 12.50, 3.50, 5.00, 10.0, 2.5],
-            ['Ultrasonic Welding', 'Automated', 'High precision', 25.00, 5.00, 8.00, 15.0, 3.0],
+            ['Manual Screw Assembly', 'Manual', 'M3 screws with washers', 8.50, 2.50, 'Screw materials', 5.00, 15.0, 2.0],
+            ['Ultrasonic Welding', 'Automated', 'High frequency welding', 12.00, 3.50, 'Welding consumables', 8.00, 18.0, 1.5],
+            ['Pad Printing', 'Semi-automated', '2-color logo print', 6.50, 1.50, 'Ink and supplies', 3.50, 12.0, 2.5],
         ]
 
         for col_num, assembly in enumerate(assemblies, 2):
@@ -709,9 +711,10 @@ class ExcelParser:
                         remarks=worksheet.cell(3, col_num).value or '',
                         manual_cost=float(worksheet.cell(4, col_num).value) if worksheet.cell(4, col_num).value else 0,
                         other_cost=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
-                        inspection_handling_cost=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else 0,
-                        profit_percentage=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
-                        rejection_percentage=float(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
+                        other_cost_description=float(worksheet.cell(6, col_num).value) if worksheet.cell(5, col_num).value else 0,
+                        inspection_handling_cost=float(worksheet.cell(7, col_num).value) if worksheet.cell(6, col_num).value else 0,
+                        profit_percentage=float(worksheet.cell(8, col_num).value) if worksheet.cell(7, col_num).value else 0,
+                        rejection_percentage=float(worksheet.cell(9, col_num).value) if worksheet.cell(8, col_num).value else 0,
                     )
                     count += 1
 
@@ -942,9 +945,10 @@ class ExcelParser:
                         remarks=worksheet.cell(4, col_num).value or '',
                         manual_cost=float(worksheet.cell(5, col_num).value) if worksheet.cell(5, col_num).value else 0,
                         other_cost=float(worksheet.cell(6, col_num).value) if worksheet.cell(6, col_num).value else 0,
-                        inspection_handling_cost=float(worksheet.cell(7, col_num).value) if worksheet.cell(7, col_num).value else 0,
-                        profit_percentage=float(worksheet.cell(8, col_num).value) if worksheet.cell(8, col_num).value else 0,
-                        rejection_percentage=float(worksheet.cell(9, col_num).value) if worksheet.cell(9, col_num).value else 0,
+                        other_cost_description=float(worksheet.cell(7, col_num).value) if worksheet.cell(6, col_num).value else 0,
+                        inspection_handling_cost=float(worksheet.cell(8, col_num).value) if worksheet.cell(7, col_num).value else 0,
+                        profit_percentage=float(worksheet.cell(9, col_num).value) if worksheet.cell(8, col_num).value else 0,
+                        rejection_percentage=float(worksheet.cell(10, col_num).value) if worksheet.cell(9, col_num).value else 0,
                     )
                     count += 1
 
@@ -1128,6 +1132,7 @@ class ExcelExporter:
                 'Remarks',
                 'Manual Cost',
                 'Other Cost',
+                'Other Cost Description',
                 'Inspection & Handling Cost',
                 'Profit %',
                 'Rejection %',
@@ -1145,13 +1150,14 @@ class ExcelExporter:
                 ws_asm.cell(row=2, column=col_num, value=asm.remarks)
                 ws_asm.cell(row=3, column=col_num, value=float(asm.manual_cost))
                 ws_asm.cell(row=4, column=col_num, value=float(asm.other_cost))
-                ws_asm.cell(row=5, column=col_num, value=float(asm.inspection_handling_cost))
-                ws_asm.cell(row=6, column=col_num, value=float(asm.profit_percentage))
-                ws_asm.cell(row=7, column=col_num, value=float(asm.rejection_percentage))
-                ws_asm.cell(row=8, column=col_num, value=float(costs['base_cost']))
-                ws_asm.cell(row=9, column=col_num, value=float(costs['profit_cost']))
-                ws_asm.cell(row=10, column=col_num, value=float(costs['rejection_cost']))
-                ws_asm.cell(row=11, column=col_num, value=float(asm.total_assembly_cost))
+                ws_asm.cell(row=5, column=col_num, value=float(asm.other_cost_description))
+                ws_asm.cell(row=6, column=col_num, value=float(asm.inspection_handling_cost))
+                ws_asm.cell(row=7, column=col_num, value=float(asm.profit_percentage))
+                ws_asm.cell(row=8, column=col_num, value=float(asm.rejection_percentage))
+                ws_asm.cell(row=9, column=col_num, value=float(costs['base_cost']))
+                ws_asm.cell(row=10, column=col_num, value=float(costs['profit_cost']))
+                ws_asm.cell(row=11, column=col_num, value=float(costs['rejection_cost']))
+                ws_asm.cell(row=12, column=col_num, value=float(asm.total_assembly_cost))
                 ws_asm.column_dimensions[get_column_letter(col_num)].width = 18
 
             # Sheet 4a: Assembly Raw Materials (vertical format)
