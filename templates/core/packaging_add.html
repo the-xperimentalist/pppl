@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-8 offset-md-2">
+    <div class="col-md-10 offset-md-1">
         <div class="d-flex align-items-center mb-4">
             <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-outline-secondary me-3">
                 <i class="bi bi-arrow-left"></i> Back to Quote
@@ -14,100 +14,128 @@
 
         <div class="card">
             <div class="card-body">
-                <form method="post" id="packagingForm">
+                <form method="post">
                     {% csrf_token %}
 
-                    <h5 class="mb-3">Packaging Type (Optional)</h5>
+                    <!-- Packaging Category Selection -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="packaging_category" class="form-label">Packaging Category <span class="text-danger">*</span></label>
+                            <select class="form-select" id="packaging_category" name="packaging_category" required>
+                                <option value="box">Box</option>
+                                <option value="polybag">Polybag</option>
+                            </select>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="packaging_type" class="form-label">Select Packaging Type</label>
-                        <select class="form-select" id="packaging_type" name="packaging_type">
-                            <option value="">-- Custom Packaging (No Template) --</option>
-                            {% for pkg_type in packaging_types %}
+                        <div class="col-md-6 mb-3">
+                            <label for="packaging_type" class="form-label">Packaging Type (Optional)</label>
+                            <select class="form-select" id="packaging_type" name="packaging_type">
+                                <option value="">-- Custom Packaging (No Template) --</option>
+                                {% for pkg_type in packaging_types %}
                                 <option value="{{ pkg_type.id }}"
+                                        data-category="{{ pkg_type.packaging_category }}"
                                         data-length="{{ pkg_type.default_length }}"
                                         data-breadth="{{ pkg_type.default_breadth }}"
                                         data-height="{{ pkg_type.default_height }}"
                                         data-polybag-length="{{ pkg_type.default_polybag_length }}"
-                                        data-polybag-width="{{ pkg_type.default_polybag_width }}">
-                                    {{ pkg_type.name }} ({{ pkg_type.default_length }} × {{ pkg_type.default_breadth }} × {{ pkg_type.default_height }} mm)
+                                        data-polybag-width="{{ pkg_type.default_polybag_width }}"
+                                        data-rate="{{ pkg_type.default_rate_per_kg }}"
+                                        data-polybags-per-kg="{{ pkg_type.default_polybags_per_kg }}">
+                                    {{ pkg_type.name }} ({{ pkg_type.get_packaging_category_display }})
                                 </option>
-                            {% endfor %}
-                        </select>
-                        <div class="form-text">Optional: Select a packaging type to auto-fill dimensions, or enter custom dimensions below</div>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3">Packaging Dimensions (mm)</h5>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="packaging_length" class="form-label">Packaging Length <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_length" name="packaging_length"
-                                   step="0.00000001" value="600" required>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label for="packaging_breadth" class="form-label">Packaging Breadth <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_breadth" name="packaging_breadth"
-                                   step="0.00000001" value="400" required>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label for="packaging_height" class="form-label">Packaging Height <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="packaging_height" name="packaging_height"
-                                   step="0.00000001" value="250" required>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Optional: Select a packaging type to auto-fill dimensions</div>
                         </div>
                     </div>
 
+                    <!-- Box Fields -->
+                    <div id="box-fields">
+                        <h5 class="mb-3">Box Dimensions</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="packaging_length" class="form-label">Length (mm) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="packaging_length" name="packaging_length"
+                                       step="0.00000001" value="0">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="packaging_breadth" class="form-label">Breadth (mm) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="packaging_breadth" name="packaging_breadth"
+                                       step="0.00000001" value="0">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="packaging_height" class="form-label">Height (mm) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="packaging_height" name="packaging_height"
+                                       step="0.00000001" value="0">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="cost" class="form-label">Cost <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="cost" name="cost"
+                                       step="0.00000001" value="0">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="lifecycle" class="form-label">Lifecycle/Cycle <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="lifecycle" name="lifecycle"
+                                       value="0">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="maintenance_percentage" class="form-label">Maintenance %</label>
+                                <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage"
+                                       step="0.00000001" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Polybag Fields -->
+                    <div id="polybag-fields" style="display: none;">
+                        <h5 class="mb-3">Polybag Details</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="polybag_length" class="form-label">Polybag Length (inches) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="polybag_length" name="polybag_length"
+                                       step="0.00000001" value="0">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="polybag_width" class="form-label">Polybag Width (inches) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="polybag_width" name="polybag_width"
+                                       step="0.00000001" value="0">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="rate_per_kg" class="form-label">Rate per kg <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="rate_per_kg" name="rate_per_kg"
+                                       step="0.00000001" value="0">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="polybags_per_kg" class="form-label">Number of Polybags in 1 kg <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="polybags_per_kg" name="polybags_per_kg"
+                                       step="0.00000001" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Common Field -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="polybag_length" class="form-label">Polybag Length <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="polybag_length" name="polybag_length"
-                                   step="0.00000001" value="16" required>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="polybag_width" class="form-label">Polybag Width <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="polybag_width" name="polybag_width"
-                                   step="0.00000001" value="20" required>
+                            <label for="parts_per_packaging" class="form-label">Parts per Packaging <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="parts_per_packaging" name="parts_per_packaging"
+                                   value="0" required>
+                            <div class="form-text">Number of parts in one packaging unit</div>
                         </div>
                     </div>
 
-                    <div class="alert alert-info">
-                        <strong>Note:</strong> If you select a packaging type, dimensions will be automatically filled. You can modify them as needed, or enter custom dimensions without selecting a type.
-                    </div>
-
-                    <hr class="my-4">
-
-                    <h5 class="mb-3">Cost Details</h5>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="lifecycle" class="form-label">Lifecycle <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="lifecycle" name="lifecycle"
-                                   min="0" value="0" required>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label for="cost" class="form-label">Cost <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="cost" name="cost"
-                                   step="0.00000001" value="0" required>
-                        </div>
-
-                        <div class="col-md-4 mb-3">
-                            <label for="maintenance_percentage" class="form-label">Maintenance %</label>
-                            <input type="number" class="form-control" id="maintenance_percentage" name="maintenance_percentage"
-                                   step="0.00000001" value="0" min="0" max="100">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="parts_per_polybag" class="form-label">Parts per Polybag <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="parts_per_polybag" name="parts_per_polybag"
-                               min="0" value="0" required>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-4">
+                    <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-plus-circle"></i> Add Packaging
@@ -118,19 +146,50 @@
         </div>
     </div>
 </div>
-
 <script>
-document.getElementById('packaging_type').addEventListener('change', function() {
-    const selectedOption = this.options[this.selectedIndex];
-    if (selectedOption.value) {
-        // Fill dimensions from selected packaging type
-        document.getElementById('packaging_length').value = selectedOption.dataset.length;
-        document.getElementById('packaging_breadth').value = selectedOption.dataset.breadth;
-        document.getElementById('packaging_height').value = selectedOption.dataset.height;
-        document.getElementById('polybag_length').value = selectedOption.dataset.polybagLength;
-        document.getElementById('polybag_width').value = selectedOption.dataset.polybagWidth;
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('packaging_category');
+    const typeSelect = document.getElementById('packaging_type');
+    const boxFields = document.getElementById('box-fields');
+    const polybagFields = document.getElementById('polybag-fields');
+
+    // Toggle fields based on category
+    function toggleFields() {
+        const category = categorySelect.value;
+        if (category === 'box') {
+            boxFields.style.display = 'block';
+            polybagFields.style.display = 'none';
+        } else {
+            boxFields.style.display = 'none';
+            polybagFields.style.display = 'block';
+        }
     }
-    // Note: If user selects "Custom Packaging", dimensions remain as they were entered
+
+    categorySelect.addEventListener('change', toggleFields);
+
+    // Auto-fill from packaging type
+    typeSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            const category = selectedOption.dataset.category;
+            categorySelect.value = category;
+            toggleFields();
+
+            if (category === 'box') {
+                document.getElementById('packaging_length').value = selectedOption.dataset.length;
+                document.getElementById('packaging_breadth').value = selectedOption.dataset.breadth;
+                document.getElementById('packaging_height').value = selectedOption.dataset.height;
+            } else {
+                document.getElementById('polybag_length').value = selectedOption.dataset.polybagLength;
+                document.getElementById('polybag_width').value = selectedOption.dataset.polybagWidth;
+                document.getElementById('rate_per_kg').value = selectedOption.dataset.rate;
+                document.getElementById('polybags_per_kg').value = selectedOption.dataset.polybagsPerKg;  // FIXED: removed space
+            }
+        }
+    });
+
+    // Initialize
+    toggleFields();
 });
 </script>
 {% endblock %}

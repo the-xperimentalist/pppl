@@ -297,7 +297,7 @@ class Quote(models.Model):
 
     def get_total_packaging_cost(self):
         """Calculate total packaging cost from all packagings"""
-        return sum(packaging.total_cost for packaging in self.packagings.all())
+        return sum(packaging.cost_per_part for packaging in self.packagings.all())
 
     def get_total_transport_cost(self):
         """Calculate total transport cost per part from all transports"""
@@ -469,18 +469,48 @@ class RawMaterial(models.Model):
         return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
 
     @property
+    def frozen_rm_cost(self):
+        """Calculate frozen RM cost if frozen rate is available"""
+        from decimal import Decimal
+
+        if self.frozen_rate and Decimal(str(self.frozen_rate)) > 0:
+            # Frozen rate is per kg, gross weight is in grams
+            frozen_rate_per_kg = Decimal(str(self.frozen_rate))
+            gross_weight_grams = Decimal(str(self.gross_weight_in_grams))
+
+            # Convert: frozen_rate (per kg) × gross_weight (grams) / 1000
+            frozen_cost = (frozen_rate_per_kg * gross_weight_grams) / Decimal('1000')
+
+            return float(frozen_cost)
+
+        return None  # Return None if no frozen rate is set
+
+    @property
     def profit_cost(self):
         """Calculate profit cost"""
         from decimal import Decimal
 
         return float(
-            Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+            Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
             )
+    @property
+    def total_rm_cost_without_profit(self):
+        """Calculate total RM cost without profit percentage"""
+        from decimal import Decimal
+
+        return float(
+            Decimal(str(self.base_rm_cost)) +
+            Decimal(str(self.rejection_cost)) +
+            Decimal(str(self.overhead_cost)) +
+            Decimal(str(self.maintenance_cost)) +
+            Decimal(str(self.other_rm_cost))
+        )
 
     @property
     def rm_cost(self):
         """Calculate total RM cost"""
         from decimal import Decimal
+
         return float(
             Decimal(str(self.base_rm_cost)) +
             Decimal(str(self.rejection_cost)) +
@@ -514,44 +544,44 @@ class AssemblyType(models.Model):
 
 class PackagingType(models.Model):
     """Packaging type configuration for customer groups"""
-    PACKAGING_TYPE_CHOICES = [
-        ('pp_box', 'PP Box'),
-        ('pp_box_partition', 'PP Box by Partition'),
-        ('cg_box', 'CG Box'),
-        ('bin', 'Bin'),
-        ('custom', 'Custom'),
+
+    PACKAGING_CATEGORY_CHOICES = [
+        ('polybag', 'Polybag'),
+        ('box', 'Box'),
     ]
 
-    customer_group = models.ForeignKey(CustomerGroup, on_delete=models.CASCADE,
-                                      related_name='packaging_types', null=True)
-    name = models.CharField(max_length=100, help_text="Packaging type name")
-    packaging_type = models.CharField(max_length=50, choices=PACKAGING_TYPE_CHOICES,
-                                     default='pp_box')
+    customer_group = models.ForeignKey('CustomerGroup', on_delete=models.CASCADE,
+                                      related_name='packaging_types')
+    name = models.CharField(max_length=200)
+    packaging_category = models.CharField(max_length=20, choices=PACKAGING_CATEGORY_CHOICES,
+                                         default='box')
 
-    # Default dimensions
+    # Box defaults
     default_length = models.DecimalField(max_digits=18, decimal_places=8, default=600,
-                                        help_text="Default packaging length (mm)")
+                                        help_text="Default length in mm")
     default_breadth = models.DecimalField(max_digits=18, decimal_places=8, default=400,
-                                         help_text="Default packaging breadth (mm)")
+                                         help_text="Default breadth in mm")
     default_height = models.DecimalField(max_digits=18, decimal_places=8, default=250,
-                                        help_text="Default packaging height (mm)")
+                                        help_text="Default height in mm")
+
+    # Polybag defaults
     default_polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=16,
-                                                 help_text="Default polybag length")
+                                                 help_text="Default polybag length in inches")
     default_polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=20,
-                                               help_text="Default polybag width")
+                                               help_text="Default polybag width in inches")
+    default_rate_per_kg = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                             help_text="Default rate per kg (for polybag)")
+    default_polybags_per_kg = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                                  help_text="Default number of polybags per kg")
 
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['packaging_type', 'name']
-        verbose_name = 'Packaging Type'
-        verbose_name_plural = 'Packaging Types'
-        unique_together = ['customer_group', 'name']
+        ordering = ['customer_group', 'name']
 
     def __str__(self):
-        return f"{self.name} - {self.customer_group.name}"
+        return f"{self.name} ({self.customer_group.name})"
 
 
 class MouldingMachineDetail(models.Model):
@@ -871,6 +901,10 @@ class Packaging(models.Model):
         ('bin', 'Bin'),
         ('custom', 'Custom'),
     ]
+    PACKAGING_CATEGORY_CHOICES = [
+        ('polybag', 'Polybag'),
+        ('box', 'Box'),
+    ]
 
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='packagings')
     packaging_type = models.ForeignKey(PackagingType, on_delete=models.SET_NULL,
@@ -878,6 +912,9 @@ class Packaging(models.Model):
                                       related_name='packagings',
                                       help_text="Select packaging type")
 
+    # Category selection
+    packaging_category = models.CharField(max_length=20, choices=PACKAGING_CATEGORY_CHOICES,
+                                         default='box', help_text="Select polybag or box")
     # Dimensions (editable)
     packaging_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Packaging length (mm)")
@@ -886,17 +923,21 @@ class Packaging(models.Model):
     packaging_height = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                           help_text="Packaging height (mm)")
     polybag_length = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                        help_text="Polybag length")
+                                        help_text="Polybag length in inches")
     polybag_width = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                                       help_text="Polybag width")
+                                       help_text="Polybag width in inches")
+    rate_per_kg = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                     help_text="Rate per kg (for polybag)")
+    polybags_per_kg = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                         help_text="Number of polybags in 1 kg")
 
     # Cost details
     lifecycle = models.IntegerField(default=0, help_text="Lifecycle count")
     cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
-                              help_text="Packaging cost")
+                              help_text="Base cost for box")
     maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                 help_text="Maintenance percentage")
-    parts_per_polybag = models.IntegerField(default=0, help_text="Parts per polybag")
+    parts_per_packaging = models.IntegerField(default=0, help_text="Parts per packaging unit")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -918,20 +959,42 @@ class Packaging(models.Model):
 
     @property
     def total_cost(self):
-        """Calculate total packaging cost"""
+        """Calculate total packaging cost for the quote"""
         from decimal import Decimal
-        return float(Decimal(str(self.cost)) + Decimal(str(self.maintenance_cost)))
+
+        if self.quote.quantity > 0:
+            cost_per_part = Decimal(str(self.cost_per_part))
+            quantity = Decimal(str(self.quote.quantity))
+            return float(cost_per_part * quantity)
+
+        return 0
 
     @property
     def cost_per_part(self):
-        """Calculate packaging cost per part"""
+        """Calculate cost per part based on packaging category"""
         from decimal import Decimal
 
-        if self.lifecycle > 0 and self.parts_per_polybag > 0:
-            parts_per_pkg = Decimal(str(self.lifecycle)) * Decimal(str(self.parts_per_polybag))
-            if parts_per_pkg > 0:
-                return float(Decimal(str(self.total_cost)) / parts_per_pkg)
-        return 0
+        if self.packaging_category == 'polybag':
+            # Cost per part for polybag: rate / (polybags_per_kg × parts_per_packaging)
+            if self.polybags_per_kg > 0 and self.parts_per_packaging > 0:
+                rate = Decimal(str(self.rate_per_kg))
+                polybags_per_kg = Decimal(str(self.polybags_per_kg))
+                parts_per_pkg = Decimal(str(self.parts_per_packaging))
+
+                cost = rate / (polybags_per_kg * parts_per_pkg)
+                return float(cost)
+            return 0
+        else:  # box
+            # Cost per part for box: ((cost + maintenance_cost) / lifecycle) / parts_per_packaging
+            if self.lifecycle > 0 and self.parts_per_packaging > 0:
+                base_cost = Decimal(str(self.cost))
+                maintenance = Decimal(str(self.maintenance_cost))
+                lifecycle = Decimal(str(self.lifecycle))
+                parts_per_pkg = Decimal(str(self.parts_per_packaging))
+
+                cost = ((base_cost + maintenance) / lifecycle) / parts_per_pkg
+                return float(cost)
+            return 0
 
     def save(self, *args, **kwargs):
         """Override save to auto-populate dimensions from packaging type if available"""

@@ -304,8 +304,10 @@
                                     <th>Rejection %</th>
                                     <th>Overhead %</th>
                                     <th>Maintenance %</th>
+                                    <th>RM Cost wo profit</th>
                                     <th>Profit %</th>
-                                    <th>Total Cost</th>
+                                    <th>Frozen RM Cost</th>
+                                    <th>Total RM Cost</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -323,7 +325,9 @@
                                     <td>{{ rm.rejection_percentage|percentage_display }}%</td>
                                     <td>{{ rm.overhead_percentage|percentage_display }}%</td>
                                     <td>{{ rm.maintenance_percentage|percentage_display }}%</td>
+                                    <td>{{ rm.total_rm_cost_without_profit|smart_decimal }}</td>
                                     <td>{{ rm.profit_percentage|percentage_display }}%</td>
+                                    <td>{{ rm.frozen_rm_cost|smart_decimal }}</td>
                                     <td><strong>{{ rm.rm_cost|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'raw_material_edit' project.id quote.id rm.id %}"
@@ -536,9 +540,10 @@
                                     <th>Type</th>
                                     <th>Dimensions (L×B×H)</th>
                                     <th>Polybag (L×W)</th>
-                                    <th>Lifecycle</th>
-                                    <th>Cost</th>
-                                    <th>Parts/Polybag</th>
+                                    <th>Rate per kg (Polybag)</th>
+                                    <th>Lifecycle (Box)</th>
+                                    <th>Cost (Box)</th>
+                                    <th>Parts/Packaging</th>
                                     <th>Total Cost</th>
                                     <th>Actions</th>
                                 </tr>
@@ -546,13 +551,14 @@
                             <tbody>
                                 {% for pkg in packagings %}
                                 <tr>
-                                    <td>{{ pkg.get_packaging_type_display }}</td>
+                                    <td>{{ pkg.packaging_category }}</td>
                                     <td>{{ pkg.packaging_length|smart_decimal }} × {{ pkg.packaging_breadth|smart_decimal }} × {{ pkg.packaging_height|smart_decimal }}</td>
                                     <td>{{ pkg.polybag_length|smart_decimal }} × {{ pkg.polybag_width|smart_decimal }}</td>
+                                    <td>{{ pkg.rate_per_kg }}</td>
                                     <td>{{ pkg.lifecycle }}</td>
                                     <td>{{ pkg.cost|smart_decimal }}</td>
-                                    <td>{{ pkg.part_per_polybag }}</td>
-                                    <td><strong>{{ pkg.total_packaging_cost|smart_decimal }}</strong></td>
+                                    <td>{{ pkg.parts_per_packaging }}</td>
+                                    <td><strong>{{ pkg.cost_per_part|smart_decimal }}</strong></td>
                                     <td>
                                         <a href="{% url 'packaging_edit' project.id quote.id pkg.id %}"
                                            class="btn btn-sm btn-outline-primary {% if not quote.can_edit_sections %}disabled{% endif %}"
