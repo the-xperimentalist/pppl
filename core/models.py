@@ -969,6 +969,10 @@ class Packaging(models.Model):
 
         return 0
 
+    def get_packaging_type_display(self):
+        """Return packaging type name"""
+        return self.packaging_type.name if self.packaging_type else ""
+
     @property
     def cost_per_part(self):
         """Calculate cost per part based on packaging category"""
