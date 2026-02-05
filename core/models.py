@@ -490,9 +490,16 @@ class RawMaterial(models.Model):
         """Calculate profit cost"""
         from decimal import Decimal
 
-        return float(
-            Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-            )
+        # If frozen rate is not there, it is equal to rm_rate
+        if self.frozen_rate:
+            return float(
+                Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                )
+        else:
+            return float(
+                Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                )
+
     @property
     def total_rm_cost_without_profit(self):
         """Calculate total RM cost without profit percentage"""
