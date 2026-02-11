@@ -335,6 +335,7 @@ class RawMaterial(models.Model):
         ('kg', 'Kilogram (kg)'),
         ('gm', 'Gram (gm)'),
         ('ton', 'Ton'),
+        ('pcs', 'Pcs')
     ]
 
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='raw_materials')
@@ -349,8 +350,8 @@ class RawMaterial(models.Model):
 
     # Pricing
     frozen_rate = models.DecimalField(max_digits=18, decimal_places=8, null=True, blank=True,
-                                     help_text="Frozen rate if applicable (per kg)")
-    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate (per kg)")
+                                     help_text="Frozen rate if applicable (per kg) and per pc for uom pcs")
+    rm_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0, verbose_name="RM Rate (per kg) and per pc for uom pcs")
 
     # Weights (in the unit of measurement selected by user)
     part_weight = models.DecimalField(max_digits=18, decimal_places=8, default=0,
@@ -414,6 +415,8 @@ class RawMaterial(models.Model):
         elif self.unit_of_measurement == 'ton':
             # 1 ton = 1,000,000 grams
             return float(gross * Decimal('1000000'))
+        elif self.unit_of_measurement == 'pcs':
+            return 0
         else:  # 'gm'
             # Already in grams
             return float(gross)
@@ -436,19 +439,30 @@ class RawMaterial(models.Model):
         """Calculate base RM cost using gross weight in grams and rate per gram"""
         from decimal import Decimal
 
-        # Use gross weight in grams
-        weight_in_grams = Decimal(str(self.gross_weight_in_grams))
+        if self.unit_of_measurement != 'pcs':
+            # Use gross weight in grams
+            weight_in_grams = Decimal(str(self.gross_weight_in_grams))
 
-        # Rate per gram (converted from per kg)
-        rate_per_gram = Decimal(str(self.effective_rate_per_gram))
+            # Rate per gram (converted from per kg)
+            rate_per_gram = Decimal(str(self.effective_rate_per_gram))
 
-        # Base cost = weight in grams × rate per gram + additional costs
-        base = (weight_in_grams * rate_per_gram)
+            # Base cost = weight in grams × rate per gram + additional costs
+            base = (weight_in_grams * rate_per_gram)
 
-        # Add ICC percentage
-        icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
+            # Add ICC percentage
+            icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
 
-        return float(base + icc_cost)
+            return float(base + icc_cost)
+        else:
+            weight_in_pcs = Decimal(str(self.gross_weight))
+
+            rate_per_pcs = Decimal(str(self.rm_rate))
+
+            base = (weight_in_pcs * rate_per_pcs)
+
+            icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
+
+            return float(base + icc_cost)
 
     @property
     def rejection_cost(self):
@@ -473,13 +487,20 @@ class RawMaterial(models.Model):
         """Calculate frozen RM cost if frozen rate is available"""
         from decimal import Decimal
 
-        if self.frozen_rate and Decimal(str(self.frozen_rate)) > 0:
+        if self.frozen_rate and Decimal(str(self.frozen_rate)) > 0 and self.unit_of_measurement != 'pcs':
             # Frozen rate is per kg, gross weight is in grams
             frozen_rate_per_kg = Decimal(str(self.frozen_rate))
             gross_weight_grams = Decimal(str(self.gross_weight_in_grams))
 
             # Convert: frozen_rate (per kg) × gross_weight (grams) / 1000
             frozen_cost = (frozen_rate_per_kg * gross_weight_grams) / Decimal('1000')
+
+            return float(frozen_cost)
+        elif self.frozen_rate and Decimal(str(self.frozen_rate)) > 0 and self.unit_of_measurement == 'pcs':
+            frozen_rate_per_pc = Decimal(str(self.frozen_rate))
+            weight_in_pcs = Decimal(str(self.gross_weight))
+
+            frozen_cost = (frozen_rate_per_pc * weight_in_pcs)
 
             return float(frozen_cost)
 
@@ -491,14 +512,25 @@ class RawMaterial(models.Model):
         from decimal import Decimal
 
         # If frozen rate is not there, it is equal to rm_rate
-        if self.frozen_rate:
-            return float(
-                Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                )
+        if self.unit_of_measurement != 'pcs':
+            if self.frozen_rate:
+                return float(
+                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                    )
+            else:
+                return float(
+                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                    )
         else:
-            return float(
-                Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                )
+            if self.frozen_rate:
+                return float(
+                    Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                    )
+            else:
+                return float(
+                    Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                    )
+
 
     @property
     def total_rm_cost_without_profit(self):
