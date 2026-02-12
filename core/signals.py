@@ -10,7 +10,7 @@ def create_default_packaging_types(sender, instance, created, **kwargs):
         default_packaging_types = [
             {
                 'name': 'PP Box',
-                'packaging_type': 'pp_box',
+                'packaging_category': 'pp_box',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -19,7 +19,7 @@ def create_default_packaging_types(sender, instance, created, **kwargs):
             },
             {
                 'name': 'PP Box by Partition',
-                'packaging_type': 'pp_box_partition',
+                'packaging_category': 'pp_box_partition',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -28,7 +28,7 @@ def create_default_packaging_types(sender, instance, created, **kwargs):
             },
             {
                 'name': 'CG Box',
-                'packaging_type': 'cg_box',
+                'packaging_category': 'cg_box',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -37,7 +37,7 @@ def create_default_packaging_types(sender, instance, created, **kwargs):
             },
             {
                 'name': 'Bin',
-                'packaging_type': 'bin',
+                'packaging_category': 'bin',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
