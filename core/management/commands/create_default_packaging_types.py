@@ -6,10 +6,10 @@ class Command(BaseCommand):
     help = 'Create default packaging types for existing customer groups'
 
     def handle(self, *args, **options):
-        default_packaging_types = [
+        default_packaging_categorys = [
             {
                 'name': 'PP Box',
-                'packaging_type': 'pp_box',
+                'packaging_category': 'pp_box',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -18,7 +18,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'PP Box by Partition',
-                'packaging_type': 'pp_box_partition',
+                'packaging_category': 'pp_box_partition',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -27,7 +27,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'CG Box',
-                'packaging_type': 'cg_box',
+                'packaging_category': 'cg_box',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -36,7 +36,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'Bin',
-                'packaging_type': 'bin',
+                'packaging_category': 'bin',
                 'default_length': 600,
                 'default_breadth': 400,
                 'default_height': 250,
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         customer_groups = CustomerGroup.objects.all()
         
         for customer_group in customer_groups:
-            for pkg_type in default_packaging_types:
+            for pkg_type in default_packaging_categorys:
                 # Check if packaging type already exists
                 existing = PackagingType.objects.filter(
                     customer_group=customer_group,
