@@ -671,7 +671,7 @@ class MouldingMachineDetail(models.Model):
             shift_seconds = 28800
             effective_time = shift_seconds * (self.efficiency / 100)
             parts = (effective_time / self.cycle_time) * self.cavity
-            return int(parts)
+            return round(parts, 4)
         return 0
 
     @property
