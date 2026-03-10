@@ -144,7 +144,12 @@ class ExcelTemplateGenerator:
 
     @staticmethod
     def create_packaging_template():
-        """Create template for packaging upload (vertical format)"""
+        """Create template for packaging upload (vertical format)
+
+        Note: Fill only the fields relevant to your packaging category:
+        - For BOX: Fill rows 5-9 (Length, Breadth, Height, Cost, Lifecycle)
+        - For POLYBAG: Fill rows 11-14 (Polybag Length, Polybag Width, Rate per kg, Polybags per kg)
+        """
         wb = Workbook()
         ws = wb.active
         ws.title = "Packaging"
@@ -153,22 +158,24 @@ class ExcelTemplateGenerator:
             'Packaging Category* (box/polybag)',
             'Parts per Packaging*',
             'Maintenance %',
-            '--- BOX FIELDS ---',
-            'Length (mm)',
-            'Breadth (mm)',
-            'Height (mm)',
-            'Cost',
-            'Lifecycle',
-            '--- POLYBAG FIELDS ---',
-            'Polybag Length (inches)',
-            'Polybag Width (inches)',
-            'Rate per kg',
-            'Polybags per kg'
+            '--- BOX FIELDS (Fill only if category = box) ---',
+            'Length (mm)*',
+            'Breadth (mm)*',
+            'Height (mm)*',
+            'Cost*',
+            'Lifecycle*',
+            '--- POLYBAG FIELDS (Fill only if category = polybag) ---',
+            'Polybag Length (inches)*',
+            'Polybag Width (inches)*',
+            'Rate per kg*',
+            'Polybags per kg*'
         ]
 
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "E26B0A")
 
         # Add sample data for 2 packaging options (1 box, 1 polybag)
+        # Box example: Fill box fields, leave polybag fields as 0
+        # Polybag example: Fill polybag fields, leave box fields as 0
         packagings = [
             ['box', 50, 5.0, '', 600, 400, 250, 350.00, 100, '', 0, 0, 0, 0],
             ['polybag', 100, 3.0, '', 0, 0, 0, 0, 0, '', 16, 20, 250.00, 1000],
@@ -178,6 +185,10 @@ class ExcelTemplateGenerator:
             for row_num, value in enumerate(pkg_data, 1):
                 ws.cell(row=row_num, column=col_num, value=value)
             ws.column_dimensions[get_column_letter(col_num)].width = 18
+
+        # Add instruction notes
+        ws.cell(row=4, column=4, value="← BOX: Fill rows 5-9 →").font = Font(italic=True, color="666666")
+        ws.cell(row=10, column=4, value="← POLYBAG: Fill rows 11-14 →").font = Font(italic=True, color="666666")
 
         return wb
 
@@ -491,17 +502,17 @@ class ExcelTemplateGenerator:
             'Packaging Category* (box/polybag)',
             'Parts per Packaging*',
             'Maintenance %',
-            '--- BOX FIELDS ---',
-            'Length (mm)',
-            'Breadth (mm)',
-            'Height (mm)',
-            'Cost',
-            'Lifecycle',
-            '--- POLYBAG FIELDS ---',
-            'Polybag Length (inches)',
-            'Polybag Width (inches)',
-            'Rate per kg',
-            'Polybags per kg'
+            '--- BOX FIELDS (Fill only if category = box) ---',
+            'Length (mm)*',
+            'Breadth (mm)*',
+            'Height (mm)*',
+            'Cost*',
+            'Lifecycle*',
+            '--- POLYBAG FIELDS (Fill only if category = polybag) ---',
+            'Polybag Length (inches)*',
+            'Polybag Width (inches)*',
+            'Rate per kg*',
+            'Polybags per kg*'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_pkg, pkg_headers, "E26B0A")
 
