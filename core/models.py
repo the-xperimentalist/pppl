@@ -864,6 +864,13 @@ class AssemblyRawMaterial(models.Model):
         ('gm', 'Gram (gm)'),
         ('nos', 'Numbers (nos)'),
         ('mtr', 'Meter (mtr)'),
+        ('cm', 'Centimeter (cm)'),
+        ('mm', 'Millimeter (mm)'),
+        ('l', 'Liter (l)'),
+        ('ml', 'Milliliter (ml)'),
+        ('sq in', 'Square inch (sq in)'),
+        ('sq cm', 'Square cm (sq cm)'),
+        ('sq ft', 'Square ft (sq ft)')
     ]
 
     assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE, related_name='assembly_raw_materials')
