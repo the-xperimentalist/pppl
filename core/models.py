@@ -890,7 +890,7 @@ class AssemblyRawMaterial(models.Model):
         """Calculate total cost"""
         from decimal import Decimal
         if Decimal(str(self.production_quantity)) > 0:
-            total = Decimal(str(self.cost_per_unit)) / Decimal(str(self.production_quantity))
+            total = Decimal(str(self.cost_per_unit)) * Decimal(str(self.production_quantity))
             return float(total)
         return 0
 
