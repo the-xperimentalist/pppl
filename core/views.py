@@ -583,7 +583,7 @@ def assembly_raw_material_add(request, project_id, quote_id, assembly_id):
             AssemblyRawMaterial.objects.create(
                 assembly=assembly,
                 description=request.POST.get('description'),
-                production_quantity=int(request.POST.get('production_quantity', 1)),
+                production_quantity=float(request.POST.get('production_quantity', 0)),
                 production_weight=request.POST.get('production_weight', ''),
                 unit=request.POST.get('unit', 'kg'),
                 cost_per_unit=float(request.POST.get('cost_per_unit', 0)),
@@ -1741,7 +1741,7 @@ def assembly_raw_material_edit(request, project_id, quote_id, assembly_id, arm_i
     if request.method == 'POST':
         try:
             assembly_rm.description = request.POST.get('description')
-            assembly_rm.production_quantity = int(request.POST.get('production_quantity', 1))
+            assembly_rm.production_quantity = float(request.POST.get('production_quantity', 0))
             assembly_rm.production_weight = request.POST.get('production_weight', '')
             assembly_rm.unit = request.POST.get('unit', 'kg')
             assembly_rm.cost_per_unit = float(request.POST.get('cost_per_unit', 0))

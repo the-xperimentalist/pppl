@@ -868,7 +868,7 @@ class AssemblyRawMaterial(models.Model):
 
     assembly = models.ForeignKey(Assembly, on_delete=models.CASCADE, related_name='assembly_raw_materials')
     description = models.CharField(max_length=200, default="")
-    production_quantity = models.IntegerField(default=1)
+    production_quantity = models.DecimalField(max_digits=18, decimal_places=8, default=0)
     production_weight = models.CharField(max_length=100, blank=True, null=True, default="",
                                         help_text="Optional production weight (text field, not used in calculations)")
     unit = models.CharField(max_length=10, choices=UNIT_CHOICES, default='kg')
@@ -889,7 +889,7 @@ class AssemblyRawMaterial(models.Model):
     def total_cost(self):
         """Calculate total cost"""
         from decimal import Decimal
-        if self.production_quantity > 0:
+        if Decimal(str(self.production_quantity)) > 0:
             total = Decimal(str(self.cost_per_unit)) / Decimal(str(self.production_quantity))
             return float(total)
         return 0
