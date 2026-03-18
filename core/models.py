@@ -773,6 +773,19 @@ class Assembly(models.Model):
             return f"{self.name} - {self.quote.name}"
         return f"Assembly - {self.quote.name}"
 
+    @property
+    def total_assembly_rm_cost(self):
+        return sum(
+            Decimal(str(rm.total_cost)) for rm in self.assembly_raw_materials.all()
+        )
+
+    @property
+    def total_manufacturing_printing_cost(self):
+        return sum(
+            Decimal(str(cost.per_cost)) for cost in self.manufacturing_printing_costs.all()
+        )
+
+
     def calculate_costs(self):
         """Calculate all assembly costs"""
         from decimal import Decimal
