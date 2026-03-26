@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Material Types{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Config
+            </a>
+            <h1 class="mb-0">Upload Material Types</h1>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-box"></i> Customer Group: {{ customer_group.name }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Upload Instructions:</strong>
+                    <ol class="mb-0 mt-2">
+                        <li>Download the template file using the button below</li>
+                        <li>Fill in your material type configurations (each column = one type)</li>
+                        <li>Required fields are marked with asterisk (*)</li>
+                        <li>Upload the completed file</li>
+                    </ol>
+                </div>
+
+                <div class="mb-4">
+                    <a href="{% url 'download_material_types_template' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-download"></i> Download Material Types Template
+                    </a>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="excel_file" class="form-label">Excel File <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="excel_file" name="excel_file" 
+                               accept=".xlsx,.xls" required>
+                        <div class="form-text">Upload the completed material types Excel file (.xlsx or .xls)</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'config' %}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Upload Material Types
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sample Data Preview -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0"><i class="bi bi-table"></i> Template Structure</h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">The template uses a vertical format with headers in Column A:</p>
+                <table class="table table-sm table-bordered">
+                    <thead>
+                        <tr class="table-primary">
+                            <th>Row</th>
+                            <th>Field</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Raw Material Name*</td>
+                            <td>PP Copolymer Standard</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Raw Material Grade</td>
+                            <td>H340R</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>RM Code</td>
+                            <td>PP-STD-001</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Raw Material Rate (per kg)*</td>
+                            <td>125.50</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Description</td>
+                            <td>Standard polypropylene</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-lightbulb"></i> 
+                    <strong>Tip:</strong> Each column (B, C, D...) represents one material type
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

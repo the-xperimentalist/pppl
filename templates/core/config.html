@@ -98,9 +98,16 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Material Types</h5>
-                        <a href="{% url 'material_type_create' selected_customer_group.id %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus-circle"></i> Add Material Type
-                        </a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'upload_material_types' selected_customer_group.id %}"
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload"></i> Upload Excel
+                            </a>
+                            <a href="{% url 'material_type_create' selected_customer_group.id %}"
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add Material Type
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         {% if material_types %}
@@ -137,7 +144,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted mb-0">No material types configured yet.</p>
+                            <p class="text-muted mb-0">No material types configured yet. Click "Upload Excel" to bulk upload or "Add Material Type" to add manually.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -148,9 +155,16 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Moulding Machine Types</h5>
-                        <a href="{% url 'moulding_machine_type_create' selected_customer_group.id %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus-circle"></i> Add Machine Type
-                        </a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'upload_machine_types' selected_customer_group.id %}"
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload"></i> Upload Excel
+                            </a>
+                            <a href="{% url 'moulding_machine_type_create' selected_customer_group.id %}"
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add Machine Type
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         {% if moulding_machine_types %}
@@ -189,7 +203,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted mb-0">No moulding machine types configured yet.</p>
+                            <p class="text-muted mb-0">No moulding machine types configured yet. Click "Upload Excel" to bulk upload or "Add Machine Type" to add manually.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -200,9 +214,16 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Assembly Types</h5>
-                        <a href="{% url 'config_create' 'assembly-type' %}?customer_group={{ selected_customer_group.id }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus-circle"></i> Add Assembly Type
-                        </a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'upload_assembly_types' selected_customer_group.id %}"
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload"></i> Upload Excel
+                            </a>
+                            <a href="{% url 'config_create' 'assembly-type' %}?customer_group={{ selected_customer_group.id }}"
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add Assembly Type
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         {% if assembly_types %}
@@ -237,7 +258,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted mb-0">No assembly types configured yet.</p>
+                            <p class="text-muted mb-0">No assembly types configured yet. Click "Upload Excel" to bulk upload or "Add Assembly Type" to add manually.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -248,9 +269,16 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">Packaging Types</h5>
-                        <a href="{% url 'packaging_type_add' selected_customer_group.id %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus-circle"></i> Add Packaging Type
-                        </a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'upload_packaging_types' selected_customer_group.id %}"
+                               class="btn btn-primary btn-sm">
+                                <i class="bi bi-upload"></i> Upload Excel
+                            </a>
+                            <a href="{% url 'packaging_type_add' selected_customer_group.id %}"
+                               class="btn btn-success btn-sm">
+                                <i class="bi bi-plus-circle"></i> Add Packaging Type
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         {% if packaging_types %}
@@ -285,7 +313,7 @@
                                 </table>
                             </div>
                         {% else %}
-                            <p class="text-muted mb-0">No packaging types configured yet.</p>
+                            <p class="text-muted mb-0">No packaging types configured yet. Click "Upload Excel" to bulk upload or "Add Packaging Type" to add manually.</p>
                         {% endif %}
                     </div>
                 </div>

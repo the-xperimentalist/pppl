@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -2101,5 +2100,217 @@ def export_project(request, project_id):
     filename = f'Project_{project.name}.xlsx'.replace(' ', '_')
     response['Content-Disposition'] = f'attachment; filename={filename}'
 
+    wb.save(response)
+    return response
+
+# =============================================================================
+# Configuration Type Excel Upload Views - Added for Config Type Uploads
+# =============================================================================
+
+import tempfile
+import os
+from .excel_utils import ConfigTemplateGenerator, ConfigParser
+
+
+@login_required
+def upload_material_types(request, customer_group_id):
+    """Upload material types for a customer group from Excel"""
+    customer_group = get_object_or_404(CustomerGroup, id=customer_group_id, is_active=True)
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        try:
+            excel_file = request.FILES['excel_file']
+
+            # Save uploaded file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                for chunk in excel_file.chunks():
+                    tmp_file.write(chunk)
+                tmp_file_path = tmp_file.name
+
+            count, errors = ConfigParser.parse_material_types(tmp_file_path, customer_group)
+
+            # Clean up temp file
+            os.unlink(tmp_file_path)
+
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+
+            if count > 0:
+                messages.success(request, f'Successfully uploaded {count} material type(s)!')
+                return redirect('config')
+            else:
+                messages.warning(request, 'No material types were uploaded. Please check your file.')
+
+        except Exception as e:
+            messages.error(request, f'Error processing file: {str(e)}')
+
+    context = {
+        'customer_group': customer_group,
+    }
+    return render(request, 'core/upload_material_types.html', context)
+
+
+@login_required
+def upload_machine_types(request, customer_group_id):
+    """Upload moulding machine types for a customer group from Excel"""
+    customer_group = get_object_or_404(CustomerGroup, id=customer_group_id, is_active=True)
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        try:
+            excel_file = request.FILES['excel_file']
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                for chunk in excel_file.chunks():
+                    tmp_file.write(chunk)
+                tmp_file_path = tmp_file.name
+
+            count, errors = ConfigParser.parse_machine_types(tmp_file_path, customer_group)
+
+            os.unlink(tmp_file_path)
+
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+
+            if count > 0:
+                messages.success(request, f'Successfully uploaded {count} machine type(s)!')
+                return redirect('config')
+            else:
+                messages.warning(request, 'No machine types were uploaded. Please check your file.')
+
+        except Exception as e:
+            messages.error(request, f'Error processing file: {str(e)}')
+
+    context = {
+        'customer_group': customer_group,
+    }
+    return render(request, 'core/upload_machine_types.html', context)
+
+
+@login_required
+def upload_assembly_types(request, customer_group_id):
+    """Upload assembly types for a customer group from Excel"""
+    customer_group = get_object_or_404(CustomerGroup, id=customer_group_id, is_active=True)
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        try:
+            excel_file = request.FILES['excel_file']
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                for chunk in excel_file.chunks():
+                    tmp_file.write(chunk)
+                tmp_file_path = tmp_file.name
+
+            count, errors = ConfigParser.parse_assembly_types(tmp_file_path, customer_group)
+
+            os.unlink(tmp_file_path)
+
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+
+            if count > 0:
+                messages.success(request, f'Successfully uploaded {count} assembly type(s)!')
+                return redirect('config')
+            else:
+                messages.warning(request, 'No assembly types were uploaded. Please check your file.')
+
+        except Exception as e:
+            messages.error(request, f'Error processing file: {str(e)}')
+
+    context = {
+        'customer_group': customer_group,
+    }
+    return render(request, 'core/upload_assembly_types.html', context)
+
+
+@login_required
+def upload_packaging_types(request, customer_group_id):
+    """Upload packaging types for a customer group from Excel"""
+    customer_group = get_object_or_404(CustomerGroup, id=customer_group_id, is_active=True)
+
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        try:
+            excel_file = request.FILES['excel_file']
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                for chunk in excel_file.chunks():
+                    tmp_file.write(chunk)
+                tmp_file_path = tmp_file.name
+
+            count, errors = ConfigParser.parse_packaging_types(tmp_file_path, customer_group)
+
+            os.unlink(tmp_file_path)
+
+            if errors:
+                for error in errors:
+                    messages.error(request, error)
+
+            if count > 0:
+                messages.success(request, f'Successfully uploaded {count} packaging type(s)!')
+                return redirect('config')
+            else:
+                messages.warning(request, 'No packaging types were uploaded. Please check your file.')
+
+        except Exception as e:
+            messages.error(request, f'Error processing file: {str(e)}')
+
+    context = {
+        'customer_group': customer_group,
+    }
+    return render(request, 'core/upload_packaging_types.html', context)
+
+
+# Configuration Type Template Download Views
+
+@login_required
+def download_material_types_template(request):
+    """Download Excel template for material types"""
+    wb = ConfigTemplateGenerator.create_material_types_template()
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=material_types_template.xlsx'
+    wb.save(response)
+    return response
+
+
+@login_required
+def download_machine_types_template(request):
+    """Download Excel template for moulding machine types"""
+    wb = ConfigTemplateGenerator.create_machine_types_template()
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=machine_types_template.xlsx'
+    wb.save(response)
+    return response
+
+
+@login_required
+def download_assembly_types_template(request):
+    """Download Excel template for assembly types"""
+    wb = ConfigTemplateGenerator.create_assembly_types_template()
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=assembly_types_template.xlsx'
+    wb.save(response)
+    return response
+
+
+@login_required
+def download_packaging_types_template(request):
+    """Download Excel template for packaging types"""
+    wb = ConfigTemplateGenerator.create_packaging_types_template()
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=packaging_types_template.xlsx'
     wb.save(response)
     return response

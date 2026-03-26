@@ -114,4 +114,42 @@ urlpatterns = [
      # Export functionality
      path('projects/<int:project_id>/quotes/<int:quote_id>/export/', views.export_quote, name='export_quote'),
      path('projects/<int:project_id>/export/', views.export_project, name='export_project'),
+
+    # =============================================================================
+    # Configuration Type Excel Uploads - Added for Config Type Uploads
+    # =============================================================================
+
+    # Configuration Type Excel Uploads
+    path('customer-groups/<int:customer_group_id>/upload-material-types/',
+         views.upload_material_types,
+         name='upload_material_types'),
+
+    path('customer-groups/<int:customer_group_id>/upload-machine-types/',
+         views.upload_machine_types,
+         name='upload_machine_types'),
+
+    path('customer-groups/<int:customer_group_id>/upload-assembly-types/',
+         views.upload_assembly_types,
+         name='upload_assembly_types'),
+
+    path('customer-groups/<int:customer_group_id>/upload-packaging-types/',
+         views.upload_packaging_types,
+         name='upload_packaging_types'),
+
+    # Configuration Type Template Downloads
+    path('templates/material-types/',
+         views.download_material_types_template,
+         name='download_material_types_template'),
+
+    path('templates/machine-types/',
+         views.download_machine_types_template,
+         name='download_machine_types_template'),
+
+    path('templates/assembly-types/',
+         views.download_assembly_types_template,
+         name='download_assembly_types_template'),
+
+    path('templates/packaging-types/',
+         views.download_packaging_types_template,
+         name='download_packaging_types_template'),
 ]

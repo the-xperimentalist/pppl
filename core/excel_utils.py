@@ -1490,4 +1490,342 @@ class ExcelExporter:
                 for col_letter, col_dim in source_sheet.column_dimensions.items():
                     target_sheet.column_dimensions[col_letter].width = col_dim.width
 
+        return wb# =============================================================================
+# ADD THIS CODE TO THE END OF excel_utils.py (after line 1493)
+# CORRECTED VERSION - Matches your actual models
+# =============================================================================
+
+# Configuration Type Template Generators and Parsers
+# Add these classes at the end of the file
+
+class ConfigTemplateGenerator:
+    """Generate Excel templates for configuration types"""
+
+    @staticmethod
+    def _add_vertical_headers(ws, headers, color, start_row=1):
+        """Add vertical headers in column A with color coding"""
+        header_fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+
+        for row_num, header in enumerate(headers, start_row):
+            cell = ws.cell(row=row_num, column=1)
+            cell.value = header
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal='left', vertical='center')
+
+        ws.column_dimensions['A'].width = 40
+
+    @staticmethod
+    def create_material_types_template():
+        """Create template for uploading material types"""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Material Types"
+
+        headers = [
+            'Raw Material Name*',
+            'Raw Material Grade',
+            'RM Code',
+            'Raw Material Rate (per kg)*',
+            'Description'
+        ]
+
+        ConfigTemplateGenerator._add_vertical_headers(ws, headers, "4472C4")
+
+        # Add sample data for 3 material types
+        materials = [
+            ['PP Copolymer Standard', 'H340R', 'PP-STD-001', 125.50, 'Standard polypropylene for general use'],
+            ['ABS High Impact', 'ABS-750', 'ABS-HI-002', 185.75, 'High impact ABS for durable parts'],
+            ['PC Lexan Clear', 'PC-110', 'PC-CLR-003', 295.50, 'Clear polycarbonate for transparent parts'],
+        ]
+
+        for col_num, material_data in enumerate(materials, 2):
+            for row_num, value in enumerate(material_data, 1):
+                ws.cell(row=row_num, column=col_num, value=value)
+            ws.column_dimensions[get_column_letter(col_num)].width = 25
+
         return wb
+
+    @staticmethod
+    def create_machine_types_template():
+        """Create template for uploading moulding machine types"""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Machine Types"
+
+        headers = [
+            'Machine Type Name*',
+            'Shift Rate*',
+            'Shift Rate for MTC*',
+            'MTC Count*',
+            'Description'
+        ]
+
+        ConfigTemplateGenerator._add_vertical_headers(ws, headers, "70AD47")
+
+        # Add sample data
+        machines = [
+            ['Standard 120T Machine', 2500.00, 2200.00, 500, 'Standard 120 ton machine for 2-cavity molds'],
+            ['High Speed 180T Machine', 3200.00, 2800.00, 1000, 'High speed 180 ton for 4-cavity production'],
+            ['Heavy Duty 250T Machine', 4500.00, 4000.00, 2000, 'Heavy duty 250 ton for high cavity molds'],
+        ]
+
+        for col_num, machine_data in enumerate(machines, 2):
+            for row_num, value in enumerate(machine_data, 1):
+                ws.cell(row=row_num, column=col_num, value=value)
+            ws.column_dimensions[get_column_letter(col_num)].width = 25
+
+        return wb
+
+    @staticmethod
+    def create_assembly_types_template():
+        """Create template for uploading assembly types"""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Assembly Types"
+
+        headers = [
+            'Assembly Type Name*',
+            'Value/Code*',
+            'Description'
+        ]
+
+        ConfigTemplateGenerator._add_vertical_headers(ws, headers, "FFC000")
+
+        # Add sample data
+        assemblies = [
+            ['Manual Screw Assembly', 'MANUAL-SCREW', 'Standard manual screw assembly process'],
+            ['Ultrasonic Welding', 'US-WELD', 'Automated ultrasonic welding process'],
+            ['Insert Molding', 'INSERT-MOLD', 'Insert molding with metal components'],
+        ]
+
+        for col_num, assembly_data in enumerate(assemblies, 2):
+            for row_num, value in enumerate(assembly_data, 1):
+                ws.cell(row=row_num, column=col_num, value=value)
+            ws.column_dimensions[get_column_letter(col_num)].width = 25
+
+        return wb
+
+    @staticmethod
+    def create_packaging_types_template():
+        """Create template for uploading packaging types"""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Packaging Types"
+
+        headers = [
+            'Packaging Type Name*',
+            'Packaging Category* (box/polybag)',
+            '--- BOX DEFAULTS (Fill only if category = box) ---',
+            'Default Length (mm)',
+            'Default Breadth (mm)',
+            'Default Height (mm)',
+            '--- POLYBAG DEFAULTS (Fill only if category = polybag) ---',
+            'Default Polybag Length (inches)',
+            'Default Polybag Width (inches)',
+            'Default Rate per kg',
+            'Default Polybags per kg',
+            'Description'
+        ]
+
+        ConfigTemplateGenerator._add_vertical_headers(ws, headers, "E26B0A")
+
+        # Add sample data - 2 box, 1 polybag
+        packagings = [
+            ['Standard PP Box 600x400x250', 'box', '', 600, 400, 250, '', 0, 0, 0, 0, 'Standard PP box for general packaging'],
+            ['Large CG Box 800x600x400', 'box', '', 800, 600, 400, '', 0, 0, 0, 0, 'Large corrugated box for bulk items'],
+            ['Standard Polybag 16x20', 'polybag', '', 0, 0, 0, '', 16, 20, 250.00, 1000, 'Standard polybag for small parts'],
+        ]
+
+        for col_num, pkg_data in enumerate(packagings, 2):
+            for row_num, value in enumerate(pkg_data, 1):
+                ws.cell(row=row_num, column=col_num, value=value)
+            ws.column_dimensions[get_column_letter(col_num)].width = 25
+
+        return wb
+
+
+class ConfigParser:
+    """Parse Excel files for configuration types"""
+
+    @staticmethod
+    def parse_material_types(file_path, customer_group):
+        """Parse material types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import MaterialType
+
+        sheet_name = None
+        for possible_name in ['Material Types', 'Material_Types', 'MaterialTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Material Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        # Read each column starting from column B
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                raw_material_name = ws.cell(1, col_num).value
+                if not raw_material_name:
+                    break
+
+                MaterialType.objects.create(
+                    customer_group=customer_group,
+                    raw_material_name=str(raw_material_name),
+                    raw_material_grade=str(ws.cell(2, col_num).value or ''),
+                    raw_material_code=str(ws.cell(3, col_num).value or ''),
+                    raw_material_rate=float(ws.cell(4, col_num).value or 0),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_machine_types(file_path, customer_group):
+        """Parse moulding machine types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import MouldingMachineType
+
+        sheet_name = None
+        for possible_name in ['Machine Types', 'Machine_Types', 'MachineTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Machine Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                MouldingMachineType.objects.create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    shift_rate=float(ws.cell(2, col_num).value or 0),
+                    shift_rate_for_mtc=float(ws.cell(3, col_num).value or 0),
+                    mtc_count=int(ws.cell(4, col_num).value or 0),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_assembly_types(file_path, customer_group):
+        """Parse assembly types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import AssemblyType
+
+        sheet_name = None
+        for possible_name in ['Assembly Types', 'Assembly_Types', 'AssemblyTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Assembly Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                AssemblyType.objects.create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    value=str(ws.cell(2, col_num).value or ''),
+                    description=str(ws.cell(3, col_num).value or ''),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_packaging_types(file_path, customer_group):
+        """Parse packaging types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import PackagingType
+
+        sheet_name = None
+        for possible_name in ['Packaging Types', 'Packaging_Types', 'PackagingTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Packaging Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                category = str(ws.cell(2, col_num).value or 'box').lower()
+
+                PackagingType.objects.create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    packaging_category=category,
+                    # Box fields (rows 4-6)
+                    default_length=float(ws.cell(4, col_num).value or 600),
+                    default_breadth=float(ws.cell(5, col_num).value or 400),
+                    default_height=float(ws.cell(6, col_num).value or 250),
+                    # Polybag fields (rows 8-11)
+                    default_polybag_length=float(ws.cell(8, col_num).value or 0),
+                    default_polybag_width=float(ws.cell(9, col_num).value or 0),
+                    default_rate_per_kg=float(ws.cell(10, col_num).value or 0),
+                    default_polybags_per_kg=float(ws.cell(11, col_num).value or 0),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
