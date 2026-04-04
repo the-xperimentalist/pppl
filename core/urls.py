@@ -152,4 +152,26 @@ urlpatterns = [
     path('templates/packaging-types/',
          views.download_packaging_types_template,
          name='download_packaging_types_template'),
+
+    # =============================================================================
+    # ADD THESE URL PATTERNS TO urls.py
+    # Add these to the urlpatterns list
+    # =============================================================================
+
+    # Material Type edit
+    path('config/material-types/<int:material_type_id>/edit/',
+         views.material_type_edit,
+         name='material_type_edit'),
+
+    # Moulding Machine Type edit
+    path('config/moulding-machine-types/<int:machine_type_id>/edit/',
+         views.moulding_machine_type_edit,
+         name='moulding_machine_type_edit'),
+
+    # Assembly Type edit
+    path('config/assembly-types/<int:assembly_type_id>/edit/',
+         views.assembly_type_edit,
+         name='assembly_type_edit'),
+
+    # Note: packaging_type_edit already exists in your urls.py
 ]

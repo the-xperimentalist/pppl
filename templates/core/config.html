@@ -132,11 +132,19 @@
                                             <td>{{ material.raw_material_rate|smart_decimal }}</td>
                                             <td>{{ material.created_by.username }}</td>
                                             <td>
-                                                <a href="{% url 'material_type_delete' material.id %}"
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Delete this material type?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'material_type_edit' material.id %}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'material_type_delete' material.id %}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Delete this material type?')"
+                                                       title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -191,11 +199,19 @@
                                             <td>{{ machine.mtc_cost|smart_decimal }}</td>
                                             <td>{{ machine.created_by.username }}</td>
                                             <td>
-                                                <a href="{% url 'moulding_machine_type_delete' machine.id %}"
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Delete this machine type?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'moulding_machine_type_edit' machine.id %}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'moulding_machine_type_delete' machine.id %}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Delete this machine type?')"
+                                                       title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -246,11 +262,19 @@
                                             <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
                                             <td>{{ item.created_by.username }}</td>
                                             <td>
-                                                <a href="{% url 'config_delete' 'assembly-type' item.id %}"
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Delete this assembly type?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'assembly_type_edit' item.id %}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'config_delete' 'assembly-type' item.id %}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Delete this assembly type?')"
+                                                       title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -301,11 +325,19 @@
                                             <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
                                             <td>{{ item.created_by.username }}</td>
                                             <td>
-                                                <a href="{% url 'config_delete' 'packaging-type' item.id %}"
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Delete this packaging type?')">
-                                                    <i class="bi bi-trash"></i>
-                                                </a>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'packaging_type_edit' item.id %}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a href="{% url 'config_delete' 'packaging-type' item.id %}"
+                                                       class="btn btn-sm btn-outline-danger"
+                                                       onclick="return confirm('Delete this packaging type?')"
+                                                       title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% endfor %}

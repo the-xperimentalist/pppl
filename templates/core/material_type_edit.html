@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Material Type{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Config
+            </a>
+            <h1 class="mb-0">Edit Material Type</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-box"></i> Edit Material Type</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="raw_material_name" class="form-label">Raw Material Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="raw_material_name" name="raw_material_name" 
+                               value="{{ material_type.raw_material_name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="raw_material_grade" class="form-label">Raw Material Grade</label>
+                        <input type="text" class="form-control" id="raw_material_grade" name="raw_material_grade" 
+                               value="{{ material_type.raw_material_grade }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="raw_material_code" class="form-label">RM Code</label>
+                        <input type="text" class="form-control" id="raw_material_code" name="raw_material_code" 
+                               value="{{ material_type.raw_material_code }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="raw_material_rate" class="form-label">Raw Material Rate (per kg) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="raw_material_rate" name="raw_material_rate" 
+                               value="{{ material_type.raw_material_rate }}" required>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'config' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -2314,3 +2314,78 @@ def download_packaging_types_template(request):
     response['Content-Disposition'] = 'attachment; filename=packaging_types_template.xlsx'
     wb.save(response)
     return response
+
+# =============================================================================
+# ADD THESE EDIT VIEW FUNCTIONS TO views.py
+# Add after the existing create/delete functions for each type
+# =============================================================================
+
+@login_required
+def material_type_edit(request, material_type_id):
+    """Edit material type"""
+    material_type = get_object_or_404(MaterialType, id=material_type_id, is_active=True)
+
+    if request.method == 'POST':
+        try:
+            material_type.raw_material_name = request.POST.get('raw_material_name')
+            material_type.raw_material_grade = request.POST.get('raw_material_grade', '')
+            material_type.raw_material_code = request.POST.get('raw_material_code', '')
+            material_type.raw_material_rate = float(request.POST.get('raw_material_rate', 0))
+            material_type.save()
+
+            messages.success(request, f'Material type "{material_type.raw_material_name}" updated successfully!')
+            return redirect('config')
+        except Exception as e:
+            messages.error(request, f'Error updating material type: {str(e)}')
+
+    context = {
+        'material_type': material_type,
+    }
+    return render(request, 'core/material_type_edit.html', context)
+
+
+@login_required
+def moulding_machine_type_edit(request, machine_type_id):
+    """Edit moulding machine type"""
+    machine_type = get_object_or_404(MouldingMachineType, id=machine_type_id, is_active=True)
+
+    if request.method == 'POST':
+        try:
+            machine_type.name = request.POST.get('name')
+            machine_type.shift_rate = float(request.POST.get('shift_rate', 0))
+            machine_type.shift_rate_for_mtc = float(request.POST.get('shift_rate_for_mtc', 0))
+            machine_type.mtc_count = int(request.POST.get('mtc_count', 0))
+            machine_type.save()
+
+            messages.success(request, f'Machine type "{machine_type.name}" updated successfully!')
+            return redirect('config')
+        except Exception as e:
+            messages.error(request, f'Error updating machine type: {str(e)}')
+
+    context = {
+        'machine_type': machine_type,
+    }
+    return render(request, 'core/moulding_machine_type_edit.html', context)
+
+
+@login_required
+def assembly_type_edit(request, assembly_type_id):
+    """Edit assembly type"""
+    assembly_type = get_object_or_404(AssemblyType, id=assembly_type_id, is_active=True)
+
+    if request.method == 'POST':
+        try:
+            assembly_type.name = request.POST.get('name')
+            assembly_type.value = request.POST.get('value', '')
+            assembly_type.description = request.POST.get('description', '')
+            assembly_type.save()
+
+            messages.success(request, f'Assembly type "{assembly_type.name}" updated successfully!')
+            return redirect('config')
+        except Exception as e:
+            messages.error(request, f'Error updating assembly type: {str(e)}')
+
+    context = {
+        'assembly_type': assembly_type,
+    }
+    return render(request, 'core/assembly_type_edit.html', context)

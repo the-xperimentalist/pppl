@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Moulding Machine Type{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'config' %}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i> Back to Config
+            </a>
+            <h1 class="mb-0">Edit Moulding Machine Type</h1>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-gear-wide-connected"></i> Edit Moulding Machine Type</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Machine Type Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ machine_type.name }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="shift_rate" class="form-label">Shift Rate <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="shift_rate" name="shift_rate" 
+                               value="{{ machine_type.shift_rate }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="shift_rate_for_mtc" class="form-label">Shift Rate for MTC <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="shift_rate_for_mtc" name="shift_rate_for_mtc" 
+                               value="{{ machine_type.shift_rate_for_mtc }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="mtc_count" class="form-label">MTC Count <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="mtc_count" name="mtc_count" 
+                               value="{{ machine_type.mtc_count }}" required>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Calculated MTC Cost:</strong> {{ machine_type.mtc_cost|floatformat:2 }}
+                        <br><small class="text-muted">MTC Cost = MTC Count × Shift Rate for MTC</small>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'config' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
