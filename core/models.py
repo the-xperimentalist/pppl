@@ -44,6 +44,12 @@ class MouldingMachineType(models.Model):
         ordering = ['customer_group', 'name']
         verbose_name = 'Moulding Machine Type'
         verbose_name_plural = 'Moulding Machine Types'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'customer_group'],
+                name='unique_moulding_machine_type_name_customer_group'
+            )
+        ]
 
     def __str__(self):
         if self.name:
@@ -77,6 +83,12 @@ class MaterialType(models.Model):
         ordering = ['customer_group', 'raw_material_name']
         verbose_name = 'Material Type'
         verbose_name_plural = 'Material Types'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['raw_material_name', 'customer_group'],
+                name='unique_material_type_raw_material_name_customer_group'
+            )
+        ]
 
     def __str__(self):
         return f"{self.raw_material_name} - {self.raw_material_grade} ({self.customer_group.name if self.customer_group else 'No Group'})"
@@ -576,6 +588,12 @@ class AssemblyType(models.Model):
         ordering = ['customer_group', 'name']
         verbose_name = 'Assembly Type'
         verbose_name_plural = 'Assembly Types'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'customer_group'],
+                name='unique_assembly_type_name_customer_group'
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.value}) - {self.customer_group.name if self.customer_group else 'No Group'}"
@@ -618,6 +636,12 @@ class PackagingType(models.Model):
 
     class Meta:
         ordering = ['customer_group', 'name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'customer_group'],
+                name='unique_packaging_type_name_customer_group'
+            )
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.customer_group.name})"

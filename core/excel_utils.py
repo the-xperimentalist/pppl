@@ -1678,13 +1678,21 @@ class ConfigParser:
                 if not raw_material_name:
                     break
 
-                MaterialType.objects.create(
+                # MaterialType.objects.update_or_create(
+                #     customer_group=customer_group,
+                #     raw_material_name=str(raw_material_name),
+                #     raw_material_grade=str(ws.cell(2, col_num).value or ''),
+                #     raw_material_code=str(ws.cell(3, col_num).value or ''),
+                #     raw_material_rate=float(ws.cell(4, col_num).value or 0),
+                # )
+                MaterialType.objects.update_or_create(
                     customer_group=customer_group,
                     raw_material_name=str(raw_material_name),
-                    raw_material_grade=str(ws.cell(2, col_num).value or ''),
-                    raw_material_code=str(ws.cell(3, col_num).value or ''),
-                    raw_material_rate=float(ws.cell(4, col_num).value or 0),
-                )
+                    defaults={
+                        'raw_material_grade': str(ws.cell(2, col_num).value or ''),
+                        'raw_material_code': str(ws.cell(3, col_num).value or ''),
+                        'raw_material_rate': float(ws.cell(4, col_num).value or 0)
+                    })
                 count += 1
                 col_num += 1
             except Exception as e:
@@ -1721,13 +1729,21 @@ class ConfigParser:
                 if not name:
                     break
 
-                MouldingMachineType.objects.create(
+                # MouldingMachineType.objects.create(
+                #     customer_group=customer_group,
+                #     name=str(name),
+                #     shift_rate=float(ws.cell(2, col_num).value or 0),
+                #     shift_rate_for_mtc=float(ws.cell(3, col_num).value or 0),
+                #     mtc_count=int(ws.cell(4, col_num).value or 0),
+                # )
+                MouldingMachineType.objects.update_or_create(
                     customer_group=customer_group,
                     name=str(name),
-                    shift_rate=float(ws.cell(2, col_num).value or 0),
-                    shift_rate_for_mtc=float(ws.cell(3, col_num).value or 0),
-                    mtc_count=int(ws.cell(4, col_num).value or 0),
-                )
+                    defaults={
+                        'shift_rate': float(ws.cell(2, col_num).value or 0),
+                        'shift_rate_for_mtc': float(ws.cell(3, col_num).value or 0),
+                        'mtc_count': int(ws.cell(4, col_num).value or 0)
+                    })
                 count += 1
                 col_num += 1
             except Exception as e:
@@ -1764,12 +1780,19 @@ class ConfigParser:
                 if not name:
                     break
 
-                AssemblyType.objects.create(
+                # AssemblyType.objects.create(
+                #     customer_group=customer_group,
+                #     name=str(name),
+                #     value=str(ws.cell(2, col_num).value or ''),
+                #     description=str(ws.cell(3, col_num).value or ''),
+                # )
+                AssemblyType.objects.update_or_create(
                     customer_group=customer_group,
                     name=str(name),
-                    value=str(ws.cell(2, col_num).value or ''),
-                    description=str(ws.cell(3, col_num).value or ''),
-                )
+                    defaults={
+                        'value': str(ws.cell(2, col_num).value or ''),
+                        'description': str(ws.cell(3, col_num).value or '')
+                    })
                 count += 1
                 col_num += 1
             except Exception as e:
@@ -1808,20 +1831,33 @@ class ConfigParser:
 
                 category = str(ws.cell(2, col_num).value or 'box').lower()
 
-                PackagingType.objects.create(
+                # PackagingType.objects.create(
+                #     customer_group=customer_group,
+                #     name=str(name),
+                #     packaging_category=category,
+                #     # Box fields (rows 4-6)
+                #     default_length=float(ws.cell(4, col_num).value or 600),
+                #     default_breadth=float(ws.cell(5, col_num).value or 400),
+                #     default_height=float(ws.cell(6, col_num).value or 250),
+                #     # Polybag fields (rows 8-11)
+                #     default_polybag_length=float(ws.cell(8, col_num).value or 0),
+                #     default_polybag_width=float(ws.cell(9, col_num).value or 0),
+                #     default_rate_per_kg=float(ws.cell(10, col_num).value or 0),
+                #     default_polybags_per_kg=float(ws.cell(11, col_num).value or 0),
+                # )
+                PackagingType.objects.update_or_create(
                     customer_group=customer_group,
                     name=str(name),
-                    packaging_category=category,
-                    # Box fields (rows 4-6)
-                    default_length=float(ws.cell(4, col_num).value or 600),
-                    default_breadth=float(ws.cell(5, col_num).value or 400),
-                    default_height=float(ws.cell(6, col_num).value or 250),
-                    # Polybag fields (rows 8-11)
-                    default_polybag_length=float(ws.cell(8, col_num).value or 0),
-                    default_polybag_width=float(ws.cell(9, col_num).value or 0),
-                    default_rate_per_kg=float(ws.cell(10, col_num).value or 0),
-                    default_polybags_per_kg=float(ws.cell(11, col_num).value or 0),
-                )
+                    defaults={
+                        'packaging_category': category,
+                        'default_length': float(ws.cell(4, col_num).value or 600),
+                        'default_breadth': float(ws.cell(5, col_num).value or 400),
+                        'default_height': float(ws.cell(6, col_num).value or 250),
+                        'default_polybag_length': float(ws.cell(8, col_num).value or 0),
+                        'default_polybag_width': float(ws.cell(9, col_num).value or 0),
+                        'default_rate_per_kg': float(ws.cell(10, col_num).value or 0),
+                        'default_polybags_per_kg': float(ws.cell(11, col_num).value or 0),
+                    })
                 count += 1
                 col_num += 1
             except Exception as e:
