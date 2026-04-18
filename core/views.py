@@ -2028,6 +2028,7 @@ def packaging_type_edit(request, packaging_type_id):
             packaging_type.default_height = float(request.POST.get('default_height', 250))
             packaging_type.default_polybag_length = float(request.POST.get('default_polybag_length', 16))
             packaging_type.default_polybag_width = float(request.POST.get('default_polybag_width', 20))
+            packaging_type.remarks = request.POST.get('remarks', '')
             packaging_type.save()
 
             messages.success(request, f'Packaging type "{packaging_type.name}" updated successfully!')
@@ -2331,6 +2332,7 @@ def material_type_edit(request, material_type_id):
             material_type.raw_material_grade = request.POST.get('raw_material_grade', '')
             material_type.raw_material_code = request.POST.get('raw_material_code', '')
             material_type.raw_material_rate = float(request.POST.get('raw_material_rate', 0))
+            material_type.remarks = request.POST.get('remarks', '')
             material_type.save()
 
             messages.success(request, f'Material type "{material_type.raw_material_name}" updated successfully!')
@@ -2355,6 +2357,7 @@ def moulding_machine_type_edit(request, machine_type_id):
             machine_type.shift_rate = float(request.POST.get('shift_rate', 0))
             machine_type.shift_rate_for_mtc = float(request.POST.get('shift_rate_for_mtc', 0))
             machine_type.mtc_count = int(request.POST.get('mtc_count', 0))
+            machine_type.remarks = request.POST.get('remarks', '')
             machine_type.save()
 
             messages.success(request, f'Machine type "{machine_type.name}" updated successfully!')
@@ -2378,6 +2381,7 @@ def assembly_type_edit(request, assembly_type_id):
             assembly_type.name = request.POST.get('name')
             assembly_type.value = request.POST.get('value', '')
             assembly_type.description = request.POST.get('description', '')
+            assembly_type.remarks = request.POST.get('remarks', '')
             assembly_type.save()
 
             messages.success(request, f'Assembly type "{assembly_type.name}" updated successfully!')

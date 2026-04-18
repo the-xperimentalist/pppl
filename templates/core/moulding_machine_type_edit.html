@@ -49,6 +49,12 @@
                         <br><small class="text-muted">MTC Cost = MTC Count × Shift Rate for MTC</small>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3">{{ machine_type.remarks }}</textarea>
+                        <div class="form-text">Additional notes or remarks about this machine type</div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'config' %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">

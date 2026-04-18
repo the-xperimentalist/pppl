@@ -1528,7 +1528,7 @@ class ConfigTemplateGenerator:
             'Raw Material Grade',
             'RM Code',
             'Raw Material Rate (per kg)*',
-            'Description'
+            'Remarks'
         ]
 
         ConfigTemplateGenerator._add_vertical_headers(ws, headers, "4472C4")
@@ -1559,7 +1559,7 @@ class ConfigTemplateGenerator:
             'Shift Rate*',
             'Shift Rate for MTC*',
             'MTC Count*',
-            'Description'
+            'Remarks'
         ]
 
         ConfigTemplateGenerator._add_vertical_headers(ws, headers, "70AD47")
@@ -1588,16 +1588,17 @@ class ConfigTemplateGenerator:
         headers = [
             'Assembly Type Name*',
             'Value/Code*',
-            'Description'
+            'Description',
+            'Remarks'
         ]
 
         ConfigTemplateGenerator._add_vertical_headers(ws, headers, "FFC000")
 
         # Add sample data
         assemblies = [
-            ['Manual Screw Assembly', 'MANUAL-SCREW', 'Standard manual screw assembly process'],
-            ['Ultrasonic Welding', 'US-WELD', 'Automated ultrasonic welding process'],
-            ['Insert Molding', 'INSERT-MOLD', 'Insert molding with metal components'],
+            ['Manual Screw Assembly', 'MANUAL-SCREW', 'Standard manual screw assembly process', 'Requires trained operator'],
+            ['Ultrasonic Welding', 'US-WELD', 'Automated ultrasonic welding process', 'Machine model: USW-2000'],
+            ['Insert Molding', 'INSERT-MOLD', 'Insert molding with metal components', 'Requires pre-positioning jig'],
         ]
 
         for col_num, assembly_data in enumerate(assemblies, 2):
@@ -1626,7 +1627,7 @@ class ConfigTemplateGenerator:
             'Default Polybag Width (inches)',
             'Default Rate per kg',
             'Default Polybags per kg',
-            'Description'
+            'Remarks'
         ]
 
         ConfigTemplateGenerator._add_vertical_headers(ws, headers, "E26B0A")
@@ -1678,12 +1679,13 @@ class ConfigParser:
                 if not raw_material_name:
                     break
 
-                # MaterialType.objects.update_or_create(
+                # MaterialType.objects.create(
                 #     customer_group=customer_group,
                 #     raw_material_name=str(raw_material_name),
                 #     raw_material_grade=str(ws.cell(2, col_num).value or ''),
                 #     raw_material_code=str(ws.cell(3, col_num).value or ''),
                 #     raw_material_rate=float(ws.cell(4, col_num).value or 0),
+                #     remarks=str(ws.cell(5, col_num).value or ''),  # NEW
                 # )
                 MaterialType.objects.update_or_create(
                     customer_group=customer_group,
@@ -1691,7 +1693,8 @@ class ConfigParser:
                     defaults={
                         'raw_material_grade': str(ws.cell(2, col_num).value or ''),
                         'raw_material_code': str(ws.cell(3, col_num).value or ''),
-                        'raw_material_rate': float(ws.cell(4, col_num).value or 0)
+                        'raw_material_rate': float(ws.cell(4, col_num).value or 0),
+                        'remarks': str(ws.cell(5, col_num).value or '')
                     })
                 count += 1
                 col_num += 1
@@ -1735,6 +1738,7 @@ class ConfigParser:
                 #     shift_rate=float(ws.cell(2, col_num).value or 0),
                 #     shift_rate_for_mtc=float(ws.cell(3, col_num).value or 0),
                 #     mtc_count=int(ws.cell(4, col_num).value or 0),
+                #     remarks=str(ws.cell(5, col_num).value or ''),  # NEW
                 # )
                 MouldingMachineType.objects.update_or_create(
                     customer_group=customer_group,
@@ -1742,7 +1746,8 @@ class ConfigParser:
                     defaults={
                         'shift_rate': float(ws.cell(2, col_num).value or 0),
                         'shift_rate_for_mtc': float(ws.cell(3, col_num).value or 0),
-                        'mtc_count': int(ws.cell(4, col_num).value or 0)
+                        'mtc_count': int(ws.cell(4, col_num).value or 0),
+                        'remarks': str(ws.cell(5, col_num).value or '')
                     })
                 count += 1
                 col_num += 1
@@ -1785,13 +1790,15 @@ class ConfigParser:
                 #     name=str(name),
                 #     value=str(ws.cell(2, col_num).value or ''),
                 #     description=str(ws.cell(3, col_num).value or ''),
+                #     remarks=str(ws.cell(4, col_num).value or ''),  # NEW
                 # )
                 AssemblyType.objects.update_or_create(
                     customer_group=customer_group,
                     name=str(name),
                     defaults={
                         'value': str(ws.cell(2, col_num).value or ''),
-                        'description': str(ws.cell(3, col_num).value or '')
+                        'description': str(ws.cell(3, col_num).value or ''),
+                        'remarks': str(ws.cell(4, col_num).value or '')
                     })
                 count += 1
                 col_num += 1
@@ -1844,6 +1851,7 @@ class ConfigParser:
                 #     default_polybag_width=float(ws.cell(9, col_num).value or 0),
                 #     default_rate_per_kg=float(ws.cell(10, col_num).value or 0),
                 #     default_polybags_per_kg=float(ws.cell(11, col_num).value or 0),
+                #     remarks=str(ws.cell(12, col_num).value or ''),  # NEW - row 12
                 # )
                 PackagingType.objects.update_or_create(
                     customer_group=customer_group,
@@ -1857,6 +1865,7 @@ class ConfigParser:
                         'default_polybag_width': float(ws.cell(9, col_num).value or 0),
                         'default_rate_per_kg': float(ws.cell(10, col_num).value or 0),
                         'default_polybags_per_kg': float(ws.cell(11, col_num).value or 0),
+                        'remarks': str(ws.cell(12, col_num).value or '')
                     })
                 count += 1
                 col_num += 1

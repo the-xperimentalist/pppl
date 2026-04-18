@@ -119,6 +119,7 @@
                                             <th>Grade</th>
                                             <th>RM Code</th>
                                             <th>Rate</th>
+                                            <th>Remarks</th>
                                             <th>Created By</th>
                                             <th>Actions</th>
                                         </tr>
@@ -130,6 +131,7 @@
                                             <td>{{ material.raw_material_grade }}</td>
                                             <td><code>{{ material.raw_material_code }}</code></td>
                                             <td>{{ material.raw_material_rate|smart_decimal }}</td>
+                                            <td>{{ material.remarks|default:"-"|truncatewords:10 }}</td>
                                             <td>{{ material.created_by.username }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
@@ -185,6 +187,7 @@
                                             <th>Shift Rate for MTC</th>
                                             <th>MTC Count</th>
                                             <th>MTC Cost (Calculated)</th>
+                                            <th>Remarks</th>
                                             <th>Created By</th>
                                             <th>Actions</th>
                                         </tr>
@@ -197,6 +200,7 @@
                                             <td>{{ machine.shift_rate_for_mtc|smart_decimal }}</td>
                                             <td>{{ machine.mtc_count }}</td>
                                             <td>{{ machine.mtc_cost|smart_decimal }}</td>
+                                            <td>{{ machine.remarks|default:"-"|truncatewords:10 }}</td>
                                             <td>{{ machine.created_by.username }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
@@ -250,6 +254,7 @@
                                             <th>Name</th>
                                             <th>Value</th>
                                             <th>Description</th>
+                                            <th>Remarks</th>
                                             <th>Created By</th>
                                             <th>Actions</th>
                                         </tr>
@@ -260,6 +265,7 @@
                                             <td><strong>{{ item.name }}</strong></td>
                                             <td><code>{{ item.value }}</code></td>
                                             <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
+                                            <td>{{ item.remarks|default:"-"|truncatewords:10 }}</td>
                                             <td>{{ item.created_by.username }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
@@ -311,8 +317,8 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Name</th>
-                                            <th>Value</th>
-                                            <th>Description</th>
+                                            <th>Category</th>
+                                            <th>Remarks</th>
                                             <th>Created By</th>
                                             <th>Actions</th>
                                         </tr>
@@ -321,8 +327,8 @@
                                         {% for item in packaging_types %}
                                         <tr>
                                             <td><strong>{{ item.name }}</strong></td>
-                                            <td><code>{{ item.value }}</code></td>
-                                            <td>{{ item.description|default:"-"|truncatewords:15 }}</td>
+                                            <td><span class="badge bg-info">{{ item.packaging_category|title }}</span></td>
+                                            <td>{{ item.remarks|default:"-"|truncatewords:10 }}</td>
                                             <td>{{ item.created_by.username }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">

@@ -34,6 +34,7 @@ class MouldingMachineType(models.Model):
     shift_rate_for_mtc = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                              verbose_name="Shift Rate for MTC")
     mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
+    remarks = models.TextField(blank=True, null=True, default='', help_text='Additional notes or remarks')
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moulding_machine_types')
     created_at = models.DateTimeField(default=timezone.now)
@@ -73,6 +74,7 @@ class MaterialType(models.Model):
     raw_material_grade = models.CharField(max_length=100, default="")
     raw_material_code = models.CharField(max_length=100, default="", verbose_name="RM Code")
     raw_material_rate = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    remarks = models.TextField(blank=True, null=True, default='', help_text='Additional notes or remarks')
 
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='material_types')
     created_at = models.DateTimeField(default=timezone.now)
@@ -579,6 +581,7 @@ class AssemblyType(models.Model):
     name = models.CharField(max_length=100, default="")
     value = models.CharField(max_length=100, default="", help_text="Unique identifier/code")
     description = models.TextField(blank=True, null=True, default="")
+    remarks = models.TextField(blank=True, null=True, default='', help_text='Additional notes or remarks')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assembly_types')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -631,6 +634,7 @@ class PackagingType(models.Model):
     default_polybags_per_kg = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                                   help_text="Default number of polybags per kg")
 
+    remarks = models.TextField(blank=True, null=True, default='', help_text='Additional notes or remarks')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
 
