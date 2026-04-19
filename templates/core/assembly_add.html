@@ -2,6 +2,44 @@
 
 {% block title %}Add Assembly{% endblock %}
 
+{% block extra_css %}
+<style>
+    .cost-field-group {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .cost-field-group:hover {
+        background: #e9ecef;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .type-dropdown {
+        min-width: 140px;
+    }
+
+    .value-input-wrapper {
+        position: relative;
+    }
+
+    .value-input-wrapper .input-prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-weight: 600;
+        pointer-events: none;
+    }
+
+    .value-input-wrapper input.has-prefix {
+        padding-left: 30px;
+    }
+</style>
+{% endblock %}
+
 {% load custom_filters %}
 
 {% block content %}
@@ -94,27 +132,80 @@
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="profit_percentage" class="form-label">Profit %</label>
-                            <input type="number" class="form-control" id="profit_percentage" name="profit_percentage" step="0.00000001" min="0" value="0">
-                            <div class="form-text">Applied to RM + Manufacturing costs</div>
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label for="rejection_percentage" class="form-label">Rejection %</label>
-                            <input type="number" class="form-control" id="rejection_percentage" name="rejection_percentage" step="0.00000001" min="0" value="0">
-                            <div class="form-text">Applied to RM + Manufacturing costs</div>
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label for="inspection_handling_cost" class="form-label">Inspection & Handling Cost</label>
-                            <input type="number" class="form-control" id="inspection_handling_cost" name="inspection_handling_cost"
-                                   step="0.00000001" value="0">
-                            <div class="form-text">Fixed cost for inspection and handling</div>
+                    <!-- Profit Field -->
+                    <div class="cost-field-group">
+                        <label class="form-label fw-bold">Profit <span class="text-danger">*</span></label>
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label small text-muted">Type</label>
+                                <select class="form-select type-dropdown" name="profit_type" id="profit_type"
+                                        onchange="updateFieldDisplay('profit', this.value)">
+                                    <option value="percentage" selected>Percentage (%)</option>
+                                    <option value="fixed">Fixed Value (₹)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <label class="form-label small text-muted">Value</label>
+                                <div class="value-input-wrapper">
+                                    <span class="input-prefix" id="profit_prefix">%</span>
+                                    <input type="number" step="0.01" class="form-control has-prefix"
+                                           name="profit_percentage" id="profit_value"
+                                           value="0" required>
+                                </div>
+                                <small class="form-text text-muted" id="profit_help">Applied to RM + Manufacturing costs</small>
+                            </div>
                         </div>
                     </div>
-                    
+
+                    <!-- Rejection Field -->
+                    <div class="cost-field-group">
+                        <label class="form-label fw-bold">Rejection <span class="text-danger">*</span></label>
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label small text-muted">Type</label>
+                                <select class="form-select type-dropdown" name="rejection_type" id="rejection_type"
+                                        onchange="updateFieldDisplay('rejection', this.value)">
+                                    <option value="percentage" selected>Percentage (%)</option>
+                                    <option value="fixed">Fixed Value (₹)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <label class="form-label small text-muted">Value</label>
+                                <div class="value-input-wrapper">
+                                    <span class="input-prefix" id="rejection_prefix">%</span>
+                                    <input type="number" step="0.01" class="form-control has-prefix"
+                                           name="rejection_percentage" id="rejection_value"
+                                           value="0" required>
+                                </div>
+                                <small class="form-text text-muted" id="rejection_help">Applied to RM + Manufacturing costs</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inspection & Handling Cost (Always Fixed) -->
+                    <div class="cost-field-group">
+                        <label class="form-label fw-bold">Inspection & Handling Cost</label>
+                        <div class="row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label small text-muted">Type</label>
+                                <select class="form-select type-dropdown" disabled>
+                                    <option value="fixed" selected>Fixed Value (₹)</option>
+                                </select>
+                                <small class="text-muted d-block">Always a fixed value</small>
+                            </div>
+                            <div class="col-md-8 mb-2">
+                                <label class="form-label small text-muted">Value</label>
+                                <div class="value-input-wrapper">
+                                    <span class="input-prefix">₹</span>
+                                    <input type="number" step="0.01" class="form-control has-prefix"
+                                           name="inspection_handling_cost" id="inspection_handling_cost"
+                                           value="0">
+                                </div>
+                                <small class="form-text text-muted">Fixed cost for inspection and handling</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="alert alert-info">
                         <strong>Note:</strong> After creating the assembly, you'll be able to add:
                         <ul class="mb-0 mt-2">
@@ -137,6 +228,21 @@
 </div>
 
 <script>
+// Update field display when type changes
+function updateFieldDisplay(fieldName, type) {
+    const prefix = document.getElementById(fieldName + '_prefix');
+    const help = document.getElementById(fieldName + '_help');
+
+    if (type === 'fixed') {
+        prefix.textContent = '₹';
+        help.textContent = 'Enter fixed amount in rupees';
+    } else {
+        prefix.textContent = '%';
+        help.textContent = 'Enter percentage value';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
     // Toggle between manual and automated sections
     document.querySelectorAll('input[name="assembly_type"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -149,5 +255,15 @@
             }
         });
     });
+
+    // Initialize cost fields
+    const fields = ['profit', 'rejection'];
+    fields.forEach(function(fieldName) {
+        const typeSelect = document.getElementById(fieldName + '_type');
+        if (typeSelect) {
+            updateFieldDisplay(fieldName, typeSelect.value);
+        }
+    });
+});
 </script>
 {% endblock %}

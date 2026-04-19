@@ -4,6 +4,12 @@ from django.utils import timezone
 from decimal import Decimal
 
 
+COST_TYPE_CHOICES = [
+    ('percentage', 'Percentage'),
+    ('fixed', 'Fixed Value'),
+]
+
+
 class CustomerGroup(models.Model):
     """Customer Group configuration"""
     name = models.CharField(max_length=100, unique=True, default="")
@@ -165,7 +171,9 @@ class Quote(models.Model):
     handling_charge = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                          help_text="Fixed handling charge")
     profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                           help_text="Profit percentage")
+                                           help_text="Profit percentage or fixed value")
+    profit_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                  help_text='Whether profit is percentage or fixed value')
 
     # Version tracking
     major_version = models.IntegerField(default=1, help_text="Major version (e.g., 1 in 1.5)")
@@ -332,7 +340,10 @@ class Quote(models.Model):
         from decimal import Decimal
         base_cost = Decimal(str(self.get_base_cost()))
         profit_percentage = Decimal(str(self.profit_percentage))
-        return base_cost * (profit_percentage / Decimal('100'))
+        if self.profit_type == 'fixed':
+            return profit_percentage
+        else:
+            return base_cost * (profit_percentage / Decimal('100'))
 
     def get_grand_total(self):
         """Calculate grand total including profit and handling charge"""
@@ -383,18 +394,31 @@ class RawMaterial(models.Model):
     other_rm_cost_description = models.TextField(blank=True,
                                                   help_text="Description of what the other RM cost pertains to")
 
-    # Cost percentages
+    # Cost percentages/values with type
     icc_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                        verbose_name="ICC %", help_text="ICC percentage")
-    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                              help_text="Rejection percentage")
-    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                             help_text="Overhead percentage")
-    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                                help_text="Maintenance percentage")
-    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                           help_text="Profit percentage")
+                                        verbose_name="ICC %", help_text="ICC percentage or fixed value")
+    icc_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                help_text='Whether ICC is percentage or fixed value')
 
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                              help_text="Rejection percentage or fixed value")
+    rejection_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                     help_text='Whether rejection is percentage or fixed value')
+
+    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                             help_text="Overhead percentage or fixed value")
+    overhead_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                    help_text='Whether overhead is percentage or fixed value')
+
+    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                                help_text="Maintenance percentage or fixed value")
+    maintenance_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                       help_text='Whether maintenance is percentage or fixed value')
+
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                           help_text="Profit percentage or fixed value")
+    profit_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                  help_text='Whether profit is percentage or fixed value')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -461,10 +485,15 @@ class RawMaterial(models.Model):
             rate_per_gram = Decimal(str(self.effective_rate_per_gram))
 
             # Base cost = weight in grams × rate per gram + additional costs
-            base = (weight_in_grams * rate_per_gram)
+            base = float(weight_in_grams * rate_per_gram)
 
-            # Add ICC percentage
-            icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
+            icc_value = float(Decimal(str(self.icc_percentage)))
+            if self.icc_type == 'fixed':
+                icc_cost = icc_value
+            else:  # percentage
+                icc_cost = float(base * (icc_value / 100))
+            # # Add ICC percentage
+            # icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
 
             return float(base + icc_cost)
         else:
@@ -474,27 +503,49 @@ class RawMaterial(models.Model):
 
             base = (weight_in_pcs * rate_per_pcs)
 
-            icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
+            icc_value = Decimal(str(self.icc_percentage))
+            if self.icc_type == 'fixed':
+                icc_cost = float(icc_value)
+            else:  # percentage
+                icc_cost = float(base * (icc_value / Decimal('100')))
 
             return float(base + icc_cost)
 
     @property
     def rejection_cost(self):
-        """Calculate rejection cost"""
+        """Calculate rejection cost based on type"""
         from decimal import Decimal
-        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.rejection_percentage)) / Decimal('100')))
+        base = Decimal(str(self.base_rm_cost))
+        rejection_value = Decimal(str(self.rejection_percentage))
+
+        if self.rejection_type == 'fixed':
+            return float(rejection_value)
+        else:  # percentage
+            return float(base * (rejection_value / Decimal('100')))
 
     @property
     def overhead_cost(self):
-        """Calculate overhead cost"""
+        """Calculate overhead cost based on type"""
         from decimal import Decimal
-        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.overhead_percentage)) / Decimal('100')))
+        base = Decimal(str(self.base_rm_cost))
+        overhead_value = Decimal(str(self.overhead_percentage))
+
+        if self.overhead_type == 'fixed':
+            return float(overhead_value)
+        else:  # percentage
+            return float(base * (overhead_value / Decimal('100')))
 
     @property
     def maintenance_cost(self):
-        """Calculate maintenance cost"""
+        """Calculate maintenance cost based on type"""
         from decimal import Decimal
-        return float(Decimal(str(self.base_rm_cost)) * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
+        base = Decimal(str(self.base_rm_cost))
+        maintenance_value = Decimal(str(self.maintenance_percentage))
+
+        if self.maintenance_type == 'fixed':
+            return float(maintenance_value)
+        else:  # percentage
+            return float(base * (maintenance_value / Decimal('100')))
 
     @property
     def frozen_rm_cost(self):
@@ -526,25 +577,47 @@ class RawMaterial(models.Model):
         from decimal import Decimal
 
         # If frozen rate is not there, it is equal to rm_rate
-        if self.unit_of_measurement != 'pcs':
+        # If profit type is fixed, it is fixed value
+        if self.profit_type == 'fixed':
+            return Decimal(str(self.profit_percentage))
+        elif self.unit_of_measurement != 'pcs':
             if self.frozen_rate:
-                return float(
-                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                    )
+                if self.icc_type == 'fixed':
+                    return float(
+                        (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                        )
+                else:
+                    return float(
+                        Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                        )
             else:
-                return float(
-                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                    )
+                if self.icc_type == 'fixed':
+                    return float(
+                        (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                        )
+                else:
+                    return float(
+                        Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                        )
         else:
             if self.frozen_rate:
-                return float(
-                    Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                    )
+                if self.icc_type == 'fixed':
+                    return float(
+                        (Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                        )
+                else:
+                    return float(
+                        Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                        )
             else:
-                return float(
-                    Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                    )
-
+                if self.icc_type == 'fixed':
+                    return float(
+                        (Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                        )
+                else:
+                    return float(
+                        Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                        )
 
     @property
     def total_rm_cost_without_profit(self):
@@ -670,16 +743,26 @@ class MouldingMachineDetail(models.Model):
                                              verbose_name="Shift Rate for MTC")
     mtc_count = models.IntegerField(default=0, verbose_name="MTC Count", help_text="Number of MTC")
 
-    # Cost percentages
+    # Cost percentages/values with type
     rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                              help_text="Rejection percentage")
-    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                             help_text="Overhead percentage")
-    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                                help_text="Maintenance percentage")
-    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
-                                           help_text="Profit percentage")
+                                              help_text="Rejection percentage or fixed value")
+    rejection_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                     help_text='Whether rejection is percentage or fixed value')
 
+    overhead_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                             help_text="Overhead percentage or fixed value")
+    overhead_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                    help_text='Whether overhead is percentage or fixed value')
+
+    maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                                help_text="Maintenance percentage or fixed value")
+    maintenance_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                       help_text='Whether maintenance is percentage or fixed value')
+
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                           help_text="Profit percentage or fixed value")
+    profit_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                  help_text='Whether profit is percentage or fixed value')
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -726,31 +809,51 @@ class MouldingMachineDetail(models.Model):
 
     @property
     def rejection_cost(self):
-        """Calculate rejection cost"""
+        """Calculate rejection cost based on type"""
         from decimal import Decimal
         base = Decimal(str(self.base_conversion_cost))
-        return float(base * (Decimal(str(self.rejection_percentage)) / Decimal('100')))
+        rejection_value = Decimal(str(self.rejection_percentage))
+
+        if self.rejection_type == 'fixed':
+            return float(rejection_value)
+        else:  # percentage
+            return float(base * (rejection_value / Decimal('100')))
 
     @property
     def overhead_cost(self):
-        """Calculate overhead cost"""
+        """Calculate overhead cost based on type"""
         from decimal import Decimal
         base = Decimal(str(self.base_conversion_cost))
-        return float(base * (Decimal(str(self.overhead_percentage)) / Decimal('100')))
+        overhead_value = Decimal(str(self.overhead_percentage))
+
+        if self.overhead_type == 'fixed':
+            return float(overhead_value)
+        else:  # percentage
+            return float(base * (overhead_value / Decimal('100')))
 
     @property
     def machine_maintenance_cost(self):
-        """Calculate maintenance cost"""
+        """Calculate maintenance cost based on type"""
         from decimal import Decimal
         base = Decimal(str(self.base_conversion_cost))
-        return float(base * (Decimal(str(self.maintenance_percentage)) / Decimal('100')))
+        maintenance_value = Decimal(str(self.maintenance_percentage))
+
+        if self.maintenance_type == 'fixed':
+            return float(maintenance_value)
+        else:  # percentage
+            return float(base * (maintenance_value / Decimal('100')))
 
     @property
     def machine_profit_cost(self):
-        """Calculate profit cost"""
+        """Calculate profit cost based on type"""
         from decimal import Decimal
         base = Decimal(str(self.base_conversion_cost))
-        return float(base * (Decimal(str(self.profit_percentage)) / Decimal('100')))
+        profit_value = Decimal(str(self.profit_percentage))
+
+        if self.profit_type == 'fixed':
+            return float(profit_value)
+        else:  # percentage
+            return float(base * (profit_value / Decimal('100')))
 
     @property
     def conversion_cost(self):
@@ -782,8 +885,14 @@ class Assembly(models.Model):
                                                   help_text="Description of what the other cost pertains to")
 
     # Percentages and fixed costs
-    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0)
-    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0)
+    profit_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                           help_text="Profit percentage or fixed value")
+    profit_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                  help_text='Whether profit is percentage or fixed value')
+    rejection_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
+                                              help_text="Rejection percentage or fixed value")
+    rejection_type = models.CharField(max_length=10, choices=COST_TYPE_CHOICES, default='percentage',
+                                     help_text='Whether rejection is percentage or fixed value')
     inspection_handling_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                                    verbose_name="Inspection & Handling Cost",
                                                    help_text="Fixed cost for inspection and handling")

@@ -13,6 +13,26 @@ from django.http import HttpResponse
 from .excel_utils import ExcelTemplateGenerator, ExcelParser
 
 
+def save_cost_field(obj, field_base_name, request):
+    """
+    Helper function to save cost field value and type from request.
+
+    Args:
+        obj: The model instance to update
+        field_base_name: Base name of the field (e.g., 'icc', 'rejection', 'profit')
+        request: The HTTP request object
+
+    Example:
+        save_cost_field(raw_material, 'icc', request)
+        This will save both icc_percentage and icc_type fields
+    """
+    value = request.POST.get(f"{field_base_name}_percentage", 0)
+    cost_type = request.POST.get(f"{field_base_name}_type", 'percentage')
+
+    setattr(obj, f"{field_base_name}_percentage", float(value) if value else 0)
+    setattr(obj, f"{field_base_name}_type", cost_type)
+
+
 # Check if user is superuser
 def superuser_required(user):
     return user.is_superuser
@@ -85,7 +105,7 @@ def quote_create(request, project_id):
         quantity = int(request.POST.get('quantity', 1))
 
         if name and client_group_id and client_name and part_number and part_name:
-            quote = Quote.objects.create(
+            quote = Quote(
                 project=project,
                 name=name,
                 client_group_id=client_group_id,
@@ -102,6 +122,9 @@ def quote_create(request, project_id):
                 created_by=request.user,
                 quote_definition_complete=True
             )
+            # Save cost field with type
+            save_cost_field(quote, 'profit', request)
+            quote.save()
 
             # Add timeline entry
             QuoteTimeline.add_entry(
@@ -189,6 +212,8 @@ def quote_definition_edit(request, project_id, quote_id):
         quote.description = request.POST.get('description')
         quote.quantity = request.POST.get('quantity', 1)
         quote.quote_definition_complete = True
+        # Save cost field with type
+        save_cost_field(quote, 'profit', request)
 
         quote.save()
         quote.increment_version(request.user, 'Quote definition updated')
@@ -251,6 +276,12 @@ def raw_material_add(request, project_id, quote_id):
                 other_rm_cost=float(request.POST.get('other_rm_cost', 0)),
                 other_rm_cost_description=request.POST.get('other_rm_cost_description', ''),
             )
+            # Save cost fields with type
+            save_cost_field(raw_material, 'icc', request)
+            save_cost_field(raw_material, 'rejection', request)
+            save_cost_field(raw_material, 'overhead', request)
+            save_cost_field(raw_material, 'maintenance', request)
+            save_cost_field(raw_material, 'profit', request)
             raw_material.save()
 
             # Increment version and add timeline entry
@@ -343,7 +374,7 @@ def moulding_machine_add(request, project_id, quote_id):
         try:
             moulding_machine_type_id = request.POST.get('moulding_machine_type')
 
-            machine = MouldingMachineDetail.objects.create(
+            machine = MouldingMachineDetail(
                 quote=quote,
                 moulding_machine_type_id=moulding_machine_type_id if moulding_machine_type_id else None,
                 cavity=int(request.POST.get('cavity', 1)),
@@ -358,6 +389,13 @@ def moulding_machine_add(request, project_id, quote_id):
                 maintenance_percentage=float(request.POST.get('maintenance_percentage', 0)),
                 profit_percentage=float(request.POST.get('profit_percentage', 0)),
             )
+            # Save cost fields with type
+            save_cost_field(machine, 'rejection', request)
+            save_cost_field(machine, 'overhead', request)
+            save_cost_field(machine, 'maintenance', request)
+            save_cost_field(machine, 'profit', request)
+
+            machine.save()
 
             # Increment version and add timeline entry
             quote.increment_version(request.user, f'Moulding machine with {machine.cavity} cavity added')
@@ -426,6 +464,7 @@ def moulding_machine_complete(request, project_id, quote_id):
 
 # ============ ASSEMBLY ============
 
+
 @login_required
 def assembly_add(request, project_id, quote_id):
     """Add assembly to quote"""
@@ -445,7 +484,7 @@ def assembly_add(request, project_id, quote_id):
         try:
             assembly_type_id = request.POST.get('assembly_type_config')
 
-            assembly = Assembly.objects.create(
+            assembly = Assembly(
                 quote=quote,
                 assembly_type_config_id=assembly_type_id if assembly_type_id else None,
                 name=request.POST.get('name', ''),
@@ -457,6 +496,10 @@ def assembly_add(request, project_id, quote_id):
                 rejection_percentage=float(request.POST.get('rejection_percentage', 0)),
                 inspection_handling_cost=float(request.POST.get('inspection_handling_cost', 0)),
             )
+            # Save cost fields with type
+            save_cost_field(assembly, 'profit', request)
+            save_cost_field(assembly, 'rejection', request)
+            assembly.save()
 
             # Increment version and add timeline entry
             quote.increment_version(request.user, f'Assembly "{assembly.name}" added')
@@ -505,6 +548,9 @@ def assembly_edit(request, project_id, quote_id, assembly_id):
             assembly.profit_percentage = float(request.POST.get('profit_percentage', 0))
             assembly.rejection_percentage = float(request.POST.get('rejection_percentage', 0))
             assembly.inspection_handling_cost = float(request.POST.get('inspection_handling_cost', 0))
+            # Save cost fields with type
+            save_cost_field(assembly, 'profit', request)
+            save_cost_field(assembly, 'rejection', request)
             assembly.save()
 
             # Increment version and add timeline entry
@@ -1603,6 +1649,7 @@ def upload_complete_quote(request, project_id, quote_id):
     }
     return render(request, 'core/upload_complete_quote.html', context)
 
+
 @login_required
 def raw_material_edit(request, project_id, quote_id, rm_id):
     """Edit raw material"""
@@ -1645,7 +1692,12 @@ def raw_material_edit(request, project_id, quote_id, rm_id):
             raw_material.profit_percentage = float(request.POST.get('profit_percentage', 0))
             raw_material.other_rm_cost = float(request.POST.get('other_rm_cost', 0))
             raw_material.other_rm_cost_description = request.POST.get('other_rm_cost_description', '')
-
+            # Save cost fields with type
+            save_cost_field(raw_material, 'icc', request)
+            save_cost_field(raw_material, 'rejection', request)
+            save_cost_field(raw_material, 'overhead', request)
+            save_cost_field(raw_material, 'maintenance', request)
+            save_cost_field(raw_material, 'profit', request)
             raw_material.save()
 
             # Increment version and add timeline entry
@@ -1702,7 +1754,11 @@ def moulding_machine_edit(request, project_id, quote_id, mm_id):
             machine.overhead_percentage = float(request.POST.get('overhead_percentage', 0))
             machine.maintenance_percentage = float(request.POST.get('maintenance_percentage', 0))
             machine.profit_percentage = float(request.POST.get('profit_percentage', 0))
-
+            # Save cost fields with type
+            save_cost_field(machine, 'rejection', request)
+            save_cost_field(machine, 'overhead', request)
+            save_cost_field(machine, 'maintenance', request)
+            save_cost_field(machine, 'profit', request)
             machine.save()
 
             # Increment version and add timeline entry
@@ -1767,6 +1823,7 @@ def assembly_raw_material_edit(request, project_id, quote_id, assembly_id, arm_i
         'unit_choices': AssemblyRawMaterial.UNIT_CHOICES,
     }
     return render(request, 'core/assembly_raw_material_edit.html', context)
+
 
 @login_required
 def manufacturing_printing_cost_edit(request, project_id, quote_id, assembly_id, cost_id):

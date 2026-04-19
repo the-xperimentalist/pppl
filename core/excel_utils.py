@@ -48,20 +48,28 @@ class ExcelTemplateGenerator:
             'Purging Losses %',
             'Other RM Cost',
             'Other RM Cost Description',
-            'ICC %',
-            'Rejection %',
-            'Overhead %',
-            'Maintenance %',
-            'Profit %'
+            'ICC Value',
+            'ICC Type (percentage/fixed)',
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)',
+            'Overhead Value',
+            'Overhead Type (percentage/fixed)',
+            'Maintenance Value',
+            'Maintenance Type (percentage/fixed)',
+            'Profit Value',
+            'Profit Type (percentage/fixed)'
         ]
 
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "4472C4")
 
         # Add sample data for 3 materials
         materials = [
-            ['PP Copolymer', 'PP-H340R', 'RM-PP-001', 'kg', 125.50, None, 0.0234, 0.0045, 2.5, 1.2, 5.0, 'Masterbatch cost', 0.5, 2.0, 5.0, 3.0, 10.0],
-            ['ABS High Impact', 'ABS-750', 'RM-ABS-002', 'kg', 185.75, 180.00, 0.0456, 0.0089, 3.0, 1.5, 7.5, 'Color additive', 0.75, 2.5, 4.5, 2.5, 12.0],
-            ['Nylon 6', 'PA6-GF30', 'RM-PA6-003', 'kg', 215.00, None, 0.0678, 0.0123, 4.5, 2.0, 10.0, 'UV stabilizer', 1.0, 3.0, 6.0, 4.0, 15.0],
+            ['PP Copolymer', 'PP-H340R', 'RM-PP-001', 'kg', 125.50, None, 0.0234, 0.0045, 2.5, 1.2, 5.0, 'Masterbatch cost',
+             0.5, 'percentage', 2.0, 'percentage', 5.0, 'percentage', 3.0, 'percentage', 10.0, 'percentage'],
+            ['ABS High Impact', 'ABS-750', 'RM-ABS-002', 'kg', 185.75, 180.00, 0.0456, 0.0089, 3.0, 1.5, 7.5, 'Color additive',
+             0.75, 'percentage', 2.5, 'percentage', 4.5, 'percentage', 2.5, 'percentage', 12.0, 'percentage'],
+            ['Nylon 6', 'PA6-GF30', 'RM-PA6-003', 'kg', 215.00, None, 0.0678, 0.0123, 4.5, 2.0, 10.0, 'UV stabilizer',
+             1.0, 'percentage', 3.0, 'percentage', 6.0, 'percentage', 4.0, 'percentage', 15.0, 'percentage'],
         ]
 
         for col_num, material_data in enumerate(materials, 2):
@@ -86,19 +94,26 @@ class ExcelTemplateGenerator:
             'Shift Rate*',
             'Shift Rate for MTC*',
             'MTC Count*',
-            'Rejection %',
-            'Overhead %',
-            'Maintenance %',
-            'Profit %'
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)',
+            'Overhead Value',
+            'Overhead Type (percentage/fixed)',
+            'Maintenance Value',
+            'Maintenance Type (percentage/fixed)',
+            'Profit Value',
+            'Profit Type (percentage/fixed)'
         ]
 
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "70AD47")
 
         # Add sample data for 3 machines
         machines = [
-            [2, 120, 25.5, 85.0, 2500.00, 2200.00, 500, 1.0, 5.0, 3.0, 10.0],
-            [4, 180, 28.3, 87.5, 3200.00, 2800.00, 1000, 1.2, 5.2, 3.2, 11.0],
-            [8, 250, 30.8, 90.0, 4500.00, 4000.00, 2000, 0.8, 4.8, 2.8, 12.0],
+            [2, 120, 25.5, 85.0, 2500.00, 2200.00, 500,
+             1.0, 'percentage', 5.0, 'percentage', 3.0, 'percentage', 10.0, 'percentage'],
+            [4, 180, 28.3, 87.5, 3200.00, 2800.00, 1000,
+             1.2, 'percentage', 5.2, 'percentage', 3.2, 'percentage', 11.0, 'percentage'],
+            [8, 250, 30.8, 90.0, 4500.00, 4000.00, 2000,
+             0.8, 'percentage', 4.8, 'percentage', 2.8, 'percentage', 12.0, 'percentage'],
         ]
 
         for col_num, machine_data in enumerate(machines, 2):
@@ -123,16 +138,20 @@ class ExcelTemplateGenerator:
             'Other Cost',
             'Other Cost Description',
             'Inspection & Handling Cost',
-            'Profit %',
-            'Rejection %'
+            'Profit Value',
+            'Profit Type (percentage/fixed)',
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)'
         ]
 
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "FFC000")
 
         # Add sample data
         assemblies = [
-            ['Manual Screw Assembly', 'Manual', 'M3 screws with washers', 8.50, 2.50, 'Screw materials', 5.00, 15.0, 2.0],
-            ['Ultrasonic Welding', 'Automated', 'High frequency welding', 12.00, 3.50, 'Welding consumables', 8.00, 18.0, 1.5],
+            ['Manual Screw Assembly', 'Manual', 'M3 screws with washers', 8.50, 2.50, 'Screw materials', 5.00,
+             15.0, 'percentage', 2.0, 'percentage'],
+            ['Ultrasonic Welding', 'Automated', 'High frequency welding', 12.00, 3.50, 'Welding consumables', 8.00,
+             18.0, 'percentage', 1.5, 'percentage'],
         ]
 
         for col_num, assembly_data in enumerate(assemblies, 2):
@@ -174,8 +193,6 @@ class ExcelTemplateGenerator:
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "E26B0A")
 
         # Add sample data for 2 packaging options (1 box, 1 polybag)
-        # Box example: Fill box fields, leave polybag fields as 0
-        # Polybag example: Fill polybag fields, leave box fields as 0
         packagings = [
             ['box', 50, 5.0, '', 600, 400, 250, 350.00, 100, '', 0, 0, 0, 0],
             ['polybag', 100, 3.0, '', 0, 0, 0, 0, 0, '', 16, 20, 250.00, 1000],
@@ -209,10 +226,10 @@ class ExcelTemplateGenerator:
 
         ExcelTemplateGenerator._add_vertical_headers(ws, headers, "9933FF")
 
-        # Add sample data
+        # Add sample data for 2 transport options
         transports = [
-            [12, 8, 6, 6500.00, 1000],
-            [14, 9, 7, 8500.00, 1500],
+            [12, 8, 6, 7500, 200],
+            [15, 10, 7, 9500, 300],
         ]
 
         for col_num, trans_data in enumerate(transports, 2):
@@ -223,67 +240,35 @@ class ExcelTemplateGenerator:
         return wb
 
     @staticmethod
-    def create_complete_quote_template():
-        """Create template for complete quote with all sections"""
+    def create_complete_template():
+        """Create a comprehensive template with all components"""
         wb = Workbook()
         wb.remove(wb.active)
 
-        # Instructions Sheet
+        # Instructions
         ws_inst = wb.create_sheet("Instructions")
-        ws_inst['A1'] = "COMPLETE QUOTE TEMPLATE"
+        ws_inst['A1'] = "QUOTE UPLOAD TEMPLATE"
         ws_inst['A1'].font = Font(bold=True, size=14)
-        ws_inst['A3'] = "This template allows you to create a complete quote with all components:"
-        ws_inst['A4'] = "- Quote definition"
-        ws_inst['A5'] = "- Raw materials (RM Rate in per kg, Process/Purging Losses in %)"
-        ws_inst['A6'] = "- Moulding machines"
-        ws_inst['A7'] = "- Assemblies"
-        ws_inst['A8'] = "- Packaging"
-        ws_inst['A9'] = "- Transport (dimensions in feet)"
-        ws_inst['A11'] = "IMPORTANT NOTES:"
-        ws_inst['A11'].font = Font(bold=True)
-        ws_inst['A12'] = "- RM Rate is per kg (converted to per gram for calculations)"
-        ws_inst['A13'] = "- Process Losses and Purging Losses are percentages of (part weight + runner weight)"
-        ws_inst['A14'] = "- Other RM Cost is an additional fixed cost added directly to the material cost"
-        ws_inst['A15'] = "- Weights converted to grams: kg→×1000, ton→×1,000,000, gm→×1"
-        ws_inst['A16'] = "- Transport dimensions are in feet (1 ft = 304.8 mm)"
-        ws_inst['A17'] = "- Inspection & Handling Cost is a fixed cost (not percentage)"
-        ws_inst.column_dimensions['A'].width = 80
+        ws_inst['A3'] = "This template allows you to upload all quote components at once:"
+        ws_inst['A4'] = "- Raw materials (RM Rate in per kg)"
+        ws_inst['A5'] = "- Moulding machines"
+        ws_inst['A6'] = "- Assemblies"
+        ws_inst['A7'] = "- Packaging"
+        ws_inst['A8'] = "- Transport (dimensions in feet)"
+        ws_inst['A10'] = "Each sheet uses vertical format (headers in column A)."
+        ws_inst['A11'] = "Each column (B, C, D...) represents one item/machine/assembly."
+        ws_inst['A13'] = "IMPORTANT NOTES:"
+        ws_inst['A13'].font = Font(bold=True)
+        ws_inst['A14'] = "- RM Rate is entered per kg (will be converted to per gram for calculations)"
+        ws_inst['A15'] = "- Process Losses and Purging Losses are percentages of (part weight + runner weight)"
+        ws_inst['A16'] = "- Other RM Cost is an additional fixed cost added directly to the material cost"
+        ws_inst['A17'] = "- Weights are converted to grams: kg→×1000, ton→×1,000,000, gm→×1"
+        ws_inst['A18'] = "- Transport dimensions are in feet (1 ft = 304.8 mm)"
+        ws_inst['A19'] = "- Inspection & Handling is a fixed cost (not percentage)"
+        ws_inst['A20'] = "- Cost Types: Choose 'percentage' or 'fixed' for each cost parameter"
+        ws_inst.column_dimensions['A'].width = 100
 
-        # Quote Definition
-        ws_def = wb.create_sheet("Quote Definition")
-        def_headers = [
-            'Quote Name*',
-            'Client Name*',
-            'SAP Number',
-            'Part Number*',
-            'Part Name*',
-            'Amendment Number',
-            'Description',
-            'Quantity*',
-            'Handling Charge',
-            'Profit %',
-            'Notes'
-        ]
-        ExcelTemplateGenerator._add_vertical_headers(ws_def, def_headers, "2E75B6")
-
-        quote_data = [
-            'Sample Complete Quote',
-            'ABC Manufacturing Ltd',
-            'SAP-2024-001',
-            'PART-12345',
-            'Automotive Dashboard Component',
-            'Rev-A',
-            'Complete quote with all components for testing',
-            10000,
-            500.00,
-            15.0,
-            'Priority order - Q1 2024'
-        ]
-        for row_num, value in enumerate(quote_data, 1):
-            ws_def.cell(row=row_num, column=2, value=value)
-        ws_def.column_dimensions['B'].width = 40
-
-        # Add other sheets
+        # Add each component sheet
         wb_rm = ExcelTemplateGenerator.create_raw_materials_template()
         ws_rm = wb.create_sheet("Raw Materials")
         for row in wb_rm.active.iter_rows():
@@ -371,7 +356,8 @@ class ExcelTemplateGenerator:
         ws_inst['A20'] = "- Weights are converted to grams: kg→×1000, ton→×1,000,000, gm→×1"
         ws_inst['A21'] = "- Transport dimensions are in feet (1 ft = 304.8 mm)"
         ws_inst['A22'] = "- Inspection & Handling is a fixed cost (not percentage)"
-        ws_inst['A24'] = "Upload this to a project to create multiple quotes with all components."
+        ws_inst['A23'] = "- Cost Types: Choose 'percentage' or 'fixed' for each cost parameter"
+        ws_inst['A25'] = "Upload this to a project to create multiple quotes with all components."
         ws_inst.column_dimensions['A'].width = 100
 
         # Quote Definition
@@ -386,15 +372,19 @@ class ExcelTemplateGenerator:
             'Description',
             'Quantity*',
             'Handling Charge',
-            'Profit %',
+            'Profit Value',
+            'Profit Type (percentage/fixed)',
             'Notes'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_def, def_headers, "2E75B6")
 
         quotes = [
-            ['Auto Dashboard 2024', 'AutoTech Industries', 'SAP-AUTO-2024-001', 'DASH-4567', 'Dashboard Center Console', 'Rev-B', 'Automotive dashboard component with premium finish', 10000, 500, 20, 'High volume production'],
-            ['Electronics Housing Pro', 'TechCorp Ltd', 'SAP-TECH-2024-002', 'EH-PRO-890', 'Premium Electronics Housing', 'Rev-A', 'IP67 rated electronic component housing', 25000, 350, 18, 'Weather resistant coating required'],
-            ['Medical Device Shell', 'MedEquip Co', 'SAP-MED-2024-003', 'MD-SHELL-123', 'Sterile Medical Device Shell', 'Rev-C', 'FDA compliant medical device component', 5000, 800, 25, 'Cleanroom manufacturing required'],
+            ['Auto Dashboard 2024', 'AutoTech Industries', 'SAP-AUTO-2024-001', 'DASH-4567', 'Dashboard Center Console', 'Rev-B',
+             'Automotive dashboard component with premium finish', 10000, 500, 20, 'percentage', 'High volume production'],
+            ['Electronics Housing Pro', 'TechCorp Ltd', 'SAP-TECH-2024-002', 'EH-PRO-890', 'Premium Electronics Housing', 'Rev-A',
+             'IP67 rated electronic component housing', 25000, 350, 18, 'percentage', 'Weather resistant coating required'],
+            ['Medical Device Shell', 'MedEquip Co', 'SAP-MED-2024-003', 'MD-SHELL-123', 'Sterile Medical Device Shell', 'Rev-C',
+             'FDA compliant medical device component', 5000, 800, 25, 'percentage', 'Cleanroom manufacturing required'],
         ]
 
         for col_num, quote_data in enumerate(quotes, 2):
@@ -402,7 +392,7 @@ class ExcelTemplateGenerator:
                 ws_def.cell(row=row_num, column=col_num, value=value)
             ws_def.column_dimensions[get_column_letter(col_num)].width = 30
 
-        # Raw Materials (horizontal format with Quote Name in row 1)
+        # Raw Materials
         ws_rm = wb.create_sheet("Raw Materials")
         rm_headers = [
             'Quote Name*',
@@ -418,19 +408,28 @@ class ExcelTemplateGenerator:
             'Purging Losses %',
             'Other RM Cost',
             'Other RM Cost Description',
-            'ICC %',
-            'Rejection %',
-            'Overhead %',
-            'Maintenance %',
-            'Profit %'
+            'ICC Value',
+            'ICC Type (percentage/fixed)',
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)',
+            'Overhead Value',
+            'Overhead Type (percentage/fixed)',
+            'Maintenance Value',
+            'Maintenance Type (percentage/fixed)',
+            'Profit Value',
+            'Profit Type (percentage/fixed)'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_rm, rm_headers, "4472C4")
 
         raw_materials = [
-            ['Auto Dashboard 2024', 'PP Copolymer', 'PP-R272', 'RM-PP-272', 'kg', 135.5, None, 0.245, 0.038, 3.5, 1.8, 5.0, 'Masterbatch', 0.8, 2.2, 5.5, 3.2, 11],
-            ['Auto Dashboard 2024', 'ABS High Impact', 'ABS-HI-850', 'RM-ABS-850', 'kg', 195, None, 0.156, 0.024, 2.8, 1.5, 7.5, 'UV stabilizer', 0.6, 2.0, 5.0, 3.0, 10],
-            ['Electronics Housing Pro', 'PC+ABS Blend', 'PCABS-750', 'RM-PCABS-750', 'kg', 265, None, 0.178, 0.028, 3.2, 1.6, 8.0, 'Flame retardant', 0.7, 2.5, 6.0, 3.5, 12],
-            ['Medical Device Shell', 'Medical Grade PP', 'PP-MED-H310', 'RM-PP-MED-310', 'kg', 385, None, 0.125, 0.019, 2, 1.2, 12.0, 'Antimicrobial', 0.5, 1.5, 4.0, 2.5, 8],
+            ['Auto Dashboard 2024', 'PP Copolymer', 'PP-R272', 'RM-PP-272', 'kg', 135.5, None, 0.245, 0.038, 3.5, 1.8, 5.0, 'Masterbatch',
+             0.8, 'percentage', 2.2, 'percentage', 5.5, 'percentage', 3.2, 'percentage', 11, 'percentage'],
+            ['Auto Dashboard 2024', 'ABS High Impact', 'ABS-HI-850', 'RM-ABS-850', 'kg', 195, None, 0.156, 0.024, 2.8, 1.5, 7.5, 'UV stabilizer',
+             0.6, 'percentage', 2.0, 'percentage', 5.0, 'percentage', 3.0, 'percentage', 10, 'percentage'],
+            ['Electronics Housing Pro', 'PC+ABS Blend', 'PCABS-750', 'RM-PCABS-750', 'kg', 265, None, 0.178, 0.028, 3.2, 1.6, 8.0, 'Flame retardant',
+             0.7, 'percentage', 2.5, 'percentage', 6.0, 'percentage', 3.5, 'percentage', 12, 'percentage'],
+            ['Medical Device Shell', 'Medical Grade PP', 'PP-MED-H310', 'RM-PP-MED-310', 'kg', 385, None, 0.125, 0.019, 2, 1.2, 12.0, 'Antimicrobial',
+             0.5, 'percentage', 1.5, 'percentage', 4.0, 'percentage', 2.5, 'percentage', 8, 'percentage'],
         ]
 
         for col_num, material in enumerate(raw_materials, 2):
@@ -438,7 +437,7 @@ class ExcelTemplateGenerator:
                 ws_rm.cell(row=row_num, column=col_num, value=value)
             ws_rm.column_dimensions[get_column_letter(col_num)].width = 25
 
-        # Moulding Machines (horizontal format)
+        # Moulding Machines
         ws_mm = wb.create_sheet("Moulding Machines")
         mm_headers = [
             'Quote Name*',
@@ -449,18 +448,26 @@ class ExcelTemplateGenerator:
             'Shift Rate*',
             'Shift Rate for MTC*',
             'MTC Count*',
-            'Rejection %',
-            'Overhead %',
-            'Maintenance %',
-            'Profit %'
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)',
+            'Overhead Value',
+            'Overhead Type (percentage/fixed)',
+            'Maintenance Value',
+            'Maintenance Type (percentage/fixed)',
+            'Profit Value',
+            'Profit Type (percentage/fixed)'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_mm, mm_headers, "70AD47")
 
         machines = [
-            ['Auto Dashboard 2024', 8, 320, 58.5, 88, 9500, 9000, 4, 2.8, 6.5, 4.2, 16],
-            ['Auto Dashboard 2024', 4, 220, 52.3, 90, 7200, 6800, 3, 2.5, 6, 3.8, 14],
-            ['Electronics Housing Pro', 4, 180, 45.7, 91, 6500, 6100, 3, 2.2, 5.5, 3.5, 13],
-            ['Medical Device Shell', 2, 150, 42.8, 92.5, 5800, 5400, 2, 2, 5, 3.2, 12],
+            ['Auto Dashboard 2024', 8, 320, 58.5, 88, 9500, 9000, 4,
+             2.8, 'percentage', 6.5, 'percentage', 4.2, 'percentage', 16, 'percentage'],
+            ['Auto Dashboard 2024', 4, 220, 52.3, 90, 7200, 6800, 3,
+             2.5, 'percentage', 6, 'percentage', 3.8, 'percentage', 14, 'percentage'],
+            ['Electronics Housing Pro', 4, 180, 45.7, 91, 6500, 6100, 3,
+             2.2, 'percentage', 5.5, 'percentage', 3.5, 'percentage', 13, 'percentage'],
+            ['Medical Device Shell', 2, 150, 42.8, 92.5, 5800, 5400, 2,
+             2, 'percentage', 5, 'percentage', 3.2, 'percentage', 12, 'percentage'],
         ]
 
         for col_num, machine in enumerate(machines, 2):
@@ -468,7 +475,7 @@ class ExcelTemplateGenerator:
                 ws_mm.cell(row=row_num, column=col_num, value=value)
             ws_mm.column_dimensions[get_column_letter(col_num)].width = 25
 
-        # Assemblies (horizontal format)
+        # Assemblies
         ws_asm = wb.create_sheet("Assemblies")
         asm_headers = [
             'Quote Name*',
@@ -479,15 +486,20 @@ class ExcelTemplateGenerator:
             'Other Cost',
             'Other Cost Description',
             'Inspection & Handling Cost',
-            'Profit %',
-            'Rejection %'
+            'Profit Value',
+            'Profit Type (percentage/fixed)',
+            'Rejection Value',
+            'Rejection Type (percentage/fixed)'
         ]
         ExcelTemplateGenerator._add_vertical_headers(ws_asm, asm_headers, "FFC000")
 
         assemblies = [
-            ['Auto Dashboard 2024', 'Insert Molding + Ultrasonic Welding', 'Automated', 'High precision required', 28.5, 6.5, 'Welding consumables', 10, 12, 3],
-            ['Electronics Housing Pro', 'Snap Fit Assembly', 'Manual', 'IP67 sealing required', 15.75, 4.25, 'Sealing materials', 6.5, 10, 2.5],
-            ['Medical Device Shell', 'Cleanroom Assembly + Sterilization', 'Manual', 'FDA Class II requirements', 45, 12, 'Sterilization', 15, 15, 1.5],
+            ['Auto Dashboard 2024', 'Insert Molding + Ultrasonic Welding', 'Automated', 'High precision required', 28.5, 6.5, 'Welding consumables', 10,
+             12, 'percentage', 3, 'percentage'],
+            ['Electronics Housing Pro', 'Snap Fit Assembly', 'Manual', 'IP67 sealing required', 15.75, 4.25, 'Sealing materials', 6.5,
+             10, 'percentage', 2.5, 'percentage'],
+            ['Medical Device Shell', 'Cleanroom Assembly + Sterilization', 'Manual', 'FDA Class II requirements', 45, 12, 'Sterilization', 15,
+             15, 'percentage', 1.5, 'percentage'],
         ]
 
         for col_num, assembly in enumerate(assemblies, 2):
@@ -495,7 +507,7 @@ class ExcelTemplateGenerator:
                 ws_asm.cell(row=row_num, column=col_num, value=value)
             ws_asm.column_dimensions[get_column_letter(col_num)].width = 30
 
-        # Packaging (horizontal format)
+        # Packaging
         ws_pkg = wb.create_sheet("Packaging")
         pkg_headers = [
             'Quote Name*',
@@ -527,7 +539,7 @@ class ExcelTemplateGenerator:
                 ws_pkg.cell(row=row_num, column=col_num, value=value)
             ws_pkg.column_dimensions[get_column_letter(col_num)].width = 25
 
-        # Transport (horizontal format)
+        # Transport
         ws_trans = wb.create_sheet("Transport")
         trans_headers = [
             'Quote Name*',
@@ -600,11 +612,26 @@ class ExcelParser:
                     purging_loss_cost=float(ws.cell(10, col_num).value or 0),
                     other_rm_cost=float(ws.cell(11, col_num).value or 0),
                     other_rm_cost_description=str(ws.cell(12, col_num).value or ''),
+
+                    # ICC with type
                     icc_percentage=float(ws.cell(13, col_num).value or 0),
-                    rejection_percentage=float(ws.cell(14, col_num).value or 0),
-                    overhead_percentage=float(ws.cell(15, col_num).value or 0),
-                    maintenance_percentage=float(ws.cell(16, col_num).value or 0),
-                    profit_percentage=float(ws.cell(17, col_num).value or 0),
+                    icc_type=str(ws.cell(14, col_num).value or 'percentage').lower(),
+
+                    # Rejection with type
+                    rejection_percentage=float(ws.cell(15, col_num).value or 0),
+                    rejection_type=str(ws.cell(16, col_num).value or 'percentage').lower(),
+
+                    # Overhead with type
+                    overhead_percentage=float(ws.cell(17, col_num).value or 0),
+                    overhead_type=str(ws.cell(18, col_num).value or 'percentage').lower(),
+
+                    # Maintenance with type
+                    maintenance_percentage=float(ws.cell(19, col_num).value or 0),
+                    maintenance_type=str(ws.cell(20, col_num).value or 'percentage').lower(),
+
+                    # Profit with type
+                    profit_percentage=float(ws.cell(21, col_num).value or 0),
+                    profit_type=str(ws.cell(22, col_num).value or 'percentage').lower(),
                 )
                 count += 1
                 col_num += 1
@@ -648,10 +675,22 @@ class ExcelParser:
                     shift_rate=float(ws.cell(5, col_num).value or 0),
                     shift_rate_for_mtc=float(ws.cell(6, col_num).value or 0),
                     mtc_count=int(ws.cell(7, col_num).value or 0),
+
+                    # Rejection with type
                     rejection_percentage=float(ws.cell(8, col_num).value or 0),
-                    overhead_percentage=float(ws.cell(9, col_num).value or 0),
-                    maintenance_percentage=float(ws.cell(10, col_num).value or 0),
-                    profit_percentage=float(ws.cell(11, col_num).value or 0),
+                    rejection_type=str(ws.cell(9, col_num).value or 'percentage').lower(),
+
+                    # Overhead with type
+                    overhead_percentage=float(ws.cell(10, col_num).value or 0),
+                    overhead_type=str(ws.cell(11, col_num).value or 'percentage').lower(),
+
+                    # Maintenance with type
+                    maintenance_percentage=float(ws.cell(12, col_num).value or 0),
+                    maintenance_type=str(ws.cell(13, col_num).value or 'percentage').lower(),
+
+                    # Profit with type
+                    profit_percentage=float(ws.cell(14, col_num).value or 0),
+                    profit_type=str(ws.cell(15, col_num).value or 'percentage').lower(),
                 )
                 count += 1
                 col_num += 1
@@ -662,18 +701,181 @@ class ExcelParser:
         return count, errors
 
     @staticmethod
-    def parse_complete_quote(file_path, quote, user):
-        """Parse a complete quote from Excel file and add components to existing quote"""
+    def parse_assemblies(file_path, quote):
+        """Parse assemblies from Excel (vertical format)"""
         wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        sheet_name = None
+        for possible_name in ['Assemblies', 'Assembly']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Assemblies' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        # Import here to avoid circular imports
+        from core.models import AssemblyType
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                assembly_name = ws.cell(1, col_num).value
+                if not assembly_name:
+                    break
+
+                # Try to find assembly type
+                assembly_type_name = ws.cell(2, col_num).value
+                assembly_type = None
+                if assembly_type_name and quote.client_group:
+                    try:
+                        assembly_type = AssemblyType.objects.get(
+                            customer_group=quote.client_group,
+                            name=str(assembly_type_name)
+                        )
+                    except AssemblyType.DoesNotExist:
+                        pass
+
+                Assembly.objects.create(
+                    quote=quote,
+                    name=str(assembly_name),
+                    assembly_type_config=assembly_type,
+                    remarks=str(ws.cell(3, col_num).value or ''),
+                    manual_cost=float(ws.cell(4, col_num).value or 0),
+                    other_cost=float(ws.cell(5, col_num).value or 0),
+                    other_cost_description=str(ws.cell(6, col_num).value or ''),
+                    inspection_handling_cost=float(ws.cell(7, col_num).value or 0),
+
+                    # Profit with type
+                    profit_percentage=float(ws.cell(8, col_num).value or 0),
+                    profit_type=str(ws.cell(9, col_num).value or 'percentage').lower(),
+
+                    # Rejection with type
+                    rejection_percentage=float(ws.cell(10, col_num).value or 0),
+                    rejection_type=str(ws.cell(11, col_num).value or 'percentage').lower(),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_packaging(file_path, quote):
+        """Parse packaging from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        sheet_name = None
+        for possible_name in ['Packaging', 'Package']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Packaging' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                category = ws.cell(1, col_num).value
+                if not category:
+                    break
+
+                category = str(category).lower()
+
+                Packaging.objects.create(
+                    quote=quote,
+                    packaging_category=category,
+                    parts_per_packaging=int(ws.cell(2, col_num).value or 0),
+                    maintenance_percentage=float(ws.cell(3, col_num).value or 0),
+                    packaging_length=float(ws.cell(5, col_num).value or 0) if category == 'box' else 0,
+                    packaging_breadth=float(ws.cell(6, col_num).value or 0) if category == 'box' else 0,
+                    packaging_height=float(ws.cell(7, col_num).value or 0) if category == 'box' else 0,
+                    cost=float(ws.cell(8, col_num).value or 0) if category == 'box' else 0,
+                    lifecycle=int(ws.cell(9, col_num).value or 0) if category == 'box' else 0,
+                    polybag_length=float(ws.cell(11, col_num).value or 0) if category == 'polybag' else 0,
+                    polybag_width=float(ws.cell(12, col_num).value or 0) if category == 'polybag' else 0,
+                    rate_per_kg=float(ws.cell(13, col_num).value or 0) if category == 'polybag' else 0,
+                    polybags_per_kg=float(ws.cell(14, col_num).value or 0) if category == 'polybag' else 0,
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_transport(file_path, quote):
+        """Parse transport from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        sheet_name = None
+        for possible_name in ['Transport', 'Transportation']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Transport' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                length = ws.cell(1, col_num).value
+                if length is None:
+                    break
+
+                Transport.objects.create(
+                    quote=quote,
+                    transport_length=float(length or 0),
+                    transport_breadth=float(ws.cell(2, col_num).value or 0),
+                    transport_height=float(ws.cell(3, col_num).value or 0),
+                    trip_cost=float(ws.cell(4, col_num).value or 0),
+                    parts_per_box=int(ws.cell(5, col_num).value or 0),
+                )
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_complete_quote(file_path, quote):
+        """Parse a complete quote from a single Excel file (vertical format)"""
+        # Save uploaded file temporarily
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+            for chunk in file_path.chunks():
+                tmp_file.write(chunk)
+            tmp_file_path = tmp_file.name
 
         results = {
             'raw_materials': 0,
             'moulding_machines': 0,
             'assemblies': 0,
             'packaging': 0,
-            'transport': 0,
+            'transport': 0
         }
         errors = []
+
+        wb = openpyxl.load_workbook(tmp_file_path, data_only=True)
 
         # Raw Materials
         rm_sheet_name = 'Raw Materials' if 'Raw Materials' in wb.sheetnames else 'Raw_Materials'
@@ -703,11 +905,26 @@ class ExcelParser:
                         purging_loss_cost=float(ws_rm.cell(10, col_num).value or 0),
                         other_rm_cost=float(ws_rm.cell(11, col_num).value or 0),
                         other_rm_cost_description=str(ws_rm.cell(12, col_num).value or ''),
+
+                        # ICC with type
                         icc_percentage=float(ws_rm.cell(13, col_num).value or 0),
-                        rejection_percentage=float(ws_rm.cell(14, col_num).value or 0),
-                        overhead_percentage=float(ws_rm.cell(15, col_num).value or 0),
-                        maintenance_percentage=float(ws_rm.cell(16, col_num).value or 0),
-                        profit_percentage=float(ws_rm.cell(17, col_num).value or 0),
+                        icc_type=str(ws_rm.cell(14, col_num).value or 'percentage').lower(),
+
+                        # Rejection with type
+                        rejection_percentage=float(ws_rm.cell(15, col_num).value or 0),
+                        rejection_type=str(ws_rm.cell(16, col_num).value or 'percentage').lower(),
+
+                        # Overhead with type
+                        overhead_percentage=float(ws_rm.cell(17, col_num).value or 0),
+                        overhead_type=str(ws_rm.cell(18, col_num).value or 'percentage').lower(),
+
+                        # Maintenance with type
+                        maintenance_percentage=float(ws_rm.cell(19, col_num).value or 0),
+                        maintenance_type=str(ws_rm.cell(20, col_num).value or 'percentage').lower(),
+
+                        # Profit with type
+                        profit_percentage=float(ws_rm.cell(21, col_num).value or 0),
+                        profit_type=str(ws_rm.cell(22, col_num).value or 'percentage').lower(),
                     )
                     results['raw_materials'] += 1
                     col_num += 1
@@ -735,10 +952,22 @@ class ExcelParser:
                         shift_rate=float(ws_mm.cell(5, col_num).value or 0),
                         shift_rate_for_mtc=float(ws_mm.cell(6, col_num).value or 0),
                         mtc_count=int(ws_mm.cell(7, col_num).value or 0),
+
+                        # Rejection with type
                         rejection_percentage=float(ws_mm.cell(8, col_num).value or 0),
-                        overhead_percentage=float(ws_mm.cell(9, col_num).value or 0),
-                        maintenance_percentage=float(ws_mm.cell(10, col_num).value or 0),
-                        profit_percentage=float(ws_mm.cell(11, col_num).value or 0),
+                        rejection_type=str(ws_mm.cell(9, col_num).value or 'percentage').lower(),
+
+                        # Overhead with type
+                        overhead_percentage=float(ws_mm.cell(10, col_num).value or 0),
+                        overhead_type=str(ws_mm.cell(11, col_num).value or 'percentage').lower(),
+
+                        # Maintenance with type
+                        maintenance_percentage=float(ws_mm.cell(12, col_num).value or 0),
+                        maintenance_type=str(ws_mm.cell(13, col_num).value or 'percentage').lower(),
+
+                        # Profit with type
+                        profit_percentage=float(ws_mm.cell(14, col_num).value or 0),
+                        profit_type=str(ws_mm.cell(15, col_num).value or 'percentage').lower(),
                     )
                     results['moulding_machines'] += 1
                     col_num += 1
@@ -747,8 +976,9 @@ class ExcelParser:
                     col_num += 1
 
         # Assemblies
-        asm_sheet_name = 'Assemblies' if 'Assemblies' in wb.sheetnames else 'Assemblies'
+        asm_sheet_name = 'Assemblies' if 'Assemblies' in wb.sheetnames else 'Assembly'
         if asm_sheet_name in wb.sheetnames:
+            from core.models import AssemblyType
             ws_asm = wb[asm_sheet_name]
             col_num = 2
             while col_num <= ws_asm.max_column:
@@ -757,16 +987,35 @@ class ExcelParser:
                     if not assembly_name:
                         break
 
+                    # Try to find assembly type
+                    assembly_type_name = ws_asm.cell(2, col_num).value
+                    assembly_type = None
+                    if assembly_type_name and quote.client_group:
+                        try:
+                            assembly_type = AssemblyType.objects.get(
+                                customer_group=quote.client_group,
+                                name=str(assembly_type_name)
+                            )
+                        except AssemblyType.DoesNotExist:
+                            pass
+
                     Assembly.objects.create(
                         quote=quote,
                         name=str(assembly_name),
+                        assembly_type_config=assembly_type,
                         remarks=str(ws_asm.cell(3, col_num).value or ''),
                         manual_cost=float(ws_asm.cell(4, col_num).value or 0),
                         other_cost=float(ws_asm.cell(5, col_num).value or 0),
                         other_cost_description=str(ws_asm.cell(6, col_num).value or ''),
                         inspection_handling_cost=float(ws_asm.cell(7, col_num).value or 0),
+
+                        # Profit with type
                         profit_percentage=float(ws_asm.cell(8, col_num).value or 0),
-                        rejection_percentage=float(ws_asm.cell(9, col_num).value or 0),
+                        profit_type=str(ws_asm.cell(9, col_num).value or 'percentage').lower(),
+
+                        # Rejection with type
+                        rejection_percentage=float(ws_asm.cell(10, col_num).value or 0),
+                        rejection_type=str(ws_asm.cell(11, col_num).value or 'percentage').lower(),
                     )
                     results['assemblies'] += 1
                     col_num += 1
@@ -775,7 +1024,7 @@ class ExcelParser:
                     col_num += 1
 
         # Packaging
-        pkg_sheet_name = 'Packaging' if 'Packaging' in wb.sheetnames else 'Packaging'
+        pkg_sheet_name = 'Packaging' if 'Packaging' in wb.sheetnames else 'Package'
         if pkg_sheet_name in wb.sheetnames:
             ws_pkg = wb[pkg_sheet_name]
             col_num = 2
@@ -785,23 +1034,22 @@ class ExcelParser:
                     if not category:
                         break
 
+                    category = str(category).lower()
+
                     Packaging.objects.create(
                         quote=quote,
-                        packaging_type=None,
-                        packaging_category=str(category or 'box'),
+                        packaging_category=category,
                         parts_per_packaging=int(ws_pkg.cell(2, col_num).value or 0),
                         maintenance_percentage=float(ws_pkg.cell(3, col_num).value or 0),
-                        # Box fields (rows 5-9)
-                        packaging_length=float(ws_pkg.cell(5, col_num).value or 0),
-                        packaging_breadth=float(ws_pkg.cell(6, col_num).value or 0),
-                        packaging_height=float(ws_pkg.cell(7, col_num).value or 0),
-                        cost=float(ws_pkg.cell(8, col_num).value or 0),
-                        lifecycle=int(ws_pkg.cell(9, col_num).value or 0),
-                        # Polybag fields (rows 11-14)
-                        polybag_length=float(ws_pkg.cell(11, col_num).value or 0),
-                        polybag_width=float(ws_pkg.cell(12, col_num).value or 0),
-                        rate_per_kg=float(ws_pkg.cell(13, col_num).value or 0),
-                        polybags_per_kg=float(ws_pkg.cell(14, col_num).value or 0),
+                        packaging_length=float(ws_pkg.cell(5, col_num).value or 0) if category == 'box' else 0,
+                        packaging_breadth=float(ws_pkg.cell(6, col_num).value or 0) if category == 'box' else 0,
+                        packaging_height=float(ws_pkg.cell(7, col_num).value or 0) if category == 'box' else 0,
+                        cost=float(ws_pkg.cell(8, col_num).value or 0) if category == 'box' else 0,
+                        lifecycle=int(ws_pkg.cell(9, col_num).value or 0) if category == 'box' else 0,
+                        polybag_length=float(ws_pkg.cell(11, col_num).value or 0) if category == 'polybag' else 0,
+                        polybag_width=float(ws_pkg.cell(12, col_num).value or 0) if category == 'polybag' else 0,
+                        rate_per_kg=float(ws_pkg.cell(13, col_num).value or 0) if category == 'polybag' else 0,
+                        polybags_per_kg=float(ws_pkg.cell(14, col_num).value or 0) if category == 'polybag' else 0,
                     )
                     results['packaging'] += 1
                     col_num += 1
@@ -833,6 +1081,9 @@ class ExcelParser:
                 except Exception as e:
                     errors.append(f"Transport Column {get_column_letter(col_num)}: {str(e)}")
                     col_num += 1
+
+        # Clean up temp file
+        os.unlink(tmp_file_path)
 
         return quote, errors, results
 
@@ -888,8 +1139,12 @@ class ExcelParser:
                         description=str(ws_def.cell(7, col_num).value or ''),
                         quantity=int(ws_def.cell(8, col_num).value or 1),
                         handling_charge=float(ws_def.cell(9, col_num).value or 0),
+
+                        # Profit with type
                         profit_percentage=float(ws_def.cell(10, col_num).value or 0),
-                        notes=str(ws_def.cell(11, col_num).value or ''),
+                        profit_type=str(ws_def.cell(11, col_num).value or 'percentage').lower(),
+
+                        notes=str(ws_def.cell(12, col_num).value or ''),
                         created_by=user,
                         quote_definition_complete=True
                     )
@@ -960,11 +1215,26 @@ class ExcelParser:
                         purging_loss_cost=float(ws_rm.cell(row=11, column=col_num).value or 0),
                         other_rm_cost=float(ws_rm.cell(row=12, column=col_num).value or 0),
                         other_rm_cost_description=str(ws_rm.cell(row=13, column=col_num).value or ''),
+
+                        # ICC with type
                         icc_percentage=float(ws_rm.cell(row=14, column=col_num).value or 0),
-                        rejection_percentage=float(ws_rm.cell(row=15, column=col_num).value or 0),
-                        overhead_percentage=float(ws_rm.cell(row=16, column=col_num).value or 0),
-                        maintenance_percentage=float(ws_rm.cell(row=17, column=col_num).value or 0),
-                        profit_percentage=float(ws_rm.cell(row=18, column=col_num).value or 0),
+                        icc_type=str(ws_rm.cell(row=15, column=col_num).value or 'percentage').lower(),
+
+                        # Rejection with type
+                        rejection_percentage=float(ws_rm.cell(row=16, column=col_num).value or 0),
+                        rejection_type=str(ws_rm.cell(row=17, column=col_num).value or 'percentage').lower(),
+
+                        # Overhead with type
+                        overhead_percentage=float(ws_rm.cell(row=18, column=col_num).value or 0),
+                        overhead_type=str(ws_rm.cell(row=19, column=col_num).value or 'percentage').lower(),
+
+                        # Maintenance with type
+                        maintenance_percentage=float(ws_rm.cell(row=20, column=col_num).value or 0),
+                        maintenance_type=str(ws_rm.cell(row=21, column=col_num).value or 'percentage').lower(),
+
+                        # Profit with type
+                        profit_percentage=float(ws_rm.cell(row=22, column=col_num).value or 0),
+                        profit_type=str(ws_rm.cell(row=23, column=col_num).value or 'percentage').lower(),
                     )
                     col_num += 1
                 except Exception as e:
@@ -998,10 +1268,22 @@ class ExcelParser:
                         shift_rate=float(ws_mm.cell(row=6, column=col_num).value or 0),
                         shift_rate_for_mtc=float(ws_mm.cell(row=7, column=col_num).value or 0),
                         mtc_count=int(ws_mm.cell(row=8, column=col_num).value or 0),
+
+                        # Rejection with type
                         rejection_percentage=float(ws_mm.cell(row=9, column=col_num).value or 0),
-                        overhead_percentage=float(ws_mm.cell(row=10, column=col_num).value or 0),
-                        maintenance_percentage=float(ws_mm.cell(row=11, column=col_num).value or 0),
-                        profit_percentage=float(ws_mm.cell(row=12, column=col_num).value or 0),
+                        rejection_type=str(ws_mm.cell(row=10, column=col_num).value or 'percentage').lower(),
+
+                        # Overhead with type
+                        overhead_percentage=float(ws_mm.cell(row=11, column=col_num).value or 0),
+                        overhead_type=str(ws_mm.cell(row=12, column=col_num).value or 'percentage').lower(),
+
+                        # Maintenance with type
+                        maintenance_percentage=float(ws_mm.cell(row=13, column=col_num).value or 0),
+                        maintenance_type=str(ws_mm.cell(row=14, column=col_num).value or 'percentage').lower(),
+
+                        # Profit with type
+                        profit_percentage=float(ws_mm.cell(row=15, column=col_num).value or 0),
+                        profit_type=str(ws_mm.cell(row=16, column=col_num).value or 'percentage').lower(),
                     )
                     col_num += 1
                 except Exception as e:
@@ -1009,8 +1291,9 @@ class ExcelParser:
                     col_num += 1
 
         # Parse Assemblies
-        asm_sheet_name = 'Assemblies' if 'Assemblies' in wb.sheetnames else 'Assemblies'
+        asm_sheet_name = 'Assemblies' if 'Assemblies' in wb.sheetnames else 'Assembly'
         if asm_sheet_name in wb.sheetnames:
+            from core.models import AssemblyType
             ws_asm = wb[asm_sheet_name]
             col_num = 2
             while col_num <= ws_asm.max_column:
@@ -1026,16 +1309,35 @@ class ExcelParser:
                         col_num += 1
                         continue
 
+                    # Try to find assembly type
+                    assembly_type_name = ws_asm.cell(row=3, column=col_num).value
+                    assembly_type = None
+                    if assembly_type_name and quote.client_group:
+                        try:
+                            assembly_type = AssemblyType.objects.get(
+                                customer_group=quote.client_group,
+                                name=str(assembly_type_name)
+                            )
+                        except AssemblyType.DoesNotExist:
+                            pass
+
                     Assembly.objects.create(
                         quote=quote,
                         name=str(assembly_name),
+                        assembly_type_config=assembly_type,
                         remarks=str(ws_asm.cell(row=4, column=col_num).value or ''),
                         manual_cost=float(ws_asm.cell(row=5, column=col_num).value or 0),
                         other_cost=float(ws_asm.cell(row=6, column=col_num).value or 0),
                         other_cost_description=str(ws_asm.cell(row=7, column=col_num).value or ''),
                         inspection_handling_cost=float(ws_asm.cell(row=8, column=col_num).value or 0),
+
+                        # Profit with type
                         profit_percentage=float(ws_asm.cell(row=9, column=col_num).value or 0),
-                        rejection_percentage=float(ws_asm.cell(row=10, column=col_num).value or 0),
+                        profit_type=str(ws_asm.cell(row=10, column=col_num).value or 'percentage').lower(),
+
+                        # Rejection with type
+                        rejection_percentage=float(ws_asm.cell(row=11, column=col_num).value or 0),
+                        rejection_type=str(ws_asm.cell(row=12, column=col_num).value or 'percentage').lower(),
                     )
                     col_num += 1
                 except Exception as e:
@@ -1043,7 +1345,7 @@ class ExcelParser:
                     col_num += 1
 
         # Parse Packaging
-        pkg_sheet_name = 'Packaging' if 'Packaging' in wb.sheetnames else 'Packaging'
+        pkg_sheet_name = 'Packaging' if 'Packaging' in wb.sheetnames else 'Package'
         if pkg_sheet_name in wb.sheetnames:
             ws_pkg = wb[pkg_sheet_name]
             col_num = 2
@@ -1060,23 +1362,22 @@ class ExcelParser:
                         col_num += 1
                         continue
 
+                    category = str(category).lower()
+
                     Packaging.objects.create(
                         quote=quote,
-                        packaging_type=None,
-                        packaging_category=str(category or 'box'),
+                        packaging_category=category,
                         parts_per_packaging=int(ws_pkg.cell(row=3, column=col_num).value or 0),
                         maintenance_percentage=float(ws_pkg.cell(row=4, column=col_num).value or 0),
-                        # Box fields
-                        packaging_length=float(ws_pkg.cell(row=6, column=col_num).value or 0),
-                        packaging_breadth=float(ws_pkg.cell(row=7, column=col_num).value or 0),
-                        packaging_height=float(ws_pkg.cell(row=8, column=col_num).value or 0),
-                        cost=float(ws_pkg.cell(row=9, column=col_num).value or 0),
-                        lifecycle=int(ws_pkg.cell(row=10, column=col_num).value or 0),
-                        # Polybag fields
-                        polybag_length=float(ws_pkg.cell(row=12, column=col_num).value or 0),
-                        polybag_width=float(ws_pkg.cell(row=13, column=col_num).value or 0),
-                        rate_per_kg=float(ws_pkg.cell(row=14, column=col_num).value or 0),
-                        polybags_per_kg=float(ws_pkg.cell(row=15, column=col_num).value or 0),
+                        packaging_length=float(ws_pkg.cell(row=6, column=col_num).value or 0) if category == 'box' else 0,
+                        packaging_breadth=float(ws_pkg.cell(row=7, column=col_num).value or 0) if category == 'box' else 0,
+                        packaging_height=float(ws_pkg.cell(row=8, column=col_num).value or 0) if category == 'box' else 0,
+                        cost=float(ws_pkg.cell(row=9, column=col_num).value or 0) if category == 'box' else 0,
+                        lifecycle=int(ws_pkg.cell(row=10, column=col_num).value or 0) if category == 'box' else 0,
+                        polybag_length=float(ws_pkg.cell(row=12, column=col_num).value or 0) if category == 'polybag' else 0,
+                        polybag_width=float(ws_pkg.cell(row=13, column=col_num).value or 0) if category == 'polybag' else 0,
+                        rate_per_kg=float(ws_pkg.cell(row=14, column=col_num).value or 0) if category == 'polybag' else 0,
+                        polybags_per_kg=float(ws_pkg.cell(row=15, column=col_num).value or 0) if category == 'polybag' else 0,
                     )
                     col_num += 1
                 except Exception as e:
@@ -1084,7 +1385,7 @@ class ExcelParser:
                     col_num += 1
 
         # Parse Transport
-        trans_sheet_name = 'Transport' if 'Transport' in wb.sheetnames else 'Transport'
+        trans_sheet_name = 'Transport' if 'Transport' in wb.sheetnames else 'Transportation'
         if trans_sheet_name in wb.sheetnames:
             ws_trans = wb[trans_sheet_name]
             col_num = 2
@@ -1115,6 +1416,193 @@ class ExcelParser:
                     col_num += 1
 
         return errors
+
+    @staticmethod
+    def parse_material_types(file_path, customer_group):
+        """Parse material types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import MaterialType
+
+        sheet_name = None
+        for possible_name in ['Material Types', 'Material_Types', 'MaterialTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Material Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        # Read each column starting from column B
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                raw_material_name = ws.cell(1, col_num).value
+                if not raw_material_name:
+                    break
+
+                MaterialType.objects.update_or_create(
+                    customer_group=customer_group,
+                    raw_material_name=str(raw_material_name),
+                    defaults={
+                        'raw_material_grade': str(ws.cell(2, col_num).value or ''),
+                        'raw_material_code': str(ws.cell(3, col_num).value or ''),
+                        'raw_material_rate': float(ws.cell(4, col_num).value or 0),
+                        'remarks': str(ws.cell(5, col_num).value or '')
+                    })
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_machine_types(file_path, customer_group):
+        """Parse moulding machine types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import MouldingMachineType
+
+        sheet_name = None
+        for possible_name in ['Machine Types', 'Machine_Types', 'MachineTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Machine Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                MouldingMachineType.objects.update_or_create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    defaults={
+                        'shift_rate': float(ws.cell(2, col_num).value or 0),
+                        'shift_rate_for_mtc': float(ws.cell(3, col_num).value or 0),
+                        'mtc_count': int(ws.cell(4, col_num).value or 0),
+                        'remarks': str(ws.cell(5, col_num).value or '')
+                    })
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_assembly_types(file_path, customer_group):
+        """Parse assembly types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import AssemblyType
+
+        sheet_name = None
+        for possible_name in ['Assembly Types', 'Assembly_Types', 'AssemblyTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Assembly Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                AssemblyType.objects.update_or_create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    defaults={
+                        'value': str(ws.cell(2, col_num).value or ''),
+                        'description': str(ws.cell(3, col_num).value or ''),
+                        'remarks': str(ws.cell(4, col_num).value or '')
+                    })
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
+
+    @staticmethod
+    def parse_packaging_types(file_path, customer_group):
+        """Parse packaging types from Excel (vertical format)"""
+        wb = openpyxl.load_workbook(file_path, data_only=True)
+
+        # Import here to avoid circular imports
+        from core.models import PackagingType
+
+        sheet_name = None
+        for possible_name in ['Packaging Types', 'Packaging_Types', 'PackagingTypes']:
+            if possible_name in wb.sheetnames:
+                sheet_name = possible_name
+                break
+
+        if not sheet_name:
+            return 0, ["Sheet 'Packaging Types' not found"]
+
+        ws = wb[sheet_name]
+        count = 0
+        errors = []
+
+        col_num = 2
+        while col_num <= ws.max_column:
+            try:
+                name = ws.cell(1, col_num).value
+                if not name:
+                    break
+
+                category = str(ws.cell(2, col_num).value or 'box').lower()
+
+                PackagingType.objects.update_or_create(
+                    customer_group=customer_group,
+                    name=str(name),
+                    defaults={
+                        'packaging_category': category,
+                        'default_length': float(ws.cell(4, col_num).value or 600),
+                        'default_breadth': float(ws.cell(5, col_num).value or 400),
+                        'default_height': float(ws.cell(6, col_num).value or 250),
+                        'default_polybag_length': float(ws.cell(8, col_num).value or 0),
+                        'default_polybag_width': float(ws.cell(9, col_num).value or 0),
+                        'default_rate_per_kg': float(ws.cell(10, col_num).value or 0),
+                        'default_polybags_per_kg': float(ws.cell(11, col_num).value or 0),
+                        'remarks': str(ws.cell(12, col_num).value or '')
+                    })
+                count += 1
+                col_num += 1
+            except Exception as e:
+                errors.append(f"Column {get_column_letter(col_num)}: {str(e)}")
+                col_num += 1
+
+        return count, errors
 
 
 class ExcelExporter:
@@ -1491,9 +1979,7 @@ class ExcelExporter:
                     target_sheet.column_dimensions[col_letter].width = col_dim.width
 
         return wb# =============================================================================
-# ADD THIS CODE TO THE END OF excel_utils.py (after line 1493)
-# CORRECTED VERSION - Matches your actual models
-# =============================================================================
+
 
 # Configuration Type Template Generators and Parsers
 # Add these classes at the end of the file
