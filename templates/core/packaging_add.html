@@ -135,6 +135,16 @@
                         </div>
                     </div>
 
+                    <!-- Common Field -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="parts_per_packaging" class="form-label">Manual Cost <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="manual_cost" name="manual_cost"
+                                   step="0.00000001" value="0">
+                            <div class="form-text">Manual cost when other values not to be considered</div>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{% url 'quote_detail' project.id quote.id %}" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">

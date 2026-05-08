@@ -810,6 +810,7 @@ def packaging_add(request, project_id, quote_id):
                 polybag_width=float(request.POST.get('polybag_width', 0)),
                 rate_per_kg=float(request.POST.get('rate_per_kg', 0)),
                 polybags_per_kg=float(request.POST.get('polybags_per_kg', 0)),
+                manual_cost=float(request.POST.get('manual_cost', 0))
             )
 
             quote.increment_version(request.user, f'Added packaging: {packaging.get_packaging_category_display()}')
@@ -901,6 +902,7 @@ def transport_add(request, project_id, quote_id):
                 transport_height=float(request.POST.get('transport_height', 0)),
                 trip_cost=float(request.POST.get('trip_cost', 0)),
                 parts_per_box=int(request.POST.get('parts_per_box', 1)),
+                manual_cost=float(request.POST.get('manual_cost', 0))
             )
             transport.save()
 
@@ -1912,6 +1914,8 @@ def packaging_edit(request, project_id, quote_id, packaging_id):
             packaging.rate_per_kg = float(request.POST.get('rate_per_kg', 0))
             packaging.polybags_per_kg = float(request.POST.get('polybags_per_kg', 0))
 
+            packaging.manual_cost = float(request.POST.get('manual_cost', 0))
+
             packaging.save()
 
             quote.increment_version(request.user, f'Updated packaging: {packaging.get_packaging_category_display()}')
@@ -2019,6 +2023,7 @@ def transport_edit(request, project_id, quote_id, transport_id):
             transport.transport_height = float(request.POST.get('transport_height', 0))
             transport.trip_cost = float(request.POST.get('trip_cost', 0))
             transport.parts_per_box = int(request.POST.get('parts_per_box', 1))
+            transport.manual_cost = float(request.POST.get('manual_cost', 0))
             transport.save()
 
             # Increment version and add timeline entry

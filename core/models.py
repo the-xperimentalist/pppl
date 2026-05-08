@@ -487,15 +487,15 @@ class RawMaterial(models.Model):
             # Base cost = weight in grams × rate per gram + additional costs
             base = float(weight_in_grams * rate_per_gram)
 
-            icc_value = float(Decimal(str(self.icc_percentage)))
-            if self.icc_type == 'fixed':
-                icc_cost = icc_value
-            else:  # percentage
-                icc_cost = float(base * (icc_value / 100))
+            # icc_value = float(Decimal(str(self.icc_percentage)))
+            # if self.icc_type == 'fixed':
+            #     icc_cost = icc_value
+            # else:  # percentage
+            #     icc_cost = float(base * (icc_value / 100))
             # # Add ICC percentage
             # icc_cost = base * (Decimal(str(self.icc_percentage)) / Decimal('100'))
 
-            return float(base + icc_cost)
+            # return float(base + icc_cost)
         else:
             weight_in_pcs = Decimal(str(self.gross_weight))
 
@@ -503,13 +503,26 @@ class RawMaterial(models.Model):
 
             base = (weight_in_pcs * rate_per_pcs)
 
-            icc_value = Decimal(str(self.icc_percentage))
-            if self.icc_type == 'fixed':
-                icc_cost = float(icc_value)
-            else:  # percentage
-                icc_cost = float(base * (icc_value / Decimal('100')))
+            # icc_value = Decimal(str(self.icc_percentage))
+            # if self.icc_type == 'fixed':
+            #     icc_cost = float(icc_value)
+            # else:  # percentage
+            #     icc_cost = float(base * (icc_value / Decimal('100')))
 
-            return float(base + icc_cost)
+            # return float(base + icc_cost)
+        return float(base)
+
+    @property
+    def total_icc_cost(self):
+        base_rm = self.base_rm_cost
+        icc_value = float(Decimal(str(self.icc_percentage)))
+        if self.icc_type == 'fixed':
+            icc_cost = icc_value
+        else:  # percentage
+            icc_cost = float(base_rm * (icc_value / 100))
+
+        return icc_cost
+
 
     @property
     def rejection_cost(self):
@@ -629,7 +642,8 @@ class RawMaterial(models.Model):
             Decimal(str(self.rejection_cost)) +
             Decimal(str(self.overhead_cost)) +
             Decimal(str(self.maintenance_cost)) +
-            Decimal(str(self.other_rm_cost))
+            Decimal(str(self.other_rm_cost)) +
+            Decimal(str(self.total_icc_cost))
         )
 
     @property
@@ -643,7 +657,8 @@ class RawMaterial(models.Model):
             Decimal(str(self.overhead_cost)) +
             Decimal(str(self.maintenance_cost)) +
             Decimal(str(self.profit_cost)) +
-            Decimal(str(self.other_rm_cost))
+            Decimal(str(self.other_rm_cost)) +
+            Decimal(str(self.total_icc_cost))
         )
 
 
@@ -1134,6 +1149,8 @@ class Packaging(models.Model):
     maintenance_percentage = models.DecimalField(max_digits=13, decimal_places=8, default=0,
                                                 help_text="Maintenance percentage")
     parts_per_packaging = models.IntegerField(default=0, help_text="Parts per packaging unit")
+    manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                    help_text="Manually uploaded cost")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1158,6 +1175,8 @@ class Packaging(models.Model):
         """Calculate total packaging cost for the quote"""
         from decimal import Decimal
 
+        if float(Decimal(str(self.manual_cost))) != float(Decimal(str(0))):
+            return float(Decimal(str(self.manual_cost)))
         if self.quote.quantity > 0:
             cost_per_part = Decimal(str(self.cost_per_part))
             quantity = Decimal(str(self.quote.quantity))
@@ -1174,6 +1193,8 @@ class Packaging(models.Model):
         """Calculate cost per part based on packaging category"""
         from decimal import Decimal
 
+        if float(Decimal(str(self.manual_cost))) != float(Decimal(str(0))):
+            return float(Decimal(str(self.manual_cost)))
         if self.packaging_category == 'polybag':
             # Cost per part for polybag: rate / (polybags_per_kg × parts_per_packaging)
             if self.polybags_per_kg > 0 and self.parts_per_packaging > 0:
@@ -1231,6 +1252,8 @@ class Transport(models.Model):
     trip_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
                                    help_text="Cost per trip")
     parts_per_box = models.IntegerField(default=1, help_text="Number of parts per box")
+    manual_cost = models.DecimalField(max_digits=18, decimal_places=8, default=0,
+                                    help_text="Manually uploaded cost")
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1298,6 +1321,9 @@ class Transport(models.Model):
     @property
     def trip_cost_per_part(self):
         """Calculate trip cost per part"""
+        from decimal import Decimal
+        if float(Decimal(str(self.manual_cost))) != float(Decimal(str(0))):
+            return float(Decimal(str(self.manual_cost)))
         if self.total_parts_per_trip > 0:
             from decimal import Decimal
             return float(Decimal(str(self.trip_cost)) / Decimal(str(self.total_parts_per_trip)))
