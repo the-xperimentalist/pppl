@@ -595,42 +595,53 @@ class RawMaterial(models.Model):
             return Decimal(str(self.profit_percentage))
         elif self.unit_of_measurement != 'pcs':
             if self.frozen_rate:
-                if self.icc_type == 'fixed':
-                    return float(
-                        (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                        )
-                else:
-                    return float(
-                        Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                        )
+                return float(
+                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000')))
+                # if self.icc_type == 'fixed':
+                #     return float(
+                #         (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                #         )
+                # else:
+                #     return float(
+                #         Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                #         )
             else:
-                if self.icc_type == 'fixed':
-                    return float(
-                        (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                        )
-                else:
-                    return float(
-                        Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
-                        )
+                return float(
+                    Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                    )
+                # if self.icc_type == 'fixed':
+                #     return float(
+                #         (Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                #         )
+                # else:
+                #     return float(
+                #         Decimal(str(self.gross_weight_in_grams)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100') / Decimal('1000'))
+                #         )
         else:
             if self.frozen_rate:
-                if self.icc_type == 'fixed':
-                    return float(
-                        (Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                        )
-                else:
-                    return float(
-                        Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                        )
+                return float(
+                    Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                    )
+                # if self.icc_type == 'fixed':
+                #     return float(
+                #         (Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                #         )
+                # else:
+                #     return float(
+                #         Decimal(str(self.gross_weight)) * Decimal(str(self.frozen_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                #         )
             else:
-                if self.icc_type == 'fixed':
-                    return float(
-                        (Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                        )
-                else:
-                    return float(
-                        Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
-                        )
+                return float(
+                    Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                    )
+                # if self.icc_type == 'fixed':
+                #     return float(
+                #         (Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) + self.icc_percentage) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                #         )
+                # else:
+                #     return float(
+                #         Decimal(str(self.gross_weight)) * Decimal(str(self.rm_rate)) * (1 + (Decimal(str(self.icc_percentage)) / Decimal('100'))) * (Decimal(str(self.profit_percentage)) / Decimal('100'))
+                #         )
 
     @property
     def total_rm_cost_without_profit(self):
