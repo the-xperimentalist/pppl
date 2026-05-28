@@ -411,6 +411,31 @@ def quote_definition_edit(request, project_id, quote_id):
     return render(request, 'core/quote_definition_edit.html', context)
 
 
+@login_required
+def quote_delete(request, project_id, quote_id):
+    """Delete a quote and all its related data"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+    quote = get_object_or_404(Quote, id=quote_id, project=project)
+
+    try:
+        quote_name = quote.name
+
+        # Delete the quote itself
+        quote.delete()
+
+        # Log the deletion
+        print(f"Quote '{quote_name}' deleted by {request.user.username}")
+
+        return redirect("project_detail", project_id=project_id)
+
+    except Exception as e:
+        print(f"Error deleting quote: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Error deleting quote: {str(e)}'
+        }, status=500)
+
+
 # ============ RAW MATERIALS ============
 
 

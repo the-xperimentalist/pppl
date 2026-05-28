@@ -104,7 +104,7 @@
                         for "<strong>{{ search_query }}</strong>"
                     {% endif %}
                     {% if status_filter %}
-                        with status "<strong>{{ status_filter|upper }}</strong>"
+                        with status "<strong>{{ status_filter|title }}</strong>"
                     {% endif %}
                 </small>
             </div>
@@ -132,7 +132,7 @@
                     </thead>
                     <tbody>
                         {% for quote in filtered_quotes %}
-                        <tr class="quote-row" data-quote-id="{{ quote.id }}">
+                        <tr class="quote-row" data-quote-id="{{ quote.id }}" data-quote-name="{{ quote.name }}">
                             <td>
                                 <a href="{% url 'quote_detail' project.id quote.id %}" class="text-decoration-none">
                                     <strong>{{ quote.name }}</strong>
@@ -161,13 +161,14 @@
                                        class="btn btn-sm btn-outline-success" title="View Summary">
                                         <i class="bi bi-file-text"></i>
                                     </a>
-                                    <button type="button"
+                                    <a href="{% url 'quote_delete' project.id quote.id %}"
                                             class="btn btn-sm btn-outline-danger delete-quote-btn"
                                             data-quote-id="{{ quote.id }}"
                                             data-quote-name="{{ quote.name }}"
+                                            onclick="return confirm('Discard this quote? This action cannot be undone.')"
                                             title="Delete Quote">
                                         <i class="bi bi-trash"></i>
-                                    </button>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -205,27 +206,24 @@
                 <p>Are you sure you want to delete the quote <strong id="quote-name-display"></strong>?</p>
 
                 <div class="alert alert-danger" role="alert">
-                    <i class="bi bi-exclamation-circle"></i> <strong>Warning:</strong> This action will:
+                    <i class="bi bi-exclamation-circle"></i> <strong>Warning:</strong> This action will delete:
                     <ul class="mb-0 mt-2">
-                        <li>Delete all <strong>raw materials</strong> for this quote</li>
-                        <li>Delete all <strong>moulding machines</strong> configurations</li>
-                        <li>Delete all <strong>assemblies</strong> and their components</li>
-                        <li>Delete all <strong>packaging</strong> options</li>
-                        <li>Delete all <strong>transport</strong> options</li>
-                        <li>Delete all <strong>manufacturing costs</strong></li>
-                        <li>Delete all <strong>quote history/timeline</strong> entries</li>
+                        <li>This <strong>quote</strong> and all its versions</li>
+                        <li>All <strong>raw materials</strong> for this quote</li>
+                        <li>All <strong>moulding machines</strong> configurations</li>
+                        <li>All <strong>assemblies</strong> and their components</li>
+                        <li>All <strong>packaging</strong> options</li>
+                        <li>All <strong>transport</strong> options</li>
+                        <li>All <strong>manufacturing costs</strong></li>
+                        <li>All <strong>quote timeline/history</strong> entries</li>
                         <li><strong>This action cannot be undone!</strong></li>
                     </ul>
                 </div>
-
-                <p class="text-muted small">
-                    <i class="bi bi-info-circle"></i> Quote data: <strong id="quote-data-info"></strong>
-                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirm-delete-quote-btn">
-                    <i class="bi bi-trash"></i> Yes, Delete Permanently
+                    <i class="bi bi-trash"></i> Yes, Delete Quote
                 </button>
             </div>
         </div>
@@ -257,41 +255,22 @@ document.addEventListener('DOMContentLoaded', function() {
     let quoteToDelete = null;
     const projectId = {{ project.id }};
 
-    // Delete quote button click handlers
+    // Delete quote button click handlers - SIMPLIFIED (no fetchQuoteInfo)
     document.querySelectorAll('.delete-quote-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
+
             quoteToDelete = this.dataset.quoteId;
             const quoteName = this.dataset.quoteName;
 
-            // Update modal content
+            // Update modal content with quote name
             document.getElementById('quote-name-display').textContent = quoteName;
-
-            // Fetch quote info for display
-            fetchQuoteInfo(quoteToDelete);
 
             // Show modal
             deleteQuoteModal.show();
         });
     });
-
-    // Fetch quote information for the modal
-    function fetchQuoteInfo(quoteId) {
-        fetch(`/project/${projectId}/quote/${quoteId}/info/`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const info = `Created: ${new Date(data.created_at).toLocaleDateString()}, ` +
-                        `Client: ${data.client_name}, ` +
-                        `Status: ${data.status.toUpperCase()}`;
-            document.getElementById('quote-data-info').textContent = info;
-        })
-        .catch(error => console.error('Error fetching quote info:', error));
-    }
 
     // Confirm delete button
     document.getElementById('confirm-delete-quote-btn').addEventListener('click', function() {
@@ -303,11 +282,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading modal
         loadingModal.show();
 
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                         document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+
         // Send delete request
         fetch(`/project/${projectId}/quote/${quoteToDelete}/delete/`, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': getCsrfToken(),
+                'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({})
@@ -325,19 +308,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Remove the row with animation
                 const quoteRow = document.querySelector(`[data-quote-id="${quoteToDelete}"]`);
-                quoteRow.style.animation = 'fadeOut 0.5s ease-out';
+                if (quoteRow) {
+                    quoteRow.style.animation = 'fadeOut 0.5s ease-out';
 
-                setTimeout(() => {
-                    quoteRow.remove();
+                    setTimeout(() => {
+                        quoteRow.remove();
 
-                    // Check if there are any quotes left
-                    const remainingRows = document.querySelectorAll('.quote-row');
-                    if (remainingRows.length === 0) {
-                        location.reload();
-                    }
+                        // Check if there are any quotes left
+                        const remainingRows = document.querySelectorAll('.quote-row');
+                        if (remainingRows.length === 0) {
+                            location.reload();
+                        }
 
-                    loadingModal.hide();
-                }, 500);
+                        loadingModal.hide();
+                    }, 500);
+                }
             } else {
                 throw new Error(data.message || 'Failed to delete quote');
             }
@@ -364,34 +349,43 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        const container = document.querySelector('.row:nth-child(3)');
+        const container = document.querySelector('.row:nth-child(2)');
         const tempDiv = document.createElement('div');
         tempDiv.className = 'row mb-3';
         tempDiv.innerHTML = `<div class="col-md-12">${alertHtml}</div>`;
 
-        container.parentNode.insertBefore(tempDiv, container);
+        if (container && container.parentNode) {
+            container.parentNode.insertBefore(tempDiv, container);
+        }
 
         // Auto-dismiss after 5 seconds
         setTimeout(() => {
             const alert = tempDiv.querySelector('.alert');
             if (alert) {
-                bootstrap.Alert.getOrCreateInstance(alert).close();
+                const alertInstance = bootstrap.Alert.getOrCreateInstance(alert);
+                alertInstance.close();
                 tempDiv.remove();
             }
         }, 5000);
     }
 
     // Real-time search input
-    document.getElementById('quote-search-input')?.addEventListener('keyup', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('quote-search-form').submit();
-        }
-    });
+    const searchInput = document.getElementById('quote-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('quote-search-form').submit();
+            }
+        });
+    }
 
     // Status filter change
-    document.getElementById('status-filter')?.addEventListener('change', function() {
-        document.getElementById('quote-search-form').submit();
-    });
+    const statusFilter = document.getElementById('status-filter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            document.getElementById('quote-search-form').submit();
+        });
+    }
 });
 
 // CSS Animation for fade out
