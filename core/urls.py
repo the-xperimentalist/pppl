@@ -13,6 +13,11 @@ urlpatterns = [
     path('projects/<int:project_id>/quotes/<int:quote_id>/', views.quote_detail, name='quote_detail'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/definition/edit/', views.quote_definition_edit, name='quote_definition_edit'),
 
+     # NEW URLS FOR DELETE AND INFO
+     path('project/<int:project_id>/delete/', views.project_delete, name='project_delete'),
+     path('project/<int:project_id>/info/', views.project_info, name='project_info'),  # Optional: for detailed info
+     path('project/<int:project_id>/delete-permanent/', views.project_delete_permanent, name='project_delete_permanent'),  # Optional: for hard delete
+
     # Raw Materials
     path('projects/<int:project_id>/quotes/<int:quote_id>/raw-materials/add/', views.raw_material_add, name='raw_material_add'),
     path('projects/<int:project_id>/quotes/<int:quote_id>/raw-materials/<int:rm_id>/delete/', views.raw_material_delete, name='raw_material_delete'),

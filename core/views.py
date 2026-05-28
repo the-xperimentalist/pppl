@@ -11,6 +11,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponse
 from .excel_utils import ExcelTemplateGenerator, ExcelParser
+from django.db.models import Q
+from django.http import JsonResponse
+import json
+
 
 
 def save_cost_field(obj, field_base_name, request):
@@ -45,9 +49,27 @@ def home(request):
 
 @login_required
 def projects(request):
-    """List all projects"""
+    """List all projects with search functionality"""
     all_projects = Project.objects.filter(is_active=True)
-    return render(request, 'core/projects.html', {'projects': all_projects})
+
+    # Get search query from GET parameters
+    search_query = request.GET.get('search', '').strip()
+
+    if search_query:
+        # Search by project name or description (case-insensitive)
+        all_projects = all_projects.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        ).distinct()
+
+    # Order by creation date (most recent first)
+    all_projects = all_projects.order_by('-created_at')
+
+    context = {
+        'projects': all_projects,
+        'search_query': search_query,
+    }
+    return render(request, 'core/projects.html', context)
 
 
 @login_required
@@ -73,15 +95,175 @@ def project_create(request):
 
 @login_required
 def project_detail(request, project_id):
-    """View individual project with its quotes"""
+    """View individual project with its quotes - includes search and filter"""
     project = get_object_or_404(Project, id=project_id, is_active=True)
     quotes = project.quotes.all()
 
+    # Get search query and filters from GET parameters
+    search_query = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '').strip()
+
+    # Apply search filter
+    if search_query:
+        quotes = quotes.filter(
+            Q(name__icontains=search_query) |
+            Q(client_name__icontains=search_query)
+        ).distinct()
+
+    # Apply status filter
+    if status_filter:
+        quotes = quotes.filter(status=status_filter)
+
+    # Order by creation date (most recent first)
+    filtered_quotes = quotes.order_by('-created_at')
+
     context = {
         'project': project,
-        'quotes': quotes,
+        'quotes': quotes,  # Keep original for badge count
+        'filtered_quotes': filtered_quotes,
+        'search_query': search_query,
+        'status_filter': status_filter,
     }
     return render(request, 'core/project_detail.html', context)
+
+
+@login_required
+def project_delete(request, project_id):
+    """Delete a project and all its related data"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+
+    # Optional: Add permission check (e.g., only project creator can delete)
+    # Uncomment if you want to restrict deletion to project owner:
+    # if project.created_by != request.user:
+    #     return JsonResponse({'success': False, 'message': 'You do not have permission to delete this project'}, status=403)
+
+    try:
+        project_name = project.name
+
+        # Get all quotes in this project
+        quotes = project.quotes.all()
+
+        # Delete all related data for each quote
+        for quote in quotes:
+            # Delete raw materials
+            quote.raw_materials.all().delete()
+
+            # Delete moulding machines
+            quote.moulding_machines.all().delete()
+
+            # Delete assemblies
+            quote.assemblies.all().delete()
+
+            # Delete assembly raw materials
+            AssemblyRawMaterial.objects.filter(assembly__quote=quote).delete()
+
+            # Delete packaging
+            quote.packagings.all().delete()
+
+            # Delete transport
+            quote.transports.all().delete()
+
+            # Delete manufacturing/printing costs
+            ManufacturingPrintingCost.objects.filter(quote=quote).delete()
+
+            # Delete quote timelines
+            quote.timeline_entries.all().delete()
+
+            # Delete the quote itself
+            quote.delete()
+
+        # Finally, delete the project (soft delete - mark as inactive)
+        project.is_active = False
+        project.save()
+
+        # Log the deletion
+        print(f"Project '{project_name}' deleted by {request.user.username}")
+
+        return redirect('projects')
+
+    except Exception as e:
+        print(f"Error deleting project: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Error deleting project: {str(e)}'
+        }, status=500)
+
+
+@login_required
+def project_delete_permanent(request, project_id):
+    """Permanently delete a project and all related data (hard delete)"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
+
+    # Only superusers can perform hard delete
+    if not request.user.is_superuser:
+        return JsonResponse({'success': False, 'message': 'Only administrators can perform permanent deletion'}, status=403)
+
+    try:
+        project_name = project.name
+        project_id_temp = project.id
+
+        # Delete all quotes and their related data
+        quotes = project.quotes.all()
+
+        for quote in quotes:
+            quote.raw_materials.all().delete()
+            quote.moulding_machines.all().delete()
+            quote.assemblies.all().delete()
+            AssemblyRawMaterial.objects.filter(assembly__quote=quote).delete()
+            quote.packagings.all().delete()
+            quote.transports.all().delete()
+            ManufacturingPrintingCost.objects.filter(quote=quote).delete()
+            quote.timeline_entries.all().delete()
+            quote.delete()
+
+        # Permanently delete the project from database
+        project.delete()
+
+        print(f"Project '{project_name}' permanently deleted by {request.user.username}")
+
+        return JsonResponse({
+            'success': True,
+            'message': f'Project "{project_name}" and all related data have been permanently removed from the database.'
+        })
+
+    except Exception as e:
+        print(f"Error permanently deleting project: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': f'Error deleting project: {str(e)}'
+        }, status=500)
+
+
+@login_required
+def project_info(request, project_id):
+    """Get project information for deletion confirmation"""
+    project = get_object_or_404(Project, id=project_id, is_active=True)
+
+    # Count related objects
+    quotes_count = project.quotes.count()
+    raw_materials_count = sum(q.raw_materials.count() for q in project.quotes.all())
+    machines_count = sum(q.moulding_machines.count() for q in project.quotes.all())
+    assemblies_count = sum(q.assemblies.count() for q in project.quotes.all())
+    packagings_count = sum(q.packagings.count() for q in project.quotes.all())
+    transports_count = sum(q.transports.count() for q in project.quotes.all())
+
+    return JsonResponse({
+        'name': project.name,
+        'description': project.description,
+        'created_by': project.created_by.username,
+        'created_at': project.created_at.isoformat(),
+        'quotes_count': quotes_count,
+        'raw_materials_count': raw_materials_count,
+        'machines_count': machines_count,
+        'assemblies_count': assemblies_count,
+        'packagings_count': packagings_count,
+        'transports_count': transports_count,
+        'total_items': (raw_materials_count + machines_count + assemblies_count +
+                       packagings_count + transports_count)
+    })
 
 
 @login_required

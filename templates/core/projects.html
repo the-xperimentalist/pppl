@@ -16,22 +16,102 @@
     </div>
 </div>
 
+<!-- Search and Filter Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{% url 'projects' %}" id="search-form">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="search-input"
+                                    name="search"
+                                    placeholder="Search by project name or description..."
+                                    value="{{ search_query }}"
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Count -->
+{% if projects %}
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <small class="text-muted">
+                <i class="bi bi-info-circle"></i>
+                Showing <strong>{{ projects|length }}</strong> project{{ projects|length|pluralize }}
+                {% if search_query %}
+                    for "<strong>{{ search_query }}</strong>"
+                {% endif %}
+            </small>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Projects Grid -->
 <div class="row">
     <div class="col-md-12">
         {% if projects %}
             <div class="row">
                 {% for project in projects %}
                 <div class="col-md-4 mb-4">
-                    <div class="card h-100">
+                    <div class="card h-100 project-card" data-project-id="{{ project.id }}">
                         <div class="card-body">
-                            <h5 class="card-title">{{ project.name }}</h5>
-                            <p class="card-text text-muted">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title flex-grow-1">{{ project.name }}</h5>
+                                <div class="dropdown">
+                                    <button
+                                        class="btn btn-sm btn-link text-muted"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                        id="dropdown-{{ project.id }}"
+                                    >
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-{{ project.id }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'project_detail' project.id %}">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item text-danger delete-project-btn" href="{% url 'project_delete' project.id %}" data-project-id="{{ project.id }}"
+                                            onclick="return confirm('Discard this project? This action cannot be undone.')">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <p class="card-text text-muted small">
                                 {% if project.description %}
                                     {{ project.description|truncatewords:20 }}
                                 {% else %}
-                                    No description
+                                    <em>No description</em>
                                 {% endif %}
                             </p>
+
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <small class="text-muted">
                                     <i class="bi bi-file-text"></i> {{ project.get_quotes_count }} quote{{ project.get_quotes_count|pluralize }}
@@ -52,10 +132,211 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> No projects yet. Create your first project to get started!
-            </div>
+            {% if search_query %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-search"></i> No projects found for "<strong>{{ search_query }}</strong>".
+                    <a href="{% url 'projects' %}" class="alert-link">Clear search</a>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No projects yet. <a href="{% url 'project_create' %}" class="alert-link">Create your first project</a> to get started!
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteProjectModal" tabindex="-1" aria-labelledby="deleteProjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title text-danger" id="deleteProjectModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Delete Project
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the project <strong id="project-name-display"></strong>?</p>
+
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> <strong>Warning:</strong> This action will:
+                    <ul class="mb-0 mt-2">
+                        <li>Delete all <strong>quotes</strong> associated with this project</li>
+                        <li>Delete all <strong>raw materials, machines, assemblies, packaging, and transport</strong> data</li>
+                        <li>Delete all <strong>quote timelines and history</strong></li>
+                        <li><strong>This action cannot be undone!</strong></li>
+                    </ul>
+                </div>
+
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle"></i> If you want to keep this data, you can deactivate the project instead.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+                    <i class="bi bi-trash"></i> Yes, Delete Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p><strong>Deleting project...</strong></p>
+                <p class="text-muted small">This may take a moment as all related data is being removed.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteProjectModal = new bootstrap.Modal(document.getElementById('deleteProjectModal'));
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    let projectToDelete = null;
+
+    // Delete project button click handlers
+    document.querySelectorAll('.delete-project-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            projectToDelete = this.dataset.projectId;
+
+            // Get project card and name
+            const projectCard = document.querySelector(`[data-project-id="${projectToDelete}"]`);
+            const projectName = projectCard.querySelector('.card-title').textContent.trim();
+
+            // Update modal content
+            document.getElementById('project-name-display').textContent = projectName;
+
+            // Show modal
+            deleteProjectModal.show();
+        });
+    });
+
+    // Confirm delete button
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+        if (!projectToDelete) return;
+
+        // Hide delete modal
+        deleteProjectModal.hide();
+
+        // Show loading modal
+        loadingModal.show();
+
+        // Send delete request
+        fetch(`/project/${projectToDelete}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+                              document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showAlert('success', 'Project Deleted', data.message);
+
+                // Remove the card with animation
+                const projectCard = document.querySelector(`[data-project-id="${projectToDelete}"]`);
+                projectCard.closest('.col-md-4').style.animation = 'fadeOut 0.5s ease-out';
+
+                setTimeout(() => {
+                    projectCard.closest('.col-md-4').remove();
+
+                    // Check if there are any projects left
+                    if (document.querySelectorAll('.project-card').length === 0) {
+                        location.reload();
+                    }
+
+                    loadingModal.hide();
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Failed to delete project');
+            }
+        })
+        .catch(error => {
+            loadingModal.hide();
+            console.error('Error:', error);
+            showAlert('danger', 'Error', error.message || 'Failed to delete project. Please try again.');
+        });
+    });
+
+    // Helper function to show alerts
+    function showAlert(type, title, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <strong>${title}:</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+
+        const alertContainer = document.querySelector('.row:first-child');
+        const tempDiv = document.createElement('div');
+        tempDiv.className = 'row mb-3';
+        tempDiv.innerHTML = `<div class="col-md-12">${alertHtml}</div>`;
+
+        alertContainer.parentNode.insertBefore(tempDiv, alertContainer.nextSibling);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            const alert = tempDiv.querySelector('.alert');
+            if (alert) {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+                tempDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // Real-time search input
+    document.getElementById('search-input').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('search-form').submit();
+        }
+    });
+});
+
+// CSS Animation for fade out
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    }
+
+    .project-card {
+        transition: box-shadow 0.3s ease;
+    }
+
+    .project-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}

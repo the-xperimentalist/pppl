@@ -45,20 +45,78 @@
     </div>
 </div>
 
-<div class="row mb-3">
+<!-- Search and Filter Section for Quotes -->
+<div class="row mb-4">
     <div class="col-md-12">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <h3>Quotes</h3>
             <a href="{% url 'quote_create' project.id %}" class="btn btn-success">
                 <i class="bi bi-plus-circle"></i> New Quote
             </a>
         </div>
+
+        {% if quotes %}
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" action="{% url 'project_detail' project.id %}" id="quote-search-form">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="quote-search-input"
+                                    name="search"
+                                    placeholder="Search by quote name or client..."
+                                    value="{{ search_query }}"
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="status-filter" name="status">
+                                <option value="">All Status</option>
+                                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="discarded" {% if status_filter == 'discarded' %}selected{% endif %}>Discarded</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Count -->
+        <div class="row mb-3 mt-3">
+            <div class="col-md-12">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    Showing <strong>{{ filtered_quotes|length }}</strong> quote{{ filtered_quotes|length|pluralize }}
+                    {% if search_query %}
+                        for "<strong>{{ search_query }}</strong>"
+                    {% endif %}
+                    {% if status_filter %}
+                        with status "<strong>{{ status_filter|upper }}</strong>"
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<!-- Quotes Table -->
 <div class="row">
     <div class="col-md-12">
-        {% if quotes %}
+        {% if filtered_quotes %}
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead class="table-light">
@@ -73,8 +131,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for quote in quotes %}
-                        <tr>
+                        {% for quote in filtered_quotes %}
+                        <tr class="quote-row" data-quote-id="{{ quote.id }}">
                             <td>
                                 <a href="{% url 'quote_detail' project.id quote.id %}" class="text-decoration-none">
                                     <strong>{{ quote.name }}</strong>
@@ -94,14 +152,23 @@
                             <td>{{ quote.created_by.username }}</td>
                             <td>{{ quote.created_at|date:"M d, Y, h:i A" }}</td>
                             <td>
-                                <a href="{% url 'quote_detail' project.id quote.id %}"
-                                   class="btn btn-sm btn-outline-primary" title="View Details">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{% url 'quote_summary' project.id quote.id %}"
-                                   class="btn btn-sm btn-outline-success" title="View Summary">
-                                    <i class="bi bi-file-text"></i>
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'quote_detail' project.id quote.id %}"
+                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'quote_summary' project.id quote.id %}"
+                                       class="btn btn-sm btn-outline-success" title="View Summary">
+                                        <i class="bi bi-file-text"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger delete-quote-btn"
+                                            data-quote-id="{{ quote.id }}"
+                                            data-quote-name="{{ quote.name }}"
+                                            title="Delete Quote">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -109,10 +176,246 @@
                 </table>
             </div>
         {% else %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> No quotes in this project yet. Create your first quote to get started!
-            </div>
+            {% if search_query or status_filter %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-search"></i>
+                    No quotes found matching your search criteria.
+                    <a href="{% url 'project_detail' project.id %}" class="alert-link">Clear filters</a>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No quotes in this project yet. <a href="{% url 'quote_create' project.id %}" class="alert-link">Create your first quote</a> to get started!
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 </div>
+
+<!-- Delete Quote Confirmation Modal -->
+<div class="modal fade" id="deleteQuoteModal" tabindex="-1" aria-labelledby="deleteQuoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title text-danger" id="deleteQuoteModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Delete Quote
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the quote <strong id="quote-name-display"></strong>?</p>
+
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-circle"></i> <strong>Warning:</strong> This action will:
+                    <ul class="mb-0 mt-2">
+                        <li>Delete all <strong>raw materials</strong> for this quote</li>
+                        <li>Delete all <strong>moulding machines</strong> configurations</li>
+                        <li>Delete all <strong>assemblies</strong> and their components</li>
+                        <li>Delete all <strong>packaging</strong> options</li>
+                        <li>Delete all <strong>transport</strong> options</li>
+                        <li>Delete all <strong>manufacturing costs</strong></li>
+                        <li>Delete all <strong>quote history/timeline</strong> entries</li>
+                        <li><strong>This action cannot be undone!</strong></li>
+                    </ul>
+                </div>
+
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle"></i> Quote data: <strong id="quote-data-info"></strong>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-quote-btn">
+                    <i class="bi bi-trash"></i> Yes, Delete Permanently
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p><strong>Deleting quote...</strong></p>
+                <p class="text-muted small">This may take a moment as all related data is being removed.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteQuoteModal = new bootstrap.Modal(document.getElementById('deleteQuoteModal'));
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    let quoteToDelete = null;
+    const projectId = {{ project.id }};
+
+    // Delete quote button click handlers
+    document.querySelectorAll('.delete-quote-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            quoteToDelete = this.dataset.quoteId;
+            const quoteName = this.dataset.quoteName;
+
+            // Update modal content
+            document.getElementById('quote-name-display').textContent = quoteName;
+
+            // Fetch quote info for display
+            fetchQuoteInfo(quoteToDelete);
+
+            // Show modal
+            deleteQuoteModal.show();
+        });
+    });
+
+    // Fetch quote information for the modal
+    function fetchQuoteInfo(quoteId) {
+        fetch(`/project/${projectId}/quote/${quoteId}/info/`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const info = `Created: ${new Date(data.created_at).toLocaleDateString()}, ` +
+                        `Client: ${data.client_name}, ` +
+                        `Status: ${data.status.toUpperCase()}`;
+            document.getElementById('quote-data-info').textContent = info;
+        })
+        .catch(error => console.error('Error fetching quote info:', error));
+    }
+
+    // Confirm delete button
+    document.getElementById('confirm-delete-quote-btn').addEventListener('click', function() {
+        if (!quoteToDelete) return;
+
+        // Hide delete modal
+        deleteQuoteModal.hide();
+
+        // Show loading modal
+        loadingModal.show();
+
+        // Send delete request
+        fetch(`/project/${projectId}/quote/${quoteToDelete}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showAlert('success', 'Quote Deleted', data.message);
+
+                // Remove the row with animation
+                const quoteRow = document.querySelector(`[data-quote-id="${quoteToDelete}"]`);
+                quoteRow.style.animation = 'fadeOut 0.5s ease-out';
+
+                setTimeout(() => {
+                    quoteRow.remove();
+
+                    // Check if there are any quotes left
+                    const remainingRows = document.querySelectorAll('.quote-row');
+                    if (remainingRows.length === 0) {
+                        location.reload();
+                    }
+
+                    loadingModal.hide();
+                }, 500);
+            } else {
+                throw new Error(data.message || 'Failed to delete quote');
+            }
+        })
+        .catch(error => {
+            loadingModal.hide();
+            console.error('Error:', error);
+            showAlert('danger', 'Error', error.message || 'Failed to delete quote. Please try again.');
+        });
+    });
+
+    // Helper function to get CSRF token
+    function getCsrfToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value ||
+               document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+    }
+
+    // Helper function to show alerts
+    function showAlert(type, title, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <strong>${title}:</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+
+        const container = document.querySelector('.row:nth-child(3)');
+        const tempDiv = document.createElement('div');
+        tempDiv.className = 'row mb-3';
+        tempDiv.innerHTML = `<div class="col-md-12">${alertHtml}</div>`;
+
+        container.parentNode.insertBefore(tempDiv, container);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            const alert = tempDiv.querySelector('.alert');
+            if (alert) {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+                tempDiv.remove();
+            }
+        }, 5000);
+    }
+
+    // Real-time search input
+    document.getElementById('quote-search-input')?.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('quote-search-form').submit();
+        }
+    });
+
+    // Status filter change
+    document.getElementById('status-filter')?.addEventListener('change', function() {
+        document.getElementById('quote-search-form').submit();
+    });
+});
+
+// CSS Animation for fade out
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+    }
+
+    .quote-row {
+        transition: all 0.3s ease;
+    }
+
+    .quote-row:hover {
+        background-color: #f8f9fa;
+    }
+`;
+document.head.appendChild(style);
+</script>
 {% endblock %}
